@@ -21,7 +21,7 @@ class ResourceItem {
  */
 @Component
 export struct ProfileTab {
-  @StorageLink(AUTH_LOGIN_KEY) isLoggedIn: boolean = false;
+  @StorageLink(AUTH_LOGIN_KEY) @Watch('onLoginChanged') isLoggedIn: boolean = false;
   @State user: User | null = null;
   @State isLoading: boolean = false;
   private profileStack: NavPathStack = new NavPathStack();
@@ -34,6 +34,15 @@ export struct ProfileTab {
 
   aboutToAppear(): void {
     this.loadUserData();
+  }
+
+  /** 登录状态变化时自动刷新用户数据 */
+  onLoginChanged(): void {
+    if (this.isLoggedIn) {
+      this.loadUserData();
+    } else {
+      this.user = null;
+    }
   }
 
   private async loadUserData(): Promise<void> {

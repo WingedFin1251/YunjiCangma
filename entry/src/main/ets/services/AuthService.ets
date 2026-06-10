@@ -116,7 +116,9 @@ export class AuthService {
 
   static isOAuthCallback(url: string): boolean {
     return url.includes('code=') &&
-      (url.includes('github.com/?code=') || url.includes('github.com/login/oauth'));
+      (url.startsWith('githubclient://') ||
+       url.includes('github.com/?code=') ||
+       url.includes('github.com/login/oauth'));
   }
 
   static extractCodeFromUrl(url: string): string | null {
