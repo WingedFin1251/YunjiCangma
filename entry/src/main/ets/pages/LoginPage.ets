@@ -18,12 +18,6 @@ struct LoginPage {
     this.webSrc = url;
   }
 
-  private handlePageBegin(url: string): void {
-    if (AuthService.isOAuthCallback(url)) {
-      this.handleOAuthCallback(url);
-    }
-  }
-
   private async handleOAuthCallback(url: string): Promise<void> {
     const code: string | null = AuthService.extractCodeFromUrl(url);
     if (!code) {
@@ -96,10 +90,13 @@ struct LoginPage {
         Web({ src: this.webSrc, controller: this.webController })
           .javaScriptAccess(true)
           .domStorageAccess(true)
-          .onPageBegin((event) => {
-            if (event?.url) {
-              this.handlePageBegin(event.url);
+          .onLoadIntercept((event) => {
+            const url: string = event.data.getRequestUrl();
+            if (AuthService.isOAuthCallback(url)) {
+              this.handleOAuthCallback(url);
+              return true;  // 拦截加载，WebView 不跳转
             }
+            return false;
           })
           .onErrorReceive(() => {
             this.errorMessage = 'Failed to load login page';
