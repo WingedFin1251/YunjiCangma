@@ -1,7 +1,7 @@
 import { http } from '@kit.NetworkKit';
 import { GITHUB_API_BASE, APIHeaders } from '../common/constants/APIConstants';
 import { AuthService } from './AuthService';
-import type { User } from '../models/User';
+import type { User, Repository, GitHubNotification, SearchResult } from '../models/User';
 
 /**
  * GitHub API 客户端 — 自动注入认证 Token
@@ -76,5 +76,25 @@ export class GitHubAPIService {
     } catch {
       return false;
     }
+  }
+
+  /** GET /user/starred — 已加星标仓库 */
+  static async getStarredRepos(): Promise<Repository[]> {
+    return GitHubAPIService.get<Repository[]>('/user/starred?per_page=20');
+  }
+
+  /** GET /notifications — 通知列表 */
+  static async getNotifications(): Promise<GitHubNotification[]> {
+    return GitHubAPIService.get<GitHubNotification[]>('/notifications?per_page=20');
+  }
+
+  /** GET /search/repositories — 热门仓库 */
+  static async getTrendingRepos(): Promise<SearchResult> {
+    return GitHubAPIService.get<SearchResult>('/search/repositories?q=stars:%3E1&sort=stars&order=desc&per_page=10');
+  }
+
+  /** GET /users/{username}/received_events — 用户活动 */
+  static async getReceivedEvents(username: string): Promise<Object[]> {
+    return GitHubAPIService.get<Object[]>('/users/' + username + '/received_events?per_page=10');
   }
 }

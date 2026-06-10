@@ -1,12 +1,12 @@
 import { DarkTheme } from '../../common/constants/ThemeConstants';
 import { RepoCard } from '../../common/components/RepoCard';
+import { GitHubAPIService } from '../../services/GitHubAPIService';
+import type { Repository } from '../../models/User';
 
-/** 我的工作列表项 */
 class WorkItem {
   icon: string = '';
   label: string = '';
   color: string = '';
-
   constructor(icon: string, label: string, color: string) {
     this.icon = icon;
     this.label = label;
@@ -14,7 +14,6 @@ class WorkItem {
   }
 }
 
-/** 收藏仓库数据 */
 class FavoriteRepo {
   avatarChar: string = '';
   owner: string = '';
@@ -22,25 +21,23 @@ class FavoriteRepo {
   description: string = '';
   language: string = '';
   stars: number = 0;
-  isStarred: boolean = false;
-
-  constructor(a: string, o: string, r: string, d: string, l: string, s: number, star: boolean) {
-    this.avatarChar = a;
-    this.owner = o;
-    this.repo = r;
-    this.description = d;
-    this.language = l;
-    this.stars = s;
-    this.isStarred = star;
+  isStarred: boolean = true;
+  constructor(r: Repository) {
+    this.avatarChar = r.owner.login.charAt(0);
+    this.owner = r.owner.login;
+    this.repo = r.name;
+    this.description = r.description || '';
+    this.language = r.language || '';
+    this.stars = r.stargazers_count;
+    this.isStarred = true;
   }
 }
 
-/**
- * 主页 (Tab 1, 默认首页)
- */
 @Component
 export struct HomeTab {
   private homeStack: NavPathStack = new NavPathStack();
+  @State starredRepos: FavoriteRepo[] = [];
+  @State isStarredLoading: boolean = true;
 
   private workItems: WorkItem[] = [
     new WorkItem('◉', '议题', DarkTheme.issueGreen),
@@ -52,10 +49,20 @@ export struct HomeTab {
     new WorkItem('★', '已加星标', DarkTheme.starYellow),
   ];
 
-  private favoriteRepos: FavoriteRepo[] = [
-    new FavoriteRepo('F', 'flutter', 'flutter', 'Flutter makes it easy and fast to build beautiful apps', 'Dart', 168000, false),
-    new FavoriteRepo('T', 'torvalds', 'linux', 'Linux kernel source tree', 'C', 182000, true),
-  ];
+  aboutToAppear(): void {
+    this.loadStarredRepos();
+  }
+
+  private async loadStarredRepos(): Promise<void> {
+    try {
+      const repos: Repository[] = await GitHubAPIService.getStarredRepos();
+      this.starredRepos = repos.map((r: Repository) => new FavoriteRepo(r));
+    } catch (err) {
+      this.starredRepos = [];
+    } finally {
+      this.isStarredLoading = false;
+    }
+  }
 
   @Builder
   homePageMap(name: string, param: Object) {}
@@ -97,7 +104,7 @@ export struct HomeTab {
           this.sectionHeader('收藏夹')
 
           Column({ space: 12 }) {
-            ForEach(this.favoriteRepos, (repo: FavoriteRepo, index: number) => {
+            ForEach(this.starredRepos, (repo: FavoriteRepo, index: number) => {
               RepoCard({
                 avatarChar: repo.avatarChar,
                 owner: repo.owner,

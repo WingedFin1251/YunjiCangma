@@ -127,16 +127,11 @@ export struct ProfileTab {
   @Builder
   buildLoggedInProfile() {
     Column({ space: 8 }) {
-      Text(this.user!.login.charAt(0).toUpperCase())
-        .fontSize(20)
-        .fontWeight(FontWeight.Bold)
-        .fontColor(DarkTheme.textPrimary)
+      Image(this.user!.avatar_url)
         .width($r('app.float.size_avatar_lg'))
         .height($r('app.float.size_avatar_lg'))
-        .backgroundColor(DarkTheme.accent)
         .borderRadius(24)
-        .textAlign(TextAlign.Center)
-        .lineHeight($r('app.float.size_avatar_lg'))
+        .objectFit(ImageFit.Cover)
 
       Text(this.user!.name || this.user!.login)
         .fontSize(24)
