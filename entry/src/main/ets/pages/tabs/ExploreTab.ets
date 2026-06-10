@@ -65,7 +65,7 @@ export struct ExploreTab {
   }
 
   @Builder
-  explorePageMap(name: string, param: Object) {}
+  explorePageMap(name: string, param: Object | null) {}
 
   build() {
     Navigation(this.exploreStack) {

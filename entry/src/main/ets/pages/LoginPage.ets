@@ -11,6 +11,7 @@ struct LoginPage {
   @State oauthUrl: string = '';
   @State webSrc: string = '';
   private webController: webview.WebviewController = new webview.WebviewController();
+  private isProcessing: boolean = false;
 
   aboutToAppear(): void {
     const url: string = AuthService.buildOAuthUrl();
@@ -19,9 +20,13 @@ struct LoginPage {
   }
 
   private async handleOAuthCallback(url: string): Promise<void> {
+    if (this.isProcessing) return;
+    this.isProcessing = true;
+
     const code: string | null = AuthService.extractCodeFromUrl(url);
     if (!code) {
       this.errorMessage = 'Failed to extract authorization code';
+      this.isProcessing = false;
       return;
     }
     this.isLoading = true;
