@@ -17,15 +17,14 @@
 - [x] OAuth 完整流程可用（Client ID 已配置，回调 Scheme 已注册）
 - [x] 全屏沉浸（状态栏融合 + 底部小白条延伸）
 - [x] 安全区适配（top 32 / bottom 64 padding）
+- [x] 登录状态自动刷新（@StorageLink + @Watch）
 
-## v0.4.0 — 各页面功能完善
+## v0.4.0 — 数据对接 ✅ 已完成
 
-- [ ] Home Tab — 动态数据（我的工作计数、收藏夹 API 数据）
-- [ ] Inbox Tab — 通知列表（真实 API 数据）、筛选联动
-- [ ] Explore Tab — 热门仓库 API、活动流动态数据
-- [ ] Profile Tab — 热门仓库横滑、用户信息实时刷新
-- [ ] Markdown 渲染（README 显示）
-- [ ] 图片加载（用户头像、仓库图）
+- [x] Home Tab — 收藏夹对接 `GET /user/starred` 真实 API
+- [x] Inbox Tab — 通知列表对接 `GET /notifications` 真实 API
+- [x] Explore Tab — 热门仓库 `GET /search/repositories` + 活动流 `GET /received_events`
+- [x] Profile Tab — 用户头像 `Image` 组件加载 + @Watch 实时刷新
 
 ## v0.5.0 — 仓库浏览
 

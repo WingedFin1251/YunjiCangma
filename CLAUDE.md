@@ -22,7 +22,20 @@
 | 小白条 | MainPage Column + bottom Row(20, surface) | 底栏色延伸至手势指示条 |
 | 安全区 | 所有 Tab `padding({ top: 32, bottom: 64 })` | 避开状态栏 + Tab 栏 |
 | OAuth 回调 | `onLoadIntercept` + 自定义 Scheme | WebView 内拦截，不跳系统浏览器 |
-| 数据数组 | 具名 `class` 实例 (`new WorkItem(...)`) | ArkTS 禁止内联对象和无法推断类型的数组 |
+| 登录刷新 | `@StorageLink` + `@Watch('onLoginChanged')` | 登录完切回 Profile 即显示用户信息 |
+| 数据数组 | 具名 `class` 实例 (`new WorkItem(...)`) | ArkTS 禁止内联对象和无法推断的类型 |
+| API 类型 | 具名 `interface`（RepoOwner, SearchResult 等） | ArkTS 禁止内联对象作为类型声明 |
+
+## API 端点
+
+| 方法 | 端点 | 返回 |
+|------|------|------|
+| `getCurrentUser()` | `GET /user` | `User` |
+| `getUser(username)` | `GET /users/{u}` | `User` |
+| `getStarredRepos()` | `GET /user/starred` | `Repository[]` |
+| `getNotifications()` | `GET /notifications` | `GitHubNotification[]` |
+| `getTrendingRepos()` | `GET /search/repositories?sort=stars` | `SearchResult` |
+| `getReceivedEvents(u)` | `GET /users/{u}/received_events` | `Object[]` |
 
 ## 目录结构
 
@@ -34,7 +47,7 @@ entry/src/main/ets/
 │   ├── LoginPage.ets                # @Entry — WebView OAuth(onLoadIntercept)
 │   └── tabs/{Home,Inbox,Explore,Profile}Tab.ets
 ├── services/{Auth,GitHubAPI}Service.ets
-├── models/{User,AuthModels}.ets
+├── models/{User(含Repository/Notification),AuthModels}.ets
 └── common/
     ├── constants/{Theme,API}Constants.ets
     └── components/{RepoCard,ListItem,EmptyState,FilterTabBar,TabBarBuilder}.ets

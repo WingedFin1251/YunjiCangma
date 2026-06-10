@@ -1,15 +1,29 @@
 import { DarkTheme } from '../../common/constants/ThemeConstants';
 import { EmptyState } from '../../common/components/EmptyState';
+import { GitHubAPIService } from '../../services/GitHubAPIService';
+import type { GitHubNotification } from '../../models/User';
 
-/**
- * 收件箱 Inbox (Tab 2)
- * 布局：顶部导航栏 → 筛选标签栏 → 主内容区（空状态/通知列表）
- */
 @Component
 export struct InboxTab {
   private inboxStack: NavPathStack = new NavPathStack();
   @State selectedFilter: number = 0;
+  @State notifications: GitHubNotification[] = [];
+  @State isInboxLoading: boolean = true;
   private filterTabs: string[] = ['收件箱', '重点', '未读', '仓库'];
+
+  aboutToAppear(): void {
+    this.loadNotifications();
+  }
+
+  private async loadNotifications(): Promise<void> {
+    try {
+      this.notifications = await GitHubAPIService.getNotifications();
+    } catch (err) {
+      this.notifications = [];
+    } finally {
+      this.isInboxLoading = false;
+    }
+  }
 
   @Builder
   inboxPageMap(name: string, param: Object) {}
@@ -81,12 +95,17 @@ export struct InboxTab {
           .color(DarkTheme.border)
           .width('100%')
 
-        // === 主内容区：空状态 ===
-        EmptyState({
-          icon: '✉',
-          title: '都赶上了！',
-          subtitle: '休息一下，写一些代码，做您最擅长的事'
-        })
+        // === 主内容区 ===
+        if (this.isInboxLoading) {
+          Column() {
+            LoadingProgress().width(32).height(32).color(DarkTheme.accent).margin({ top: 80 })
+          }
+          .width('100%').height('100%').backgroundColor(DarkTheme.background)
+        } else if (this.notifications.length > 0) {
+          this.buildNotificationList()
+        } else {
+          EmptyState({ icon: '✉', title: '都赶上了！', subtitle: '休息一下，写一些代码，做您最擅长的事' })
+        }
       }
       .width('100%')
       .height('100%')
@@ -100,5 +119,48 @@ export struct InboxTab {
     .mode(NavigationMode.Stack)
     .hideTitleBar(true)
     .hideToolBar(true)
+  }
+
+  @Builder
+  buildNotificationList() {
+    Scroll() {
+      Column() {
+        ForEach(this.notifications, (item: GitHubNotification, index: number) => {
+          Row() {
+            Column() {
+              Text(item.subject.title)
+                .fontSize(14)
+                .fontColor(DarkTheme.textPrimary)
+                .maxLines(1)
+                .textOverflow({ overflow: TextOverflow.Ellipsis })
+              Text(item.repository.full_name)
+                .fontSize(12)
+                .fontColor(DarkTheme.textTertiary)
+                .margin({ top: 2 })
+            }
+            .alignItems(HorizontalAlign.Start)
+            .layoutWeight(1)
+            .margin({ left: 12 })
+
+            if (item.unread) {
+              Circle()
+                .width(8)
+                .height(8)
+                .fill(DarkTheme.accent)
+            }
+          }
+          .width('100%')
+          .height(48)
+          .padding({ left: 16, right: 16 })
+          .alignItems(VerticalAlign.Center)
+        }, (item: GitHubNotification) => item.id)
+      }
+      .width('100%')
+    }
+    .scrollable(ScrollDirection.Vertical)
+    .scrollBar(BarState.Off)
+    .width('100%')
+    .height('100%')
+    .backgroundColor(DarkTheme.background)
   }
 }
