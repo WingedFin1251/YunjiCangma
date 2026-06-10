@@ -1,0 +1,33 @@
+# Dependencies
+/node_modules
+/oh_modules
+
+# Build outputs
+**/build
+/.hvigor
+
+# IDE settings
+/.idea
+/.preview
+.cxx
+/.clangd
+/.clang-format
+/.clang-tidy
+
+# Local machine-specific
+/local.properties
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Test outputs
+**/.test
+
+# App analysis
+/.appanalyzer
+/.appanalyzer/
+
+# Claude Code
+/.claude/

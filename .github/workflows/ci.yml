@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Code Quality Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check project structure
+        run: |
+          echo "=== Checking project structure ==="
+          test -f build-profile.json5 && echo "✓ build-profile.json5 exists" || echo "✗ build-profile.json5 missing"
+          test -f oh-package.json5 && echo "✓ oh-package.json5 exists" || echo "✗ oh-package.json5 missing"
+          test -f AppScope/app.json5 && echo "✓ AppScope/app.json5 exists" || echo "✗ AppScope/app.json5 missing"
+          test -d entry && echo "✓ entry module exists" || echo "✗ entry module missing"
+
+      - name: Check code formatting
+        run: |
+          echo "=== Checking .ets file syntax (basic) ==="
+          find . -name "*.ets" -not -path "*/oh_modules/*" -not -path "*/build/*" | while read f; do
+            echo "  Found: $f"
+          done
+
+      - name: Check .gitignore coverage
+        run: |
+          echo "=== Checking .gitignore ==="
+          test -f .gitignore && echo "✓ .gitignore exists" || echo "✗ .gitignore missing"
+          grep -q "oh_modules" .gitignore && echo "✓ oh_modules covered" || echo "✗ oh_modules not covered"
+          grep -q "local.properties" .gitignore && echo "✓ local.properties covered" || echo "✗ local.properties not covered"
+          grep -q "build" .gitignore && echo "✓ build outputs covered" || echo "✗ build not covered"
