@@ -2,7 +2,43 @@
   "color": [
     {
       "name": "start_window_background",
-      "value": "#000000"
+      "value": "#0D1117"
+    },
+    {
+      "name": "github_bg_primary",
+      "value": "#0D1117"
+    },
+    {
+      "name": "github_bg_surface",
+      "value": "#161B22"
+    },
+    {
+      "name": "github_border",
+      "value": "#30363D"
+    },
+    {
+      "name": "github_text_primary",
+      "value": "#E6EDF3"
+    },
+    {
+      "name": "github_text_secondary",
+      "value": "#8B949E"
+    },
+    {
+      "name": "github_accent",
+      "value": "#58A6FF"
+    },
+    {
+      "name": "github_tab_bg",
+      "value": "#161B22"
+    },
+    {
+      "name": "github_tab_selected",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "github_tab_unselected",
+      "value": "#8B949E"
     }
   ]
 }
