@@ -2,15 +2,83 @@
   "string": [
     {
       "name": "module_desc",
-      "value": "module description"
+      "value": "GitHub client for HarmonyOS NEXT"
     },
     {
       "name": "EntryAbility_desc",
-      "value": "description"
+      "value": "GitHub client entry ability"
     },
     {
       "name": "EntryAbility_label",
-      "value": "label"
+      "value": "GitHub"
+    },
+    {
+      "name": "tab_home",
+      "value": "Home"
+    },
+    {
+      "name": "tab_notifications",
+      "value": "Notifications"
+    },
+    {
+      "name": "tab_explore",
+      "value": "Explore"
+    },
+    {
+      "name": "tab_profile",
+      "value": "Profile"
+    },
+    {
+      "name": "home_title",
+      "value": "GitHub"
+    },
+    {
+      "name": "notifications_title",
+      "value": "Notifications"
+    },
+    {
+      "name": "explore_title",
+      "value": "Explore"
+    },
+    {
+      "name": "profile_title",
+      "value": "Profile"
+    },
+    {
+      "name": "dark_mode_label",
+      "value": "Dark Mode"
+    },
+    {
+      "name": "welcome_title",
+      "value": "Welcome to GitHub"
+    },
+    {
+      "name": "welcome_subtitle",
+      "value": "Your feed appears here"
+    },
+    {
+      "name": "no_notifications",
+      "value": "No notifications yet"
+    },
+    {
+      "name": "notifications_hint",
+      "value": "Activity will show here"
+    },
+    {
+      "name": "search_placeholder",
+      "value": "Search GitHub"
+    },
+    {
+      "name": "explore_subtitle",
+      "value": "Discover repositories and developers"
+    },
+    {
+      "name": "profile_username",
+      "value": "User Name"
+    },
+    {
+      "name": "profile_userhandle",
+      "value": "@username"
     }
   ]
 }

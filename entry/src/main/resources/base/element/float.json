@@ -3,6 +3,30 @@
     {
       "name": "page_text_font_size",
       "value": "50fp"
+    },
+    {
+      "name": "page_title_font_size",
+      "value": "20fp"
+    },
+    {
+      "name": "body_font_size",
+      "value": "16fp"
+    },
+    {
+      "name": "caption_font_size",
+      "value": "12fp"
+    },
+    {
+      "name": "tab_icon_size",
+      "value": "24fp"
+    },
+    {
+      "name": "tab_font_size",
+      "value": "11fp"
+    },
+    {
+      "name": "avatar_size",
+      "value": "80fp"
     }
   ]
 }

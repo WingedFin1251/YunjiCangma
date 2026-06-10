@@ -3,6 +3,42 @@
     {
       "name": "start_window_background",
       "value": "#FFFFFF"
+    },
+    {
+      "name": "github_bg_primary",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "github_bg_surface",
+      "value": "#F6F8FA"
+    },
+    {
+      "name": "github_border",
+      "value": "#D0D7DE"
+    },
+    {
+      "name": "github_text_primary",
+      "value": "#1F2328"
+    },
+    {
+      "name": "github_text_secondary",
+      "value": "#656D76"
+    },
+    {
+      "name": "github_accent",
+      "value": "#0969DA"
+    },
+    {
+      "name": "github_tab_bg",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "github_tab_selected",
+      "value": "#1F2328"
+    },
+    {
+      "name": "github_tab_unselected",
+      "value": "#656D76"
     }
   ]
 }

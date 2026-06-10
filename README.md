@@ -96,11 +96,23 @@ Github/
 
 ## 核心模块
 
+- **MainPage** — 主页面，4 Tab 底部导航（Home / Notifications / Explore / Profile）
 - **EntryAbility** — 应用主入口，管理应用生命周期
-- **Index 页面** — 主页面/首页
 - **services/** — GitHub API 封装层（REST v3）
 - **models/** — 数据模型定义（Repo, Issue, User 等）
 - **BackupExtensionAbility** — 数据备份与恢复支持
+
+## 文档
+
+详细开发文档见 [docs/](docs/) 目录：
+
+| 文档 | 说明 |
+|------|------|
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | 系统架构、组件树、数据流、路由设计 |
+| [DEVELOPMENT.md](docs/DEVELOPMENT.md) | 开发指南、编码规范、调试技巧 |
+| [API.md](docs/API.md) | GitHub REST API 集成、端点参考、数据模型 |
+| [DESIGN.md](docs/DESIGN.md) | 设计系统、主题色彩、组件规范 |
+| [ROADMAP.md](docs/ROADMAP.md) | 功能路线图、版本计划 |
 
 ## 运行测试
 
