@@ -11,40 +11,48 @@
 
 ## 认证
 
-### 方式一：Personal Access Token（推荐）
+### OAuth Web Flow（已实现）
 
-```http
-Authorization: Bearer ghp_xxxxxxxxxxxxxxxxxxxx
-```
-
-1. GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens
-2. 选择需要的权限（repo, user, notifications 等）
-3. 生成 token，粘贴到应用登录页
-
-### 方式二：OAuth App（规划中）
+应用通过 WebView 加载 GitHub OAuth 授权页面，用户授权后拦截回调 URL 提取 authorization code，再用 code 交换 access token。
 
 ```
-GET https://github.com/login/oauth/authorize?client_id=xxx&scope=repo,user
+AuthService.buildOAuthUrl()
+  → WebView 加载 github.com/login/oauth/authorize
+  → 用户授权 → 回调 URL 含 ?code=xxx
+  → AuthService.extractCodeFromUrl(url)
+  → AuthService.exchangeCodeForToken(code)
+    → POST github.com/login/oauth/access_token
+    → AuthService.saveToken(token) → preferences + AppStorage
 ```
 
-### 网络请求示例
+**配置**: 在 `common/constants/APIConstants.ets` 中设置 `GITHUB_OAUTH_CLIENT_ID` 和 `GITHUB_OAUTH_CLIENT_SECRET`。
+
+### Token 管理
+
+`services/AuthService.ets` 提供完整的 Token 生命周期：
+- `saveToken(token)` → preferences 持久化 + AppStorage 全局状态
+- `loadToken()` → 启动时从 preferences 恢复
+- `getToken()` → 读取当前 token
+- `isLoggedIn()` → 检查登录状态
+- `logout()` → 清除 token
+
+### 网络请求实现
+
+`services/GitHubAPIService.ets` 封装了 HTTP 请求，`buildHeaders()` 方法自动注入 Bearer Token：
 
 ```typescript
-import { http } from '@kit.NetworkKit';
-
-// 封装在 services/GitHubAPIService.ets 中
-const httpRequest = http.createHttp();
-const response = await httpRequest.request(
-  'https://api.github.com/repos/octocat/Hello-World',
-  {
-    method: http.RequestMethod.GET,
-    header: {
-      'Authorization': `Bearer ${token}`,
-      'Accept': 'application/vnd.github+json',
-      'X-GitHub-Api-Version': '2022-11-28'
-    }
+// 实际实现
+private static buildHeaders(): Record<string, string> {
+  const token: string = AuthService.getToken();
+  const headers: Record<string, string> = {
+    'Accept': APIHeaders.ACCEPT,
+    'X-GitHub-Api-Version': APIHeaders.API_VERSION
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
   }
-);
+  return headers;
+}
 ```
 
 ### 权限声明
@@ -221,8 +229,9 @@ GitHub API 使用 Link Header 分页：
 
 ## TODO
 
-- [ ] `services/GitHubAPIService.ets` — API 客户端封装
-- [ ] `services/AuthService.ets` — Token 管理
-- [ ] `models/` — 数据模型定义
+- [x] `services/GitHubAPIService.ets` — API 客户端封装
+- [x] `services/AuthService.ets` — Token 管理
+- [x] `models/User.ets` — 用户数据模型
 - [ ] Token 安全存储（使用 HarmonyOS 密钥库）
 - [ ] 请求缓存策略（减少 API 调用）
+- [ ] 分页数据加载

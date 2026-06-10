@@ -1,32 +1,100 @@
 {
   "float": [
     {
-      "name": "page_text_font_size",
-      "value": "50fp"
+      "name": "text_size_display",
+      "value": "26sp"
     },
     {
-      "name": "page_title_font_size",
-      "value": "20fp"
+      "name": "text_size_section",
+      "value": "20sp"
     },
     {
-      "name": "body_font_size",
-      "value": "16fp"
+      "name": "text_size_body",
+      "value": "16sp"
     },
     {
-      "name": "caption_font_size",
-      "value": "12fp"
+      "name": "text_size_caption",
+      "value": "14sp"
     },
     {
-      "name": "tab_icon_size",
-      "value": "24fp"
+      "name": "text_size_tab",
+      "value": "10sp"
     },
     {
-      "name": "tab_font_size",
-      "value": "11fp"
+      "name": "spacing_page_h",
+      "value": "16dp"
     },
     {
-      "name": "avatar_size",
-      "value": "80fp"
+      "name": "spacing_section_v",
+      "value": "24dp"
+    },
+    {
+      "name": "spacing_item_v",
+      "value": "16dp"
+    },
+    {
+      "name": "spacing_icon_text",
+      "value": "12dp"
+    },
+    {
+      "name": "spacing_list_item_v",
+      "value": "14dp"
+    },
+    {
+      "name": "spacing_card_padding",
+      "value": "16dp"
+    },
+    {
+      "name": "radius_card",
+      "value": "8dp"
+    },
+    {
+      "name": "radius_button",
+      "value": "6dp"
+    },
+    {
+      "name": "icon_size_normal",
+      "value": "24dp"
+    },
+    {
+      "name": "icon_size_tab",
+      "value": "22dp"
+    },
+    {
+      "name": "size_avatar_sm",
+      "value": "32dp"
+    },
+    {
+      "name": "size_avatar_md",
+      "value": "40dp"
+    },
+    {
+      "name": "size_avatar_lg",
+      "value": "48dp"
+    },
+    {
+      "name": "size_tab_bar",
+      "value": "52dp"
+    },
+    {
+      "name": "size_list_item",
+      "value": "52dp"
+    },
+    {
+      "name": "size_filter_bar",
+      "value": "40dp"
+    },
+    {
+      "name": "size_status_input",
+      "value": "36dp"
+    },
+    {
+      "name": "size_empty_image",
+      "value": "120dp"
+    },
+    {
+      "name": "size_nav_icon_hit",
+      "value": "44dp"
     }
   ]
 }

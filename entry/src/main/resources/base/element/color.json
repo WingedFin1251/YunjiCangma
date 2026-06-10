@@ -2,43 +2,63 @@
   "color": [
     {
       "name": "start_window_background",
+      "value": "#121212"
+    },
+    {
+      "name": "dark_bg_primary",
+      "value": "#121212"
+    },
+    {
+      "name": "dark_bg_surface",
+      "value": "#1E1E1E"
+    },
+    {
+      "name": "dark_bg_elevated",
+      "value": "#2A2A2A"
+    },
+    {
+      "name": "dark_border",
+      "value": "#333333"
+    },
+    {
+      "name": "dark_text_primary",
       "value": "#FFFFFF"
     },
     {
-      "name": "github_bg_primary",
-      "value": "#FFFFFF"
+      "name": "dark_text_secondary",
+      "value": "#B3B3B3"
     },
     {
-      "name": "github_bg_surface",
-      "value": "#F6F8FA"
+      "name": "dark_text_tertiary",
+      "value": "#757575"
     },
     {
-      "name": "github_border",
-      "value": "#D0D7DE"
+      "name": "dark_accent",
+      "value": "#218BFE"
     },
     {
-      "name": "github_text_primary",
-      "value": "#1F2328"
+      "name": "dark_issue",
+      "value": "#2EA44F"
     },
     {
-      "name": "github_text_secondary",
-      "value": "#656D76"
+      "name": "dark_pr",
+      "value": "#218BFE"
     },
     {
-      "name": "github_accent",
-      "value": "#0969DA"
+      "name": "dark_discussion",
+      "value": "#8957E5"
     },
     {
-      "name": "github_tab_bg",
-      "value": "#FFFFFF"
+      "name": "dark_org",
+      "value": "#FF9529"
     },
     {
-      "name": "github_tab_selected",
-      "value": "#1F2328"
+      "name": "dark_star",
+      "value": "#FFD33D"
     },
     {
-      "name": "github_tab_unselected",
-      "value": "#656D76"
+      "name": "dark_click",
+      "value": "#383838"
     }
   ]
 }

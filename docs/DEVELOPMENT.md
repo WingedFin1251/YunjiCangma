@@ -75,6 +75,37 @@ struct MyPage {
 // document.getElementById() — ArkTS 不存在此概念
 ```
 
+### ArkTS 严格模式规则
+
+本项目启用了 `strictMode`（`caseSensitiveCheck` + `useNormalizedOHMUrl`），以下规则必须遵守：
+
+1. **常量用类静态属性** — `export class DarkTheme { static readonly bg = '#121212' }`，禁止裸对象字面量
+2. **数据用具名类实例** — 数组元素必须是有构造函数的类实例，禁止内联匿名对象
+3. **静态方法无 `this`** — `this.xxx()` → `ClassName.xxx()`
+4. **禁止对象展开** — `...obj` 不可用，需显式属性赋值
+5. **数组显式类型** — `private items: MyClass[] = [...]` 必须标注类型
+6. **`FontWeight.Light`** 不存在 → 使用 `FontWeight.Lighter`
+
+```typescript
+// ✅ 推荐模式：具名类 + 显式类型
+class WorkItem {
+  icon: string = '';
+  label: string = '';
+  constructor(icon: string, label: string) {
+    this.icon = icon;
+    this.label = label;
+  }
+}
+private workItems: WorkItem[] = [
+  new WorkItem('🟢', '议题'),
+];
+
+// ❌ 避免：内联对象
+private items: Array<{icon: string; label: string}> = [
+  { icon: '🟢', label: '议题' },  // 报错：arkts-no-untyped-obj-literals
+];
+```
+
 ### 新增功能流程
 
 1. **数据模型** — `models/` 中定义数据结构，与 GitHub API 返回结构对应

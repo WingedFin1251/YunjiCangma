@@ -23,8 +23,8 @@
 ## 项目速览
 
 - **平台**: HarmonyOS NEXT (API 6.1.0)
-- **语言**: ArkTS
+- **语言**: ArkTS（TypeScript 严格子集）
 - **架构**: Stage Model + ArkUI 声明式 UI
-- **数据源**: GitHub REST API v3
-- **设计**: GitHub 品牌色系，支持深色/浅色手动切换
-- **底部导航**: Home / Notifications / Explore / Profile
+- **数据源**: GitHub REST API v3 + OAuth Web Flow
+- **设计**: 全局深色模式（V1.0 规范，唯一主题）
+- **底部导航**: 主页 / 收件箱 / 探索 / 个人资料

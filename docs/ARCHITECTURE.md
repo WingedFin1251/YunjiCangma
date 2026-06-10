@@ -4,28 +4,30 @@
 
 本应用采用 **Tabs + Navigation** 复合架构，每个底部 Tab 拥有独立的 `Navigation` 导航栈，确保子页面跳转时底部导航栏始终可见。
 
+**主题**: 全局深色模式（唯一主题），通过 `DarkTheme` 类提供 14 个静态色值。无浅色切换。
+
 ## 分层架构
 
 ```
 ┌─────────────────────────────────────────┐
-│              UI Layer (pages/)           │
+│           UI Layer (pages/)              │
 │  MainPage → Tabs → TabContent × 4       │
 │    ├── HomeTab / Navigation             │
-│    ├── NotificationsTab / Navigation    │
+│    ├── InboxTab / Navigation            │
 │    ├── ExploreTab / Navigation          │
 │    └── ProfileTab / Navigation          │
+│  LoginPage (@Entry)                     │
 ├─────────────────────────────────────────┤
-│          Service Layer (services/)       │
-│  GitHubAPIService   AuthService          │
-│  RepoService        UserService          │
+│        Service Layer (services/)         │
+│  AuthService          GitHubAPIService   │
 ├─────────────────────────────────────────┤
-│           Model Layer (models/)          │
-│  Repository   Issue   PullRequest        │
-│  User         Notification              │
+│         Model Layer (models/)            │
+│  User                 AuthModels         │
 ├─────────────────────────────────────────┤
-│          Common Layer (common/)          │
-│  ThemeConstants   Components   Utils     │
-│  HttpClient       Logger                 │
+│        Common Layer (common/)            │
+│  DarkTheme   APIHeaders                  │
+│  RepoCard    ListItem    EmptyState      │
+│  FilterTabBar  TabBarBuilder            │
 └─────────────────────────────────────────┘
 ```
 
@@ -33,114 +35,143 @@
 
 ```
 EntryAbility (UIAbility)
-  └─ MainPage.ets (@Entry, @Component)
-       ├─ @StorageLink('currentTheme') → 主题状态
-       └─ Tabs(barPosition: BarPosition.End, barMode: BarMode.Fixed)
-            ├─ TabContent[0]
-            │    └─ HomeTab (@Component)
-            │         └─ Navigation(homeStack)
-            │              ├─ Column (首页 Feed 内容)
-            │              └─ .navDestination(homePageMap)
-            │                   └─ 未来: RepoDetail, IssueList 等
-            ├─ TabContent[1]
-            │    └─ NotificationsTab (@Component)
-            │         └─ Navigation(notifStack)
-            ├─ TabContent[2]
-            │    └─ ExploreTab (@Component)
-            │         └─ Navigation(exploreStack)
-            └─ TabContent[3]
-                 └─ ProfileTab (@Component)
-                      ├─ 头像 + 用户名
-                      ├─ Toggle (深色模式开关)
+  └─ loadContent('pages/MainPage')
+       └─ MainPage.ets (@Entry)
+            └─ Tabs(barPosition: End, barHeight: 52dp, animationDuration: 0)
+                 ├─ TabContent[0]: HomeTab
+                 │    └─ Navigation(homeStack)
+                 │         ├─ 顶部导航栏 (esc+add+more)
+                 │         ├─ 我的工作 (7 项 WorkItem 列表)
+                 │         └─ 收藏夹 (FavoriteRepo 卡片)
+                 ├─ TabContent[1]: InboxTab
+                 │    └─ Navigation(inboxStack)
+                 │         ├─ 顶部导航栏 (Inbox title + more)
+                 │         ├─ 筛选标签栏 (FilterTabBar)
+                 │         └─ EmptyState / 通知列表
+                 ├─ TabContent[2]: ExploreTab
+                 │    └─ Navigation(exploreStack)
+                 │         ├─ 标题
+                 │         ├─ 发现 (2 列 discoverItem)
+                 │         └─ 活动 (ActivityItem 流 + RepoCard)
+                 └─ TabContent[3]: ProfileTab
                       └─ Navigation(profileStack)
+                           ├─ 顶部图标 (share + settings)
+                           ├─ 个人信息 (头像 + 用户名 + 状态框)
+                           ├─ 深色模式（固定，无 Toggle）
+                           └─ 资源列表 (仓库/组织/已加星标)
+
+LoginPage.ets (@Entry, router.pushUrl 独立页面)
+  └─ Web (GitHub OAuth authorize page)
+       └─ URL 拦截 → AuthService.exchangeCodeForToken() → router.back()
 ```
 
 ## 数据流
 
-### 主题切换流
+### 启动初始化
 
 ```
-ProfileTab.Toggle.onChange(isOn)
-  → AppStorage.setOrCreate('currentTheme', isOn ? 'dark' : 'light')
-  → MainPage.@StorageLink 检测变化 → 组件重渲染
-  → 4 个 Tab.@Prop theme 同步更新 → 各 Tab 重渲染
-  → 全局颜色切换完成
+EntryAbility.onCreate()
+  → AppStorage: authToken='', isLoggedIn=false
+  → AuthService.loadToken() (异步，preferences → AppStorage)
+  → windowStage.loadContent('pages/MainPage')
 ```
 
-### API 数据流（规划）
+### OAuth 登录流
+
+```
+ProfileTab "Sign In" → router.pushUrl('pages/LoginPage')
+  → Web 加载 github.com/login/oauth/authorize
+  → 用户授权 → 回调 URL 含 ?code=xxx
+  → AuthService.extractCodeFromUrl(url)
+  → AuthService.exchangeCodeForToken(code)
+    → POST github.com/login/oauth/access_token
+    → saveToken(token) → preferences + AppStorage
+  → router.back()
+  → ProfileTab.aboutToAppear() → loadUserData()
+    → GitHubAPIService.getCurrentUser() → @State user
+```
+
+### API 数据流
 
 ```
 Tab Component (UI)
-  → Service Layer (GitHubAPIService)
-    → HttpClient (@ohos.net.http)
-      → GitHub REST API v3 (api.github.com)
-        → JSON Response
-      → Model Parser (models/)
-    → @State data
-  → List / ForEach 渲染
+  → GitHubAPIService.static method
+    → buildHeaders() (AuthService.getToken() → Bearer header)
+    → @ohos.net.http request
+    → JSON parse → typed model
+  → @State / @Prop 更新
+  → UI 重渲染
 ```
 
 ## 路由设计
 
-### 页面路由注册
-
-所有 `@Entry` 页面在 `main_pages.json` 中注册：
+### 页面路由注册 (`main_pages.json`)
 
 ```json
 {
   "src": [
-    "pages/MainPage"
+    "pages/MainPage",
+    "pages/LoginPage"
   ]
 }
 ```
 
-### Tab 内部导航
+- `MainPage` — 启动默认加载
+- `LoginPage` — 通过 `router.pushUrl({ url: 'pages/LoginPage' })` 跳转
 
-每个 Tab 使用独立 `NavPathStack`，通过 `.navDestination()` 注册子页面：
+### Tab 内部导航（规划）
 
-```typescript
-// 示例：在 HomeTab 内导航到仓库详情
-this.homeStack.pushPath({ name: 'repoDetail', param: { owner: 'octocat', repo: 'Hello-World' } })
-```
-
-### 路由架构优势
-
-| 特性 | 说明 |
-|------|------|
-| Tab 持久化 | 子页面导航不遮挡底部导航栏 |
-| 独立栈 | 各 Tab 导航状态互不影响 |
-| 返回手势 | `NavPathStack.pop()` 回到上一页 |
-| 懒加载 | 子页面仅在导航到时创建 |
+每个 Tab 持有独立 `NavPathStack`，子页面通过 `.navDestination(@Builder pageMap)` 注册。
 
 ## 状态管理
 
 | 状态类型 | 方案 | 作用域 |
 |----------|------|--------|
-| 主题 | `AppStorage` + `@StorageLink`/`@Prop` | 全局 |
+| 认证 | `AppStorage` + `@StorageLink` | 全局 (authToken, isLoggedIn) |
+| 用户数据 | `@State user` | ProfileTab |
 | Tab 选中 | `@State currentIndex` | MainPage |
-| 页面数据 | `@State` / `@ObjectLink` | Tab 内部 |
 | 导航栈 | `NavPathStack` 实例 | 单个 Tab |
+| 色彩 | `DarkTheme` 静态类 | 全局引用 |
+
+## 色彩架构
+
+深色唯一主题，由 `common/constants/ThemeConstants.ets` 中的 `DarkTheme` 类定义（14 个 `static readonly` 属性）。所有组件直接 `import { DarkTheme }` 引用，无需 prop 传递。
+
+```typescript
+// 唯一引用方式
+import { DarkTheme } from '../../common/constants/ThemeConstants';
+Column().backgroundColor(DarkTheme.background)
+Text().fontColor(DarkTheme.textPrimary)
+```
 
 ## 目录结构
 
 ```
 entry/src/main/ets/
 ├── entryability/
-│   └── EntryAbility.ets         # 应用入口，初始化 AppStorage
-├── entrybackupability/
-│   └── EntryBackupAbility.ets   # 备份扩展
+│   └── EntryAbility.ets            # 应用入口
 ├── pages/
-│   ├── MainPage.ets             # @Entry — 主页面 Tabs 容器
+│   ├── MainPage.ets                # @Entry — Tabs 容器
+│   ├── LoginPage.ets               # @Entry — OAuth 登录
 │   └── tabs/
-│       ├── HomeTab.ets          # 首页
-│       ├── NotificationsTab.ets # 通知
-│       ├── ExploreTab.ets       # 探索/搜索
-│       └── ProfileTab.ets       # 个人中心
-├── services/                    # API 服务层（规划中）
-├── models/                      # 数据模型（规划中）
+│       ├── HomeTab.ets             # 主页
+│       ├── InboxTab.ets            # 收件箱
+│       ├── ExploreTab.ets          # 探索
+│       └── ProfileTab.ets          # 个人资料
+├── services/
+│   ├── AuthService.ets             # OAuth + Token CRUD
+│   └── GitHubAPIService.ets        # API 客户端
+├── models/
+│   ├── User.ets                    # 用户模型
+│   └── AuthModels.ets              # OAuthTokenResponse
 └── common/
     ├── constants/
-    │   └── ThemeConstants.ets   # 色彩常量
+    │   ├── ThemeConstants.ets       # DarkTheme 色板
+    │   └── APIConstants.ets        # API 配置
     └── components/
-        └── TabBarBuilder.ets    # Tab 栏配置
+        ├── RepoCard.ets            # 仓库卡片
+        ├── ListItem.ets            # 列表功能项
+        ├── EmptyState.ets          # 空状态
+        ├── FilterTabBar.ets        # 筛选标签栏
+        └── TabBarBuilder.ets       # Tab 栏配置
 ```
