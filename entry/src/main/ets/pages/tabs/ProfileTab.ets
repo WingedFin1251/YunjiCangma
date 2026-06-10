@@ -66,8 +66,8 @@ export struct ProfileTab {
           Row() {
             Blank()
             Row({ space: 20 }) {
-              this.topIcon('📤')
-              this.topIcon('⚙️')
+              this.topIcon('↗')
+              this.topIcon('☰')
             }
           }
           .width('100%')
@@ -98,6 +98,7 @@ export struct ProfileTab {
         }
         .width('100%')
         .alignItems(HorizontalAlign.Center)
+        .padding({ top: 32, bottom: 64 })
       }
       .scrollable(ScrollDirection.Vertical)
       .scrollBar(BarState.Off)

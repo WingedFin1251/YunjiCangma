@@ -30,6 +30,19 @@ export default class EntryAbility extends UIAbility {
   onWindowStageCreate(windowStage: window.WindowStage): void {
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onWindowStageCreate');
 
+    // 全屏沉浸：隐藏系统导航栏，状态栏与内容融合
+    try {
+      const mainWindow = windowStage.getMainWindowSync();
+      mainWindow.setWindowLayoutFullScreen(true);
+      mainWindow.setWindowSystemBarEnable(['status']);
+      mainWindow.setWindowSystemBarProperties({
+        statusBarColor: '#121212',
+        navigationBarColor: '#1E1E1E'
+      });
+    } catch (err) {
+      hilog.warn(DOMAIN, 'testTag', 'Failed to set immersive window. Cause: %{public}s', JSON.stringify(err));
+    }
+
     windowStage.loadContent('pages/MainPage', (err) => {
       if (err.code) {
         hilog.error(DOMAIN, 'testTag', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err));

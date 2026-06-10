@@ -83,13 +83,14 @@ export struct InboxTab {
 
         // === 主内容区：空状态 ===
         EmptyState({
-          icon: '📭',
+          icon: '✉',
           title: '都赶上了！',
           subtitle: '休息一下，写一些代码，做您最擅长的事'
         })
       }
       .width('100%')
       .height('100%')
+      .padding({ top: 32, bottom: 64 })
       .backgroundColor(DarkTheme.background)
     }
     .navDestination(this.inboxPageMap)

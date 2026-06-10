@@ -10,9 +10,6 @@ struct MainPage {
   @State currentIndex: number = 0;
   private tabsController: TabsController = new TabsController();
 
-  /**
-   * Tab 栏构建器 — 平板适配：10sp 文字 + 20fp 几何符号
-   */
   @Builder
   tabBarContent(index: number, icon: string, label: ResourceStr) {
     Column() {
@@ -42,40 +39,50 @@ struct MainPage {
   }
 
   build() {
-    Tabs({
-      barPosition: BarPosition.End,
-      controller: this.tabsController,
-      index: this.currentIndex
-    }) {
-      TabContent() {
-        HomeTab()
-      }
-      .tabBar(this.tabBarContent(0, '⌂', $r('app.string.tab_home')))
+    Column() {
+      Tabs({
+        barPosition: BarPosition.End,
+        controller: this.tabsController,
+        index: this.currentIndex
+      }) {
+        TabContent() {
+          HomeTab()
+        }
+        .tabBar(this.tabBarContent(0, '☷', $r('app.string.tab_home')))
 
-      TabContent() {
-        InboxTab()
-      }
-      .tabBar(this.tabBarContent(1, '✉', $r('app.string.tab_inbox')))
+        TabContent() {
+          InboxTab()
+        }
+        .tabBar(this.tabBarContent(1, '✉', $r('app.string.tab_inbox')))
 
-      TabContent() {
-        ExploreTab()
-      }
-      .tabBar(this.tabBarContent(2, '⊕', $r('app.string.tab_explore')))
+        TabContent() {
+          ExploreTab()
+        }
+        .tabBar(this.tabBarContent(2, '◎', $r('app.string.tab_explore')))
 
-      TabContent() {
-        ProfileTab()
+        TabContent() {
+          ProfileTab()
+        }
+        .tabBar(this.tabBarContent(3, '◉', $r('app.string.tab_profile')))
       }
-      .tabBar(this.tabBarContent(3, '◉', $r('app.string.tab_profile')))
+      .barHeight(52)
+      .barBackgroundColor(DarkTheme.surface)
+      .backgroundColor(DarkTheme.background)
+      .scrollable(false)
+      .animationDuration(0)
+      .onChange((index: number) => {
+        this.currentIndex = index;
+      })
+      .layoutWeight(1)
+
+      // 小白条沉浸区：底栏颜色向下延伸
+      Row()
+        .width('100%')
+        .height(20)
+        .backgroundColor(DarkTheme.surface)
     }
-    .barHeight(52)
-    .barBackgroundColor(DarkTheme.surface)
-    .backgroundColor(DarkTheme.background)
-    .scrollable(false)
-    .animationDuration(0)
-    .onChange((index: number) => {
-      this.currentIndex = index;
-    })
     .width('100%')
     .height('100%')
+    .backgroundColor(DarkTheme.background)
   }
 }
