@@ -1,159 +1,147 @@
 # 设计系统
 
-## 主题
+> 依据：GitHub 移动端 App 深色模式 UI 开发规范文档 V1.0
+> 适用终端：HarmonyOS NEXT 移动端
+> 设计模式：**全局深色模式（唯一主题）**
 
-本应用采用 **GitHub 品牌色彩系统**，支持深色和浅色两种主题，默认深色。
+## 色彩系统
 
-### 深色主题
+14 色值，纯实色填充。定义在 `common/constants/ThemeConstants.ets` → `DarkTheme` 类。
 
-| Token | 色值 | 用途 |
-|-------|------|------|
-| `background` | `#0D1117` | 页面主背景 |
-| `surface` | `#161B22` | 卡片/面板背景 |
-| `border` | `#30363D` | 分割线/边框 |
-| `textPrimary` | `#E6EDF3` | 主要文字 |
-| `textSecondary` | `#8B949E` | 次要文字/辅助 |
-| `accent` | `#58A6FF` | 链接/强调色 |
-| `tabBarBackground` | `#161B22` | 底部导航栏背景 |
-| `tabSelected` | `#FFFFFF` | Tab 选中态图标 |
-| `tabUnselected` | `#8B949E` | Tab 未选中态图标 |
+| Token | 色值 | RGB | 用途 |
+|-------|------|-----|------|
+| `background` | `#121212` | 18,18,18 | 页面底层背景 |
+| `surface` | `#1E1E1E` | 30,30,30 | 卡片、标签栏、列表项 |
+| `surfaceElevated` | `#2A2A2A` | 42,42,42 | 按钮常态、输入框背景 |
+| `border` | `#333333` | 51,51,51 | 分割线、卡片边框 |
+| `textPrimary` | `#FFFFFF` | 255,255,255 | 页面标题、用户名 |
+| `textSecondary` | `#B3B3B3` | 179,179,179 | 描述文字、时间戳 |
+| `textTertiary` | `#757575` | 117,117,117 | 次要备注、空状态辅助 |
+| `accent` | `#218BFE` | 33,139,254 | Tab 选中、品牌高亮 |
+| `issueGreen` | `#2EA44F` | 46,164,79 | 议题模块图标 |
+| `prBlue` | `#218BFE` | 33,139,254 | 拉取请求图标 |
+| `discussionPurple` | `#8957E5` | 137,87,229 | 讨论模块图标 |
+| `orgOrange` | `#FF9529` | 255,149,41 | 组织模块图标 |
+| `starYellow` | `#FFD33D` | 255,211,61 | 已加星标图标 |
+| `clickFeedback` | `#383838` | 56,56,56 | 点击反馈底色 |
 
-### 浅色主题
+## 字体系统
 
-| Token | 色值 | 用途 |
-|-------|------|------|
-| `background` | `#FFFFFF` | 页面主背景 |
-| `surface` | `#F6F8FA` | 卡片/面板背景 |
-| `border` | `#D0D7DE` | 分割线/边框 |
-| `textPrimary` | `#1F2328` | 主要文字 |
-| `textSecondary` | `#656D76` | 次要文字/辅助 |
-| `accent` | `#0969DA` | 链接/强调色 |
-| `tabBarBackground` | `#FFFFFF` | 底部导航栏背景 |
-| `tabSelected` | `#1F2328` | Tab 选中态图标 |
-| `tabUnselected` | `#656D76` | Tab 未选中态图标 |
+行高 = 字号 × 1.4。字体：系统无衬线。
 
-## 排版
+| 层级 | 字号(sp) | 字重 | 用途 |
+|------|----------|------|------|
+| 超大标题 | 26 | Bold | 页面一级标题（主页、Inbox、探索） |
+| 模块标题 | 20 | Medium | 「我的工作」「收藏夹」「活动」 |
+| 内容主文本 | 16 | Regular | 功能名称、仓库名称 |
+| 内容辅助 | 14 | Regular | 仓库简介、标签文字 |
+| 极小辅助 | 12 | Light | 时间戳、统计数字 |
 
-| Token | 值 | 用途 |
-|-------|-----|------|
-| `page_title_font_size` | `20fp` | 页面标题 |
-| `body_font_size` | `16fp` | 正文 |
-| `caption_font_size` | `12fp` | 辅助说明文字 |
-| `tab_font_size` | `11fp` | Tab 栏文字 |
-| `tab_icon_size` | `24fp` | Tab 栏图标 |
+文本溢出：单行末尾省略号 `...`；多行描述最多 2 行省略。
 
-## 底部导航栏
+## 栅格、间距与圆角
 
-### 规格
-
-- **高度**: `56vp`
-- **模式**: `BarMode.Fixed`（4 个 Tab 均分宽度）
-- **图标**: Unicode 符号（开发阶段），未来替换为 SVG 图标
-- **选中态**: 图标颜色变为主色（深色 `#FFFFFF`，浅色 `#1F2328`）
-- **动画**: Tab 切换有 200ms 过渡动画
-
-### Tab 图标
-
-| Tab | 图标 | 说明 |
-|-----|------|------|
-| Home | ⌂ | 首页 Feed |
-| Notifications | 🔔 | 通知列表 |
-| Explore | ⌕ | 搜索/探索 |
-| Profile | 👤 | 个人中心 |
-
-> 正式版本将替换为 SVG 图标或 HarmonyOS SymbolGlyph 资源。
-
-## 组件规范
-
-### 仓库卡片（规划中）
-
-```
-┌──────────────────────────────┐
-│ 📁 owner/repo        ⭐ 1.2k │
-│ A brief description...       │
-│ 🔵 TypeScript   🟡 MIT       │
-└──────────────────────────────┘
-```
-
-- 背景: `surface` 色
-- 圆角: `8vp`
-- 边框: `1px solid border`
-- 内边距: `16vp`
-
-### Issue 列表项（规划中）
-
-```
-┌──────────────────────────────┐
-│ 🔴 Open │ Issue title        │
-│ #1234 · opened 2 days ago    │
-│ by username  │  💬 5 comments│
-└──────────────────────────────┘
-```
-
-### 搜索框
-
-```
-┌──────────────────────────────┐
-│ 🔍 Search GitHub             │
-└──────────────────────────────┘
-```
-
-- 高度: `40vp`
-- 背景: `surface` 色
-- 圆角: `8vp`
-- 边框: `1px solid border`
-- 左侧图标 + placeholder 文字
-
-### 开关/Toggle
-
-用于深色模式切换：
-- 标签: "🌙 Dark Mode"
-- `ToggleType.Switch`
-- 背景行: `surface` 色，`10vp` 圆角，`1px` 边框
-
-## 图标
-
-### 系统图标（HarmonyOS SF Symbols）
-
-| 用途 | Symbol | 条件 |
-|------|--------|------|
-| 首页 | `sys.symbol.house_fill` | 选中态 |
-| 首页 | `sys.symbol.house` | 未选中态 |
-| 通知 | `sys.symbol.bell_fill` | 选中态 |
-| 通知 | `sys.symbol.bell` | 未选中态 |
-| 搜索 | `sys.symbol.magnifyingglass` | 通用 |
-| 个人 | `sys.symbol.person_fill` | 选中态 |
-| 个人 | `sys.symbol.person` | 未选中态 |
-| 返回 | `sys.symbol.chevron_left` | 导航栏 |
-
-> 开发阶段使用 Unicode 文本替代，正式版切换到 SymbolGlyph。
-
-## 间距系统
+基于 8dp 基础栅格。
 
 | 用途 | 值 |
 |------|-----|
-| 页面水平内边距 | `16vp` |
-| 卡片间距 | `12vp` |
-| 组件内部间距 | `8vp` / `12vp` / `16vp` |
-| Tab 图标与文字间距 | `2vp` |
-| 头像大小 | `80vp` |
+| 页面左右安全边距 | 16dp |
+| 模块上下间距 | 24dp |
+| 模块内元素间距 | 16dp |
+| 图标与文字间距 | 12dp |
+| 列表项内上下边距 | 14dp |
+| 卡片内四周边距 | 16dp |
+| 常规卡片/标签圆角 | 8dp |
+| 大按钮圆角 | 6dp |
+| 头像圆形裁切 | 半径 = 尺寸 1/2 |
+| 分割线 | 1dp, #333333 |
 
-## 交互
+## 图标规范
 
-### Tab 切换
+- 样式：全局线性图标（开发阶段使用 Unicode 占位）
+- 常规图标：24dp × 24dp
+- Tab 栏图标：22dp × 22dp
+- 未选中：#B3B3B3；选中：#218BFE
 
-- 点击切换：即时响应
-- 禁止滑动切换（`scrollable: false`）
-- 200ms 过渡动画
+## 底部导航栏
 
-### 子页面导航
+| 属性 | 值 |
+|------|-----|
+| 高度 | 52dp |
+| 模式 | BarMode.Fixed（4 等分） |
+| 入口顺序 | 主页 → 收件箱 → 探索 → 个人资料 |
+| 图标 | 22dp × 22dp，文字 12sp Light |
+| 选中色 | `#218BFE` (accent) |
+| 未选中色 | `#B3B3B3` (textSecondary) |
+| 切换动画 | 无（`animationDuration: 0`） |
 
-- 使用 `Navigation.pushPath()` 推入
-- 使用手势返回或返回按钮
-- 底部 Tab 栏在子页面中保持可见
+## 全局可复用组件
 
-### 主题切换
+### 仓库卡片 `RepoCard.ets`
 
-- 位置：Profile Tab → Dark Mode Toggle
-- 切换时全局 UI 立即更新
-- 默认深色（`AppStorage.setOrCreate('currentTheme', 'dark')`）
+```
+┌──────────────────────────────────┐
+│ [A]  owner / repo                │
+│     描述文字（最多 2 行）...      │
+│ ⬤ TypeScript  ⭐ 1.2k    [☆]   │
+└──────────────────────────────────┘
+```
+
+- 背景: `surface` #1E1E1E，圆角: 8dp，阴影: Y=2dp blur=6
+- 头像: 32dp 圆形，背景 `surfaceElevated`
+- 星标按钮: 36dp×36dp，背景 `surfaceElevated`，选中色 `starYellow`
+
+### 列表功能项 `ListItem.ets`
+
+```
+┌──────────────────────────────────┐
+│ 🟢  议题                        ›│
+└──────────────────────────────────┘
+```
+
+- 高度: 52dp，整行可点击
+- 图标: 24dp，文字: 16sp Regular
+
+### 空状态 `EmptyState.ets`
+
+```
+        [📭 120dp]
+    都赶上了！（20sp Medium）
+  休息一下，写一些代码...（14sp Regular）
+```
+
+- 居中排布，无操作按钮
+
+### 筛选标签栏 `FilterTabBar.ets`
+
+```
+[收件箱▼] [重点] [未读] [仓库▼]
+```
+
+- 高度: 40dp，背景: `surface`，圆角: 8dp
+- 选中: `#FFFFFF` 文字 + `surfaceElevated` 背景
+- 未选中: `textSecondary` 文字
+
+### 头像
+
+- 尺寸: 32dp / 40dp / 48dp 三档
+- 样式: 纯圆形裁切，无边框
+- 首字母大写显示（用户名首字符）
+
+## 各页面布局
+
+| 页面 | 布局结构 |
+|------|----------|
+| 主页 | 导航栏(26sp Bold 标题 + 搜索/新增/更多) → 我的工作(7 项 WorkItem) → 收藏夹(RepoCard 列表) |
+| 收件箱 | 导航栏(Inbox + 更多) → FilterTabBar(4 标签) → EmptyState / 通知列表 |
+| 探索 | 标题(26sp Bold) → 发现(2 列: 热门仓库/精选列表) → 活动(ActivityItem + RepoCard 混合) |
+| 个人资料 | 顶部图标(分享/设置) → 头像(48dp) + 用户名(24sp Bold) + 状态框 → 资源列表(3 项) |
+
+## 交互规则
+
+1. **点击反馈**：所有可点击区域按下时背景 → `#383838`（DarkTheme.clickFeedback），100ms
+2. **Tab 切换**：即时生效，无过渡动画
+3. **纵向滚动**：原生惯性滑动、回弹
+4. **下拉刷新**：不启用
+5. **文字溢出**：单行 → 末尾省略号；多行 → 最多 2 行省略
+6. **状态同步**：星标等操作即时刷新 UI

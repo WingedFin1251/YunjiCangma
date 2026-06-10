@@ -1,6 +1,7 @@
 import { AbilityConstant, ConfigurationConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
+import { AuthService } from '../services/AuthService';
 
 const DOMAIN = 0x0000;
 
@@ -12,8 +13,12 @@ export default class EntryAbility extends UIAbility {
       hilog.error(DOMAIN, 'testTag', 'Failed to set colorMode. Cause: %{public}s', JSON.stringify(err));
     }
 
-    // 初始化主题：默认深色（GitHub 品牌色）
-    AppStorage.setOrCreate('currentTheme', 'dark');
+    // 初始化认证状态
+    AppStorage.setOrCreate('authToken', '');
+    AppStorage.setOrCreate('isLoggedIn', false);
+
+    // 异步加载持久化的 token
+    AuthService.loadToken();
 
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onCreate');
   }

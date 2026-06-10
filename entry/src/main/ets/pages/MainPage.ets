@@ -1,64 +1,44 @@
-import { getThemeColors, ThemeColors, THEME_KEY } from '../common/constants/ThemeConstants';
+import { DarkTheme } from '../common/constants/ThemeConstants';
 import { HomeTab } from './tabs/HomeTab';
-import { NotificationsTab } from './tabs/NotificationsTab';
+import { InboxTab } from './tabs/InboxTab';
 import { ExploreTab } from './tabs/ExploreTab';
 import { ProfileTab } from './tabs/ProfileTab';
 
 @Entry
 @Component
 struct MainPage {
-  @StorageLink(THEME_KEY) currentTheme: string = 'dark';
   @State currentIndex: number = 0;
   private tabsController: TabsController = new TabsController();
 
-  private getColors(): ThemeColors {
-    return getThemeColors(this.currentTheme);
-  }
-
   /**
-   * Tab 栏构建器 — 图标 + 文字，选中时高亮
+   * Tab 栏构建器 — 平板适配：10sp 文字 + 20fp 几何符号
    */
   @Builder
-  tabBarContent(index: number, label: ResourceStr) {
+  tabBarContent(index: number, icon: string, label: ResourceStr) {
     Column() {
-      Text(this.tabIcon(index))
-        .fontSize(22)
+      Text(icon)
+        .fontSize(20)
         .fontColor(this.currentIndex === index
-          ? this.getColors().tabSelected
-          : this.getColors().tabUnselected)
+          ? DarkTheme.accent
+          : DarkTheme.textSecondary)
       Text(label)
-        .fontSize(11)
+        .fontSize(10)
+        .fontWeight(FontWeight.Lighter)
         .fontColor(this.currentIndex === index
-          ? this.getColors().tabSelected
-          : this.getColors().tabUnselected)
+          ? DarkTheme.accent
+          : DarkTheme.textSecondary)
+        .maxLines(1)
+        .textOverflow({ overflow: TextOverflow.Ellipsis })
+        .constraintSize({ maxWidth: 52 })
         .margin({ top: 2 })
     }
     .justifyContent(FlexAlign.Center)
     .alignItems(HorizontalAlign.Center)
     .width('100%')
     .height('100%')
-    .padding({ top: 6 })
     .onClick(() => {
       this.tabsController.changeIndex(index);
     })
-  }
-
-  /**
-   * Tab 图标 — 使用 Unicode 符号表示各个 Tab
-   */
-  private tabIcon(index: number): string {
-    switch (index) {
-      case 0:
-        return '⌂';  // Home
-      case 1:
-        return '🔔';  // Notifications
-      case 2:
-        return '⌕';  // Explore / Search
-      case 3:
-        return '👤';  // Profile
-      default:
-        return '●';
-    }
   }
 
   build() {
@@ -67,36 +47,31 @@ struct MainPage {
       controller: this.tabsController,
       index: this.currentIndex
     }) {
-      // Tab 0: Home
       TabContent() {
-        HomeTab({ theme: this.currentTheme })
+        HomeTab()
       }
-      .tabBar(this.tabBarContent(0, $r('app.string.tab_home')))
+      .tabBar(this.tabBarContent(0, '⌂', $r('app.string.tab_home')))
 
-      // Tab 1: Notifications
       TabContent() {
-        NotificationsTab({ theme: this.currentTheme })
+        InboxTab()
       }
-      .tabBar(this.tabBarContent(1, $r('app.string.tab_notifications')))
+      .tabBar(this.tabBarContent(1, '✉', $r('app.string.tab_inbox')))
 
-      // Tab 2: Explore
       TabContent() {
-        ExploreTab({ theme: this.currentTheme })
+        ExploreTab()
       }
-      .tabBar(this.tabBarContent(2, $r('app.string.tab_explore')))
+      .tabBar(this.tabBarContent(2, '⊕', $r('app.string.tab_explore')))
 
-      // Tab 3: Profile
       TabContent() {
-        ProfileTab({ theme: this.currentTheme })
+        ProfileTab()
       }
-      .tabBar(this.tabBarContent(3, $r('app.string.tab_profile')))
+      .tabBar(this.tabBarContent(3, '◉', $r('app.string.tab_profile')))
     }
-    .barMode(BarMode.Fixed)
-    .barHeight('56vp')
-    .barBackgroundColor(this.getColors().tabBarBackground)
-    .backgroundColor(this.getColors().background)
+    .barHeight(52)
+    .barBackgroundColor(DarkTheme.surface)
+    .backgroundColor(DarkTheme.background)
     .scrollable(false)
-    .animationDuration(200)
+    .animationDuration(0)
     .onChange((index: number) => {
       this.currentIndex = index;
     })

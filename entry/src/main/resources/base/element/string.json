@@ -14,71 +14,159 @@
     },
     {
       "name": "tab_home",
-      "value": "Home"
+      "value": "主页"
     },
     {
-      "name": "tab_notifications",
-      "value": "Notifications"
+      "name": "tab_inbox",
+      "value": "收件箱"
     },
     {
       "name": "tab_explore",
-      "value": "Explore"
+      "value": "探索"
     },
     {
       "name": "tab_profile",
-      "value": "Profile"
+      "value": "个人资料"
     },
     {
-      "name": "home_title",
-      "value": "GitHub"
+      "name": "page_title_home",
+      "value": "主页"
     },
     {
-      "name": "notifications_title",
-      "value": "Notifications"
+      "name": "page_title_inbox",
+      "value": "Inbox"
     },
     {
-      "name": "explore_title",
-      "value": "Explore"
+      "name": "page_title_explore",
+      "value": "探索"
     },
     {
-      "name": "profile_title",
-      "value": "Profile"
+      "name": "section_my_work",
+      "value": "我的工作"
     },
     {
-      "name": "dark_mode_label",
-      "value": "Dark Mode"
+      "name": "section_favorites",
+      "value": "收藏夹"
     },
     {
-      "name": "welcome_title",
-      "value": "Welcome to GitHub"
+      "name": "section_discover",
+      "value": "发现"
     },
     {
-      "name": "welcome_subtitle",
-      "value": "Your feed appears here"
+      "name": "section_activity",
+      "value": "活动"
     },
     {
-      "name": "no_notifications",
-      "value": "No notifications yet"
+      "name": "my_work_issues",
+      "value": "议题"
     },
     {
-      "name": "notifications_hint",
-      "value": "Activity will show here"
+      "name": "my_work_prs",
+      "value": "拉取请求"
     },
     {
-      "name": "search_placeholder",
-      "value": "Search GitHub"
+      "name": "my_work_discussions",
+      "value": "讨论"
     },
     {
-      "name": "explore_subtitle",
-      "value": "Discover repositories and developers"
+      "name": "my_work_projects",
+      "value": "项目"
     },
     {
-      "name": "profile_username",
-      "value": "User Name"
+      "name": "my_work_repos",
+      "value": "仓库"
     },
     {
-      "name": "profile_userhandle",
-      "value": "@username"
+      "name": "my_work_orgs",
+      "value": "组织"
+    },
+    {
+      "name": "my_work_starred",
+      "value": "已加星标"
+    },
+    {
+      "name": "discover_trending",
+      "value": "热门仓库"
+    },
+    {
+      "name": "discover_collections",
+      "value": "精选列表"
+    },
+    {
+      "name": "filter_inbox",
+      "value": "收件箱"
+    },
+    {
+      "name": "filter_important",
+      "value": "重点"
+    },
+    {
+      "name": "filter_unread",
+      "value": "未读"
+    },
+    {
+      "name": "filter_repos",
+      "value": "仓库"
+    },
+    {
+      "name": "empty_inbox_title",
+      "value": "都赶上了！"
+    },
+    {
+      "name": "empty_inbox_subtitle",
+      "value": "休息一下，写一些代码，做您最擅长的事"
+    },
+    {
+      "name": "profile_repos",
+      "value": "仓库"
+    },
+    {
+      "name": "profile_orgs",
+      "value": "组织"
+    },
+    {
+      "name": "profile_starred",
+      "value": "已加星标"
+    },
+    {
+      "name": "status_placeholder",
+      "value": "Set status..."
+    },
+    {
+      "name": "login_title",
+      "value": "Sign In"
+    },
+    {
+      "name": "sign_in_button",
+      "value": "Sign In with GitHub"
+    },
+    {
+      "name": "sign_out_button",
+      "value": "Log Out"
+    },
+    {
+      "name": "profile_not_logged_in",
+      "value": "Sign in to GitHub"
+    },
+    {
+      "name": "login_loading",
+      "value": "Connecting to GitHub..."
+    },
+    {
+      "name": "login_success",
+      "value": "Signed in successfully"
+    },
+    {
+      "name": "login_failed",
+      "value": "Authentication failed"
+    },
+    {
+      "name": "login_retry",
+      "value": "Try Again"
+    },
+    {
+      "name": "login_note",
+      "value": "Your credentials are never stored. Only an access token is saved locally."
     }
   ]
 }
