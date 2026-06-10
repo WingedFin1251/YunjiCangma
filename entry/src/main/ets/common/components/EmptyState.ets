@@ -14,7 +14,7 @@ import { DarkTheme } from '../constants/ThemeConstants';
  */
 @Component
 export struct EmptyState {
-  @Prop icon: string = '📭';
+  @Prop icon: string = '✉';
   @Prop title: string = '';
   @Prop subtitle: string = '';
 

@@ -43,13 +43,13 @@ export struct HomeTab {
   private homeStack: NavPathStack = new NavPathStack();
 
   private workItems: WorkItem[] = [
-    new WorkItem('🟢', '议题', DarkTheme.issueGreen),
-    new WorkItem('🔵', '拉取请求', DarkTheme.prBlue),
-    new WorkItem('🟣', '讨论', DarkTheme.discussionPurple),
-    new WorkItem('📁', '项目', DarkTheme.accent),
-    new WorkItem('📦', '仓库', DarkTheme.textSecondary),
-    new WorkItem('🟠', '组织', DarkTheme.orgOrange),
-    new WorkItem('⭐', '已加星标', DarkTheme.starYellow),
+    new WorkItem('◉', '议题', DarkTheme.issueGreen),
+    new WorkItem('⇄', '拉取请求', DarkTheme.prBlue),
+    new WorkItem('◈', '讨论', DarkTheme.discussionPurple),
+    new WorkItem('⊞', '项目', DarkTheme.accent),
+    new WorkItem('⊡', '仓库', DarkTheme.textSecondary),
+    new WorkItem('◉', '组织', DarkTheme.orgOrange),
+    new WorkItem('★', '已加星标', DarkTheme.starYellow),
   ];
 
   private favoriteRepos: FavoriteRepo[] = [
@@ -71,8 +71,8 @@ export struct HomeTab {
               .fontColor(DarkTheme.textPrimary)
               .layoutWeight(1)
             Row({ space: 20 }) {
-              this.navIcon('🔍')
-              this.navIcon('➕')
+              this.navIcon('⌕')
+              this.navIcon('＋')
               this.navIcon('⋯')
             }
           }
@@ -115,6 +115,7 @@ export struct HomeTab {
         }
         .width('100%')
         .alignItems(HorizontalAlign.Start)
+        .padding({ top: 32, bottom: 64 })
       }
       .scrollable(ScrollDirection.Vertical)
       .scrollBar(BarState.Off)
@@ -157,6 +158,7 @@ export struct HomeTab {
     Row() {
       Text(item.icon)
         .fontSize(20)
+        .fontColor(item.color)
         .width(24)
         .height(24)
         .textAlign(TextAlign.Center)

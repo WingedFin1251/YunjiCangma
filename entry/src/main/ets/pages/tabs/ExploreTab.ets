@@ -50,8 +50,8 @@ export struct ExploreTab {
           .alignItems(VerticalAlign.Center)
 
           Row({ space: 12 }) {
-            this.discoverItem('🔴', '热门仓库')
-            this.discoverItem('🟣', '精选列表')
+            this.discoverItem('◈', '热门仓库')
+            this.discoverItem('◈', '精选列表')
           }
           .width('100%')
           .padding({ left: 16, right: 16 })
@@ -68,7 +68,7 @@ export struct ExploreTab {
               .fontWeight(FontWeight.Medium)
               .fontColor(DarkTheme.textPrimary)
               .layoutWeight(1)
-            Text('⏳')
+            Text('▼')
               .fontSize(18)
               .width(44)
               .height(44)
@@ -100,6 +100,7 @@ export struct ExploreTab {
         }
         .width('100%')
         .alignItems(HorizontalAlign.Start)
+        .padding({ top: 32, bottom: 64 })
       }
       .scrollable(ScrollDirection.Vertical)
       .scrollBar(BarState.Off)
