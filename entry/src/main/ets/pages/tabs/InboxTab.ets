@@ -25,8 +25,33 @@ export struct InboxTab {
     }
   }
 
+  /** 筛选后的通知列表 */
+  private getFilteredNotifications(): GitHubNotification[] {
+    if (this.selectedFilter === 1 || this.selectedFilter === 2) {
+      return this.notifications.filter((n: GitHubNotification) => n.unread);
+    }
+    return this.notifications;
+  }
+
+  /** 通知类型图标 */
+  private getNotifIcon(notif: GitHubNotification): string {
+    const stype: string = notif.subject.type;
+    if (stype === 'Issue') return '●';
+    if (stype === 'PullRequest') return '⇄';
+    if (stype === 'Discussion') return '◈';
+    return '✉';
+  }
+
+  private getNotifIconColor(notif: GitHubNotification): string {
+    const stype: string = notif.subject.type;
+    if (stype === 'Issue') return DarkTheme.issueGreen;
+    if (stype === 'PullRequest') return DarkTheme.prBlue;
+    if (stype === 'Discussion') return DarkTheme.discussionPurple;
+    return DarkTheme.textSecondary;
+  }
+
   @Builder
-  inboxPageMap(name: string, param: Object) {}
+  inboxPageMap(name: string, param: Object | null) {}
 
   build() {
     Navigation(this.inboxStack) {
@@ -101,7 +126,7 @@ export struct InboxTab {
             LoadingProgress().width(32).height(32).color(DarkTheme.accent).margin({ top: 80 })
           }
           .width('100%').height('100%').backgroundColor(DarkTheme.background)
-        } else if (this.notifications.length > 0) {
+        } else if (this.getFilteredNotifications().length > 0) {
           this.buildNotificationList()
         } else {
           EmptyState({ icon: '✉', title: '都赶上了！', subtitle: '休息一下，写一些代码，做您最擅长的事' })
@@ -125,8 +150,15 @@ export struct InboxTab {
   buildNotificationList() {
     Scroll() {
       Column() {
-        ForEach(this.notifications, (item: GitHubNotification, index: number) => {
+        ForEach(this.getFilteredNotifications(), (item: GitHubNotification, index: number) => {
           Row() {
+            Text(this.getNotifIcon(item))
+              .fontSize(16)
+              .fontColor(this.getNotifIconColor(item))
+              .width(24)
+              .height(24)
+              .textAlign(TextAlign.Center)
+
             Column() {
               Text(item.subject.title)
                 .fontSize(14)

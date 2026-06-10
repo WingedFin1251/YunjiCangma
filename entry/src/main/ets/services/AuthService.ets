@@ -1,4 +1,5 @@
 import { preferences } from '@kit.ArkData';
+import { common } from '@kit.AbilityKit';
 import {
   GITHUB_OAUTH_AUTHORIZE_URL,
   GITHUB_OAUTH_ACCESS_TOKEN_URL,
@@ -14,10 +15,16 @@ import { http } from '@kit.NetworkKit';
 
 const PREFERENCES_NAME: string = 'github_auth_prefs';
 
-/**
- * 认证服务 — OAuth 流程、Token 存储、登录状态
- */
 export class AuthService {
+  private static appContext: common.UIAbilityContext | null = null;
+
+  static init(context: common.UIAbilityContext): void {
+    AuthService.appContext = context;
+  }
+
+  private static getContext(): common.UIAbilityContext {
+    return AuthService.appContext!;
+  }
 
   static buildOAuthUrl(): string {
     const state: string = `${Date.now().toString(36)}${Math.floor(Math.random() * 1000000).toString(36)}`;
@@ -64,7 +71,7 @@ export class AuthService {
 
   static async saveToken(token: string): Promise<void> {
     try {
-      const prefs = await preferences.getPreferences(getContext(), PREFERENCES_NAME);
+      const prefs = await preferences.getPreferences(AuthService.getContext(), PREFERENCES_NAME);
       await prefs.put('access_token', token);
       await prefs.flush();
       AppStorage.setOrCreate<string>(AUTH_TOKEN_KEY, token);
@@ -76,7 +83,7 @@ export class AuthService {
 
   static async loadToken(): Promise<string> {
     try {
-      const prefs = await preferences.getPreferences(getContext(), PREFERENCES_NAME);
+      const prefs = await preferences.getPreferences(AuthService.getContext(), PREFERENCES_NAME);
       const token: string = await prefs.get('access_token', '') as string;
       if (token) {
         AppStorage.setOrCreate<string>(AUTH_TOKEN_KEY, token);
@@ -104,7 +111,7 @@ export class AuthService {
 
   static async logout(): Promise<void> {
     try {
-      const prefs = await preferences.getPreferences(getContext(), PREFERENCES_NAME);
+      const prefs = await preferences.getPreferences(AuthService.getContext(), PREFERENCES_NAME);
       await prefs.delete('access_token');
       await prefs.flush();
       AppStorage.setOrCreate<string>(AUTH_TOKEN_KEY, '');
