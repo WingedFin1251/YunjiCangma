@@ -26,11 +26,20 @@ export struct ProfileTab {
   @State isLoading: boolean = false;
   private profileStack: NavPathStack = new NavPathStack();
 
-  private resourceItems: ResourceItem[] = [
-    new ResourceItem('仓库', 42),
-    new ResourceItem('组织', 3),
-    new ResourceItem('已加星标', 128),
-  ];
+  private getResourceItems(): ResourceItem[] {
+    if (this.user) {
+      return [
+        new ResourceItem('仓库', this.user.public_repos),
+        new ResourceItem('关注中', this.user.following),
+        new ResourceItem('粉丝', this.user.followers),
+      ];
+    }
+    return [
+      new ResourceItem('仓库', 0),
+      new ResourceItem('关注中', 0),
+      new ResourceItem('粉丝', 0),
+    ];
+  }
 
   aboutToAppear(): void {
     this.loadUserData();
@@ -66,7 +75,7 @@ export struct ProfileTab {
   }
 
   @Builder
-  profilePageMap(name: string, param: Object) {}
+  profilePageMap(name: string, param: Object | null) {}
 
   build() {
     Navigation(this.profileStack) {
@@ -97,7 +106,7 @@ export struct ProfileTab {
           }
 
           Column({ space: 0 }) {
-            ForEach(this.resourceItems, (item: ResourceItem, index: number) => {
+            ForEach(this.getResourceItems(), (item: ResourceItem, index: number) => {
               this.resourceRow(item)
             }, (item: ResourceItem) => item.label)
           }
