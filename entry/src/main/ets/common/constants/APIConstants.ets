@@ -11,14 +11,14 @@ export const GITHUB_OAUTH_AUTHORIZE_URL: string = 'https://github.com/login/oaut
 /** GitHub OAuth Token 交换端点 */
 export const GITHUB_OAUTH_ACCESS_TOKEN_URL: string = 'https://github.com/login/oauth/access_token';
 
-export const GITHUB_OAUTH_CLIENT_ID: string = 'YOUR_CLIENT_ID';
-export const GITHUB_OAUTH_CLIENT_SECRET: string = 'YOUR_CLIENT_SECRET';
+export const GITHUB_OAUTH_CLIENT_ID: string = 'Ov23ling48xkbpVRtB13';
+export const GITHUB_OAUTH_CLIENT_SECRET: string = '[REDACTED]';
 
 /** OAuth 授权范围 */
 export const GITHUB_OAUTH_SCOPES: string = 'repo,user,notifications';
 
-/** OAuth 回调 URL */
-export const GITHUB_OAUTH_REDIRECT_URI: string = 'https://github.com/';
+/** OAuth 回调 URL — 自定义 Scheme（需与 GitHub OAuth App 设置一致） */
+export const GITHUB_OAUTH_REDIRECT_URI: string = 'githubclient://auth/callback';
 
 /** API 请求头 */
 export class APIHeaders {

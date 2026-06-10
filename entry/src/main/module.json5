@@ -35,6 +35,20 @@
             "actions": [
               "ohos.want.action.home"
             ]
+          },
+          {
+            "actions": [
+              "ohos.want.action.viewData"
+            ],
+            "entities": [
+              "entity.system.default"
+            ],
+            "uris": [
+              {
+                "scheme": "githubclient",
+                "host": "auth"
+              }
+            ]
           }
         ]
       }

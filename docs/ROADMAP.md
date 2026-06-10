@@ -1,20 +1,22 @@
 # 路线图
 
-## 当前版本: v0.3.0（深色模式 UI + 登录框架）
+## 当前版本: v0.4.0（OAuth 完整可用 + 全屏沉浸）
 
 - [x] 项目初始化 + GitHub 适配
-- [x] 4 Tab 底部导航架构（主页 / 收件箱 / 探索 / 个人资料）
-- [x] 独立 Navigation 导航栈（每个 Tab 独立路由）
-- [x] 全局深色模式（V1.0 规范，唯一主题，14 色值）
+- [x] 4 Tab 底部导航（主页 / 收件箱 / 探索 / 个人资料）
+- [x] 独立 Navigation 导航栈（NavigationMode.Stack 平板修复）
+- [x] 全局深色模式（V1.0 规范，唯一主题，14 色值 DarkTheme 类）
 - [x] 全局可复用组件库（RepoCard / ListItem / EmptyState / FilterTabBar）
-- [x] 基础资源体系（颜色、字体、字符串、尺寸）
-- [x] `services/GitHubAPIService.ets` — HTTP 客户端（GET/POST + Bearer 自动注入）
-- [x] `services/AuthService.ets` — OAuth URL 构建、code→token、preferences 持久化
-- [x] `models/User.ets` + `models/AuthModels.ets` — 数据模型
+- [x] 统一几何图标体系（◉⇄◈⊞⊡★，按功能色值区分）
+- [x] `services/GitHubAPIService.ets` + `services/AuthService.ets`
+- [x] `models/User.ets` + `models/AuthModels.ets`
 - [x] `ohos.permission.INTERNET` 权限声明
-- [x] `pages/LoginPage.ets` — OAuth WebView 登录页
+- [x] `pages/LoginPage.ets` — WebView OAuth（onLoadIntercept + 自定义 Scheme）
 - [x] Profile Tab 登录/未登录双态 UI
 - [x] 登录状态管理（AppStorage + preferences）
+- [x] OAuth 完整流程可用（Client ID 已配置，回调 Scheme 已注册）
+- [x] 全屏沉浸（状态栏融合 + 底部小白条延伸）
+- [x] 安全区适配（top 32 / bottom 64 padding）
 
 ## v0.4.0 — 各页面功能完善
 
