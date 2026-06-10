@@ -14,12 +14,14 @@
 
 - [x] 🎨 全局深色模式（V1.0 规范，14 色值，无浅色）
 - [x] 🏠 4 Tab 导航：主页 / 收件箱 / 探索 / 个人资料
-- [x] 🔐 GitHub OAuth WebView 登录（自定义 Scheme 回调）
-- [x] 🖥️ 全屏沉浸（状态栏融合 + 底部小白条适配）
-- [x] 🗜️ 平板 SafeArea 适配 + Navigation Stack 模式
-- [x] 🧩 可复用组件：RepoCard / ListItem / EmptyState / FilterTabBar
-- [x] 📡 API 服务层（Bearer 自动注入 + Token preferences 持久化）
-- [x] 🔣 统一几何图标体系（◉⇄◈⊞⊡★，按功能色值区分）
+- [x] 🔐 GitHub OAuth WebView 登录（自定义 Scheme + onLoadIntercept 拦截）
+- [x] 🖼️ 用户头像图片加载（Image 组件 + 圆形裁切）
+- [x] 🖥️ 全屏沉浸（状态栏融合 + 底部小白条延伸）
+- [x] 🗜️ 平板 SafeArea + Navigation Stack 模式
+- [x] 📡 真实 API 数据：已 Star 仓库 / 通知列表 / 热门仓库 / 活动流
+- [x] 🔄 登录状态自动刷新（@StorageLink + @Watch）
+- [x] 🧩 组件库：RepoCard / ListItem / EmptyState / FilterTabBar / TabBarBuilder
+- [x] 🔣 统一几何图标体系（◉⇄◈⊞⊡★，功能色值区分）
 
 ## 快速开始
 
@@ -65,12 +67,12 @@ entry/src/main/ets/
 
 ## 页面概览
 
-| Tab | 主要元素 |
-|-----|----------|
-| 主页 | 导航栏（搜索/新增/更多）+ 我的工作（7 项彩色图标列表）+ 收藏夹（仓库卡片） |
-| 收件箱 | Inbox 标题 + 筛选标签栏 + 空状态 |
-| 探索 | 标题 + 发现入口（2 列）+ 活动流 + 仓库卡片 |
-| 个人资料 | 分享/设置图标 + 头像/用户名/状态框 + 资源列表（仓库/组织/星标） |
+| Tab | 主要元素 | 数据源 |
+|-----|----------|--------|
+| 主页 | 我的工作（7 项）+ 收藏夹（已 Star 仓库卡片） | `GET /user/starred` |
+| 收件箱 | 筛选标签栏 + 通知列表 / 空状态 | `GET /notifications` |
+| 探索 | 发现入口（2 列）+ 活动流 + 热门仓库卡片 | `GET /search/repositories` + `GET /users/{u}/received_events` |
+| 个人资料 | GitHub 头像 + 用户名/统计 + 资源列表 + 登录/登出 | `GET /user` + `Image` 组件 |
 
 ## 文档
 

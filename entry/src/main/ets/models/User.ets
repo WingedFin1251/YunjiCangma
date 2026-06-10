@@ -49,6 +49,53 @@ export interface User {
   updated_at: string;
 }
 
+/** 仓库所有者 */
+export interface RepoOwner {
+  login: string;
+  avatar_url: string;
+}
+
+/** GitHub 仓库模型 */
+export interface Repository {
+  id: number;
+  name: string;
+  full_name: string;
+  owner: RepoOwner;
+  description: string | null;
+  stargazers_count: number;
+  language: string | null;
+  topics: string[];
+  html_url: string;
+  fork: boolean;
+}
+
+/** 通知主题 */
+export interface NotificationSubject {
+  title: string;
+  type: string;
+  url: string;
+}
+
+/** 通知关联仓库 */
+export interface NotificationRepo {
+  full_name: string;
+}
+
+/** GitHub 通知模型 */
+export interface GitHubNotification {
+  id: string;
+  subject: NotificationSubject;
+  repository: NotificationRepo;
+  reason: string;
+  unread: boolean;
+  updated_at: string;
+}
+
+/** 搜索仓库结果 */
+export interface SearchResult {
+  items: Repository[];
+}
+
 /** 匿名用户占位 */
 export const ANONYMOUS_USER: Partial<User> = {
   login: '',

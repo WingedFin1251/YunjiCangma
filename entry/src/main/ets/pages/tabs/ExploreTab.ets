@@ -1,14 +1,14 @@
 import { DarkTheme } from '../../common/constants/ThemeConstants';
 import { RepoCard } from '../../common/components/RepoCard';
+import { GitHubAPIService } from '../../services/GitHubAPIService';
+import type { Repository } from '../../models/User';
 
-/** 活动流数据 */
 class ActivityItem {
   avatar: string = '';
   user: string = '';
   action: string = '';
   repo: string = '';
   time: string = '';
-
   constructor(a: string, u: string, act: string, r: string, t: string) {
     this.avatar = a;
     this.user = u;
@@ -18,17 +18,51 @@ class ActivityItem {
   }
 }
 
-/**
- * 探索 (Tab 3)
- */
 @Component
 export struct ExploreTab {
   private exploreStack: NavPathStack = new NavPathStack();
+  @State trendingRepos: Repository[] = [];
+  @State activities: ActivityItem[] = [];
+  @State isExploreLoading: boolean = true;
 
-  private activities: ActivityItem[] = [
-    new ActivityItem('A', 'alice', 'starred', 'flutter/flutter', '2h ago'),
-    new ActivityItem('B', 'bob', 'forked', 'torvalds/linux', '5h ago'),
-  ];
+  aboutToAppear(): void {
+    this.loadExploreData();
+  }
+
+  private async loadExploreData(): Promise<void> {
+    try {
+      const trending = await GitHubAPIService.getTrendingRepos();
+      this.trendingRepos = trending.items.slice(0, 5);
+    } catch (err) {
+      this.trendingRepos = [];
+    }
+    try {
+      const events = await GitHubAPIService.getReceivedEvents('github');
+      const items: ActivityItem[] = [];
+      for (let i = 0; i < Math.min(events.length, 5); i++) {
+        const evt = events[i] as Record<string, Object>;
+        const repoObj = evt.repo as Record<string, string>;
+        const actorObj = evt.actor as Record<string, string>;
+        if (repoObj && actorObj) {
+          const repoName: string = repoObj.name || '';
+          const actorName: string = actorObj.display_login || actorObj.login || '';
+          const actionType: string = (evt.type as string || '').replace('Event', '').toLowerCase();
+          items.push(new ActivityItem(
+            actorName.charAt(0),
+            actorName,
+            actionType,
+            repoName,
+            ''
+          ));
+        }
+      }
+      this.activities = items;
+    } catch (err) {
+      this.activities = [];
+    } finally {
+      this.isExploreLoading = false;
+    }
+  }
 
   @Builder
   explorePageMap(name: string, param: Object) {}
@@ -85,16 +119,21 @@ export struct ExploreTab {
             }, (item: ActivityItem) => `${item.user}_${item.action}_${item.repo}`)
           }
 
-          RepoCard({
-            avatarChar: 'R',
-            owner: 'reactjs',
-            repo: 'react',
-            description: 'The library for web and native user interfaces.',
-            language: 'JavaScript',
-            stars: 232000,
-            isStarred: false
-          })
-            .margin({ left: 16, right: 16, top: 12 })
+          Column({ space: 12 }) {
+            ForEach(this.trendingRepos, (repo: Repository, index: number) => {
+              RepoCard({
+                avatarChar: repo.owner.login.charAt(0),
+                owner: repo.owner.login,
+                repo: repo.name,
+                description: repo.description || '',
+                language: repo.language || '',
+                stars: repo.stargazers_count,
+                isStarred: false
+              })
+            }, (repo: Repository) => repo.id.toString())
+          }
+          .padding({ left: 16, right: 16 })
+          .margin({ top: 12 })
 
           Blank().height(24)
         }
