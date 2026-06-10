@@ -1,6 +1,7 @@
 import { DarkTheme } from '../../common/constants/ThemeConstants';
 import { RepoCard } from '../../common/components/RepoCard';
 import { GitHubAPIService } from '../../services/GitHubAPIService';
+import { AUTH_LOGIN_KEY } from '../../common/constants/APIConstants';
 import type { Repository } from '../../models/User';
 
 class WorkItem {
@@ -36,21 +37,30 @@ class FavoriteRepo {
 @Component
 export struct HomeTab {
   private homeStack: NavPathStack = new NavPathStack();
+  @StorageLink(AUTH_LOGIN_KEY) @Watch('onLoginChanged') isLoggedIn: boolean = false;
   @State starredRepos: FavoriteRepo[] = [];
   @State isStarredLoading: boolean = true;
 
   private workItems: WorkItem[] = [
-    new WorkItem('◉', '议题', DarkTheme.issueGreen),
+    new WorkItem('●', '议题', DarkTheme.issueGreen),
     new WorkItem('⇄', '拉取请求', DarkTheme.prBlue),
     new WorkItem('◈', '讨论', DarkTheme.discussionPurple),
     new WorkItem('⊞', '项目', DarkTheme.accent),
     new WorkItem('⊡', '仓库', DarkTheme.textSecondary),
-    new WorkItem('◉', '组织', DarkTheme.orgOrange),
+    new WorkItem('◎', '组织', DarkTheme.orgOrange),
     new WorkItem('★', '已加星标', DarkTheme.starYellow),
   ];
 
   aboutToAppear(): void {
     this.loadStarredRepos();
+  }
+
+  onLoginChanged(): void {
+    if (this.isLoggedIn) {
+      this.loadStarredRepos();
+    } else {
+      this.starredRepos = [];
+    }
   }
 
   private async loadStarredRepos(): Promise<void> {
@@ -65,7 +75,7 @@ export struct HomeTab {
   }
 
   @Builder
-  homePageMap(name: string, param: Object) {}
+  homePageMap(name: string, param: Object | null) {}
 
   build() {
     Navigation(this.homeStack) {

@@ -13,12 +13,9 @@ export default class EntryAbility extends UIAbility {
       hilog.error(DOMAIN, 'testTag', 'Failed to set colorMode. Cause: %{public}s', JSON.stringify(err));
     }
 
-    // 初始化认证状态
+    AuthService.init(this.context);
     AppStorage.setOrCreate('authToken', '');
     AppStorage.setOrCreate('isLoggedIn', false);
-
-    // 异步加载持久化的 token
-    AuthService.loadToken();
 
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onCreate');
   }
@@ -27,10 +24,13 @@ export default class EntryAbility extends UIAbility {
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onDestroy');
   }
 
-  onWindowStageCreate(windowStage: window.WindowStage): void {
+  async onWindowStageCreate(windowStage: window.WindowStage): Promise<void> {
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onWindowStageCreate');
 
-    // 全屏沉浸：隐藏系统导航栏，状态栏与内容融合
+    // 先加载持久化 token，再渲染页面
+    await AuthService.loadToken();
+
+    // 全屏沉浸
     try {
       const mainWindow = windowStage.getMainWindowSync();
       mainWindow.setWindowLayoutFullScreen(true);
