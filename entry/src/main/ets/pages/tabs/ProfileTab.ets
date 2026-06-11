@@ -6,6 +6,9 @@ import { AuthService } from '../../services/AuthService';
 import { GitHubAPIService } from '../../services/GitHubAPIService';
 import type { User } from '../../models/User';
 import { AUTH_LOGIN_KEY } from '../../common/constants/APIConstants';
+import { SettingsPage } from '../SettingsPage';
+import { TutorialPage } from '../TutorialPage';
+import { PrivacyPage } from '../PrivacyPage';
 
 @Component
 export struct ProfileTab {
@@ -127,6 +130,15 @@ export struct ProfileTab {
         }.width('100%').height('100%').backgroundColor(this.T().background).padding({ top: 8 })
       }
       .title(name === 'followers' ? '粉丝' : '关注中').backgroundColor(this.T().background).padding({ top: 32 })
+    } else if (name === 'settings') {
+      NavDestination() { SettingsPage({ onNavigate: (n: string) => { this.profileStack.pushPath({ name: n }); } }) }
+        .title('设置').backgroundColor(this.T().background).padding({ top: 32 })
+    } else if (name === 'tutorial') {
+      NavDestination() { TutorialPage() }
+        .title('使用教程').backgroundColor(this.T().background).padding({ top: 32 })
+    } else if (name === 'privacy') {
+      NavDestination() { PrivacyPage() }
+        .title('隐私协议').backgroundColor(this.T().background).padding({ top: 32 })
     }
   }
 
@@ -136,7 +148,13 @@ export struct ProfileTab {
         Column() {
           Row() {
             Blank()
-            Row({ space: 20 }) { this.navIcon('↗'); this.navIcon('☰') }
+            Row({ space: 20 }) {
+              this.navIcon('↗')
+              Text('☰').fontSize($r('app.float.icon_size_normal'))
+                .width($r('app.float.size_nav_icon_hit')).height($r('app.float.size_nav_icon_hit'))
+                .textAlign(TextAlign.Center).lineHeight($r('app.float.size_nav_icon_hit'))
+                .onClick(() => { this.profileStack.pushPath({ name: 'settings' }); })
+            }
           }.width('100%').height(52).padding({ left: 16, right: 16 }).alignItems(VerticalAlign.Center)
 
           if (this.isLoading) {
@@ -187,21 +205,6 @@ export struct ProfileTab {
               this.resRow('粉丝', this.user.followers, 'followers')
             }.margin({ top: 24 })
           }
-
-          // 主题切换
-          Row() {
-            Text(this.themeMode === 'dark' ? '🌙' : '☀️').fontSize(18).margin({ right: 10 })
-            Text('深色模式').fontSize(16).fontColor(this.T().textPrimary)
-            Blank()
-            Toggle({ type: ToggleType.Switch, isOn: this.themeMode === 'dark' })
-              .onChange((isOn: boolean) => {
-                const newTheme: string = isOn ? 'dark' : 'light';
-                AuthService.saveTheme(newTheme);
-                AppStorage.setOrCreate(THEME_KEY, newTheme);
-              })
-          }.width('85%').height(48).padding({ left: 12, right: 12 })
-            .backgroundColor(this.T().surface).borderRadius(10).margin({ top: 16 })
-            .border({ width: 1, color: this.T().border }).alignItems(VerticalAlign.Center)
 
           Blank().height(24)
         }.width('100%').alignItems(HorizontalAlign.Center).padding({ top: 32, bottom: 64 })
