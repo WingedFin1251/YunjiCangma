@@ -1,4 +1,4 @@
-import { Theme } from '../constants/ThemeConstants';
+import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../constants/ThemeConstants';
 
 /**
  * 空状态组件（收件箱专用）
@@ -14,6 +14,7 @@ import { Theme } from '../constants/ThemeConstants';
  */
 @Component
 export struct EmptyState {
+  @StorageLink(THEME_KEY) themeMode: string = 'dark'; private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
   @Prop icon: string = '✉';
   @Prop title: string = '';
   @Prop subtitle: string = '';
@@ -30,12 +31,12 @@ export struct EmptyState {
       Text(this.title)
         .fontSize(20)
         .fontWeight(FontWeight.Medium)
-        .fontColor(Theme.textPrimary)
+        .fontColor(this.T().textPrimary)
         .textAlign(TextAlign.Center)
 
       Text(this.subtitle)
         .fontSize(14)
-        .fontColor(Theme.textSecondary)
+        .fontColor(this.T().textSecondary)
         .textAlign(TextAlign.Center)
         .padding({ left: 40, right: 40 })
     }
