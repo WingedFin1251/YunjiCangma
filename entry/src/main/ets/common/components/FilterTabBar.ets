@@ -1,4 +1,4 @@
-import { Theme } from '../constants/ThemeConstants';
+import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../constants/ThemeConstants';
 
 /**
  * 筛选标签栏组件
@@ -13,6 +13,7 @@ import { Theme } from '../constants/ThemeConstants';
  */
 @Component
 export struct FilterTabBar {
+  @StorageLink(THEME_KEY) themeMode: string = 'dark'; private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
   @Prop tabs: string[] = [];
   @State @Watch('onSelectedChange') selectedIndex: number = 0;
   onChange?: (index: number) => void;
@@ -30,11 +31,11 @@ export struct FilterTabBar {
           Text(tab)
             .fontSize(14)
             .fontColor(this.selectedIndex === index
-              ? Theme.textPrimary
-              : Theme.textSecondary)
+              ? this.T().textPrimary
+              : this.T().textSecondary)
             .padding({ left: 16, right: 16, top: 8, bottom: 8 })
             .backgroundColor(this.selectedIndex === index
-              ? Theme.surfaceElevated
+              ? this.T().surfaceElevated
               : Color.Transparent)
             .borderRadius(8)
             .onClick(() => {
@@ -49,6 +50,6 @@ export struct FilterTabBar {
     .scrollBar(BarState.Off)
     .width('100%')
     .height(40)
-    .backgroundColor(Theme.surface)
+    .backgroundColor(this.T().surface)
   }
 }

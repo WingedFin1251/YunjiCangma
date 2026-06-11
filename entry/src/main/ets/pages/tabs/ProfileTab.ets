@@ -1,6 +1,6 @@
 import { router } from '@kit.ArkUI';
 import { webview } from '@kit.ArkWeb';
-import { Theme, THEME_KEY } from '../../common/constants/ThemeConstants';
+import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
 import { RepoCard } from '../../common/components/RepoCard';
 import { AuthService } from '../../services/AuthService';
 import { GitHubAPIService } from '../../services/GitHubAPIService';
@@ -10,7 +10,7 @@ import { AUTH_LOGIN_KEY } from '../../common/constants/APIConstants';
 @Component
 export struct ProfileTab {
   @StorageLink(AUTH_LOGIN_KEY) @Watch('onLoginChanged') isLoggedIn: boolean = false;
-  @StorageLink(THEME_KEY) themeMode: string = 'dark';
+  @StorageLink(THEME_KEY) themeMode: string = 'dark'; private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
   @State user: User | null = null;
   @State isLoading: boolean = false;
   @State listItems: Object[] = [];
@@ -62,11 +62,11 @@ export struct ProfileTab {
       NavDestination() {
         Column() {
           if (this.listLoading) {
-            LoadingProgress().width(32).height(32).color(Theme.accent).margin({ top: 80 })
+            LoadingProgress().width(32).height(32).color(this.T().accent).margin({ top: 80 })
           } else if (this.listItems.length === 0) {
             Column({ space: 8 }) {
               Text('✉').fontSize(40)
-              Text('暂无仓库，前往发现更多优质开源项目').fontSize(14).fontColor(Theme.textSecondary)
+              Text('暂无仓库，前往发现更多优质开源项目').fontSize(14).fontColor(this.T().textSecondary)
             }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center).width('100%').height('100%')
           } else {
             Scroll() {
@@ -92,24 +92,24 @@ export struct ProfileTab {
               }.width('100%').padding({ left: 16, right: 16 })
             }.scrollBar(BarState.Off).width('100%').height('100%')
           }
-        }.width('100%').height('100%').backgroundColor(Theme.background).padding({ top: 8 })
-      }.title('我的仓库').backgroundColor(Theme.background).padding({ top: 32 })
+        }.width('100%').height('100%').backgroundColor(this.T().background).padding({ top: 8 })
+      }.title('我的仓库').backgroundColor(this.T().background).padding({ top: 32 })
     } else if (name === 'repoWeb') {
       NavDestination() {
         Web({ src: this.webUrl, controller: this.webCtl })
           .width('100%').height('100%')
           .darkMode(WebDarkMode.On)
           .backgroundColor(Color.Black)
-      }.title('仓库详情').backgroundColor(Theme.background).padding({ top: 32 })
+      }.title('仓库详情').backgroundColor(this.T().background).padding({ top: 32 })
     } else if (name === 'followers' || name === 'following') {
       NavDestination() {
         Column() {
           if (this.listLoading) {
-            LoadingProgress().width(32).height(32).color(Theme.accent).margin({ top: 80 })
+            LoadingProgress().width(32).height(32).color(this.T().accent).margin({ top: 80 })
           } else if (this.listItems.length === 0) {
             Column({ space: 8 }) {
               Text('✉').fontSize(40)
-              Text('暂无内容').fontSize(14).fontColor(Theme.textSecondary)
+              Text('暂无内容').fontSize(14).fontColor(this.T().textSecondary)
             }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center).width('100%').height('100%')
           } else {
             Scroll() {
@@ -117,16 +117,16 @@ export struct ProfileTab {
                 ForEach(this.listItems, (item: Object, idx: number) => {
                   Row() {
                     Text(((item as Record<string, Object>).login as string) || '')
-                      .fontSize(16).fontColor(Theme.textPrimary).layoutWeight(1)
-                    Text('›').fontSize(18).fontColor(Theme.textSecondary)
+                      .fontSize(16).fontColor(this.T().textPrimary).layoutWeight(1)
+                    Text('›').fontSize(18).fontColor(this.T().textSecondary)
                   }.width('100%').height(48).padding({ left: 16, right: 16 }).alignItems(VerticalAlign.Center)
                 }, (item: Object, idx: number) => idx.toString())
               }.width('100%')
             }.scrollBar(BarState.Off).width('100%').height('100%')
           }
-        }.width('100%').height('100%').backgroundColor(Theme.background).padding({ top: 8 })
+        }.width('100%').height('100%').backgroundColor(this.T().background).padding({ top: 8 })
       }
-      .title(name === 'followers' ? '粉丝' : '关注中').backgroundColor(Theme.background).padding({ top: 32 })
+      .title(name === 'followers' ? '粉丝' : '关注中').backgroundColor(this.T().background).padding({ top: 32 })
     }
   }
 
@@ -140,19 +140,19 @@ export struct ProfileTab {
           }.width('100%').height(52).padding({ left: 16, right: 16 }).alignItems(VerticalAlign.Center)
 
           if (this.isLoading) {
-            LoadingProgress().width(40).height(40).color(Theme.accent).margin({ top: 60 })
+            LoadingProgress().width(40).height(40).color(this.T().accent).margin({ top: 60 })
           } else if (this.isLoggedIn && this.user) {
             Column({ space: 8 }) {
               Image(this.user!.avatar_url)
                 .width($r('app.float.size_avatar_lg')).height($r('app.float.size_avatar_lg'))
                 .borderRadius(24).objectFit(ImageFit.Cover)
               Text(this.user!.name || this.user!.login)
-                .fontSize(24).fontWeight(FontWeight.Bold).fontColor(Theme.textPrimary)
+                .fontSize(24).fontWeight(FontWeight.Bold).fontColor(this.T().textPrimary)
               Row() {
                 Text('💬').fontSize(14).margin({ right: 8 })
-                Text('Set status...').fontSize(14).fontColor(Theme.textSecondary)
+                Text('Set status...').fontSize(14).fontColor(this.T().textSecondary)
               }.width('80%').height($r('app.float.size_status_input'))
-                .padding({ left: 12, right: 12 }).backgroundColor(Theme.surfaceElevated)
+                .padding({ left: 12, right: 12 }).backgroundColor(this.T().surfaceElevated)
                 .borderRadius(8).alignItems(VerticalAlign.Center)
               Row({ space: 24 }) {
                 this.statCol(this.user!.public_repos.toString(), 'Repos')
@@ -162,20 +162,20 @@ export struct ProfileTab {
               Row() {
                 Text('Log Out').fontSize(14).fontColor('#f85149')
               }.width('70%').height(42).justifyContent(FlexAlign.Center)
-                .backgroundColor(Theme.surfaceElevated).borderRadius(8).margin({ top: 16 })
+                .backgroundColor(this.T().surfaceElevated).borderRadius(8).margin({ top: 16 })
                 .onClick(() => { AuthService.logout(); this.user = null; })
             }.alignItems(HorizontalAlign.Center).padding({ top: 24, bottom: 16 }).width('100%')
           } else {
             Column({ space: 12 }) {
               Text('👤').fontSize(28)
                 .width($r('app.float.size_avatar_lg')).height($r('app.float.size_avatar_lg'))
-                .backgroundColor(Theme.surfaceElevated).borderRadius(24)
+                .backgroundColor(this.T().surfaceElevated).borderRadius(24)
                 .textAlign(TextAlign.Center).lineHeight($r('app.float.size_avatar_lg'))
-              Text('Sign in to GitHub').fontSize(16).fontColor(Theme.textSecondary)
+              Text('Sign in to GitHub').fontSize(16).fontColor(this.T().textSecondary)
               Row() {
-                Text('Sign In with GitHub').fontSize(16).fontWeight(FontWeight.Medium).fontColor(Theme.textPrimary)
+                Text('Sign In with GitHub').fontSize(16).fontWeight(FontWeight.Medium).fontColor(this.T().textPrimary)
               }.width('70%').height(44).justifyContent(FlexAlign.Center)
-                .backgroundColor(Theme.accent).borderRadius(8).margin({ top: 8 })
+                .backgroundColor(this.T().accent).borderRadius(8).margin({ top: 8 })
                 .onClick(() => { router.pushUrl({ url: 'pages/LoginPage' }); })
             }.alignItems(HorizontalAlign.Center).padding({ top: 40, bottom: 24 }).width('100%')
           }
@@ -191,37 +191,39 @@ export struct ProfileTab {
           // 主题切换
           Row() {
             Text(this.themeMode === 'dark' ? '🌙' : '☀️').fontSize(18).margin({ right: 10 })
-            Text('深色模式').fontSize(16).fontColor(Theme.textPrimary)
+            Text('深色模式').fontSize(16).fontColor(this.T().textPrimary)
             Blank()
             Toggle({ type: ToggleType.Switch, isOn: this.themeMode === 'dark' })
               .onChange((isOn: boolean) => {
-                AppStorage.setOrCreate(THEME_KEY, isOn ? 'dark' : 'light');
+                const newTheme: string = isOn ? 'dark' : 'light';
+                AuthService.saveTheme(newTheme);
+                AppStorage.setOrCreate(THEME_KEY, newTheme);
               })
           }.width('85%').height(48).padding({ left: 12, right: 12 })
-            .backgroundColor(Theme.surface).borderRadius(10).margin({ top: 16 })
-            .border({ width: 1, color: Theme.border }).alignItems(VerticalAlign.Center)
+            .backgroundColor(this.T().surface).borderRadius(10).margin({ top: 16 })
+            .border({ width: 1, color: this.T().border }).alignItems(VerticalAlign.Center)
 
           Blank().height(24)
         }.width('100%').alignItems(HorizontalAlign.Center).padding({ top: 32, bottom: 64 })
       }.scrollable(ScrollDirection.Vertical).scrollBar(BarState.Off)
-        .width('100%').height('100%').backgroundColor(Theme.background)
+        .width('100%').height('100%').backgroundColor(this.themeMode === 'dark' ? this.T().background : this.T().background)
     }
-    .navDestination(this.profilePageMap).backgroundColor(Theme.background)
+    .navDestination(this.profilePageMap).backgroundColor(this.themeMode === 'dark' ? this.T().background : this.T().background)
     .width('100%').height('100%').mode(NavigationMode.Stack).hideTitleBar(true).hideToolBar(true)
   }
 
   @Builder statCol(v: string, l: string) {
     Column() {
-      Text(v).fontSize(18).fontWeight(FontWeight.Bold).fontColor(Theme.textPrimary)
-      Text(l).fontSize(11).fontColor(Theme.textTertiary)
+      Text(v).fontSize(18).fontWeight(FontWeight.Bold).fontColor(this.T().textPrimary)
+      Text(l).fontSize(11).fontColor(this.T().textTertiary)
     }
   }
 
   @Builder resRow(label: string, count: number, route: string) {
     Row() {
-      Text(label).fontSize(16).fontColor(Theme.textPrimary).layoutWeight(1)
-      Text(count.toString()).fontSize(12).fontColor(Theme.textTertiary).margin({ right: 8 })
-      Text('›').fontSize(20).fontColor(Theme.textSecondary)
+      Text(label).fontSize(16).fontColor(this.T().textPrimary).layoutWeight(1)
+      Text(count.toString()).fontSize(12).fontColor(this.T().textTertiary).margin({ right: 8 })
+      Text('›').fontSize(20).fontColor(this.T().textSecondary)
     }.width('100%').height(52).padding({ left: 16, right: 16 }).alignItems(VerticalAlign.Center)
     .onClick(() => { this.loadList(route); this.profileStack.pushPath({ name: route }); })
   }

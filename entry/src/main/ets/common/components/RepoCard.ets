@@ -1,4 +1,4 @@
-import { Theme } from '../constants/ThemeConstants';
+import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../constants/ThemeConstants';
 
 /**
  * 仓库卡片组件（全局复用）
@@ -17,6 +17,7 @@ import { Theme } from '../constants/ThemeConstants';
  */
 @Component
 export struct RepoCard {
+  @StorageLink(THEME_KEY) themeMode: string = 'dark'; private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
   @Prop avatarChar: string = '?';
   @Prop owner: string = '';
   @Prop repo: string = '';
@@ -38,10 +39,10 @@ export struct RepoCard {
         Text(this.avatarChar.toUpperCase())
           .fontSize(14)
           .fontWeight(FontWeight.Bold)
-          .fontColor(Theme.textPrimary)
+          .fontColor(this.T().textPrimary)
           .width(32)
           .height(32)
-          .backgroundColor(Theme.surfaceElevated)
+          .backgroundColor(this.T().surfaceElevated)
           .borderRadius(16)
           .textAlign(TextAlign.Center)
           .lineHeight(32)
@@ -49,13 +50,13 @@ export struct RepoCard {
         Column() {
           Text(`${this.owner} / `)
             .fontSize(16)
-            .fontColor(Theme.textPrimary)
+            .fontColor(this.T().textPrimary)
             .maxLines(1)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
           Text(this.repo)
             .fontSize(16)
             .fontWeight(FontWeight.Bold)
-            .fontColor(Theme.textPrimary)
+            .fontColor(this.T().textPrimary)
             .maxLines(1)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
         }
@@ -70,7 +71,7 @@ export struct RepoCard {
       if (this.description) {
         Text(this.description)
           .fontSize(14)
-          .fontColor(Theme.textSecondary)
+          .fontColor(this.T().textSecondary)
           .maxLines(2)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width('100%')
@@ -84,10 +85,10 @@ export struct RepoCard {
             Circle()
               .width(8)
               .height(8)
-              .fill(Theme.accent)
+              .fill(this.T().accent)
             Text(this.language)
               .fontSize(12)
-              .fontColor(Theme.textTertiary)
+              .fontColor(this.T().textTertiary)
               .margin({ left: 4 })
           }
         }
@@ -98,7 +99,7 @@ export struct RepoCard {
             .margin({ left: 12 })
           Text(this.formatStars())
             .fontSize(12)
-            .fontColor(Theme.textTertiary)
+            .fontColor(this.T().textTertiary)
             .margin({ left: 2 })
         }
 
@@ -108,11 +109,11 @@ export struct RepoCard {
         Button() {
           Text(this.starred ? '★' : '☆')
             .fontSize(16)
-            .fontColor(this.starred ? Theme.starYellow : Theme.textSecondary)
+            .fontColor(this.starred ? this.T().starYellow : this.T().textSecondary)
         }
         .width(36)
         .height(36)
-        .backgroundColor(Theme.surfaceElevated)
+        .backgroundColor(this.T().surfaceElevated)
         .borderRadius(6)
         .onClick(() => {
           this.starred = !this.starred;
@@ -124,7 +125,7 @@ export struct RepoCard {
     }
     .width('100%')
     .padding(16)
-    .backgroundColor(Theme.surface)
+    .backgroundColor(this.T().surface)
     .borderRadius(8)
     .shadow({
       radius: 6,
