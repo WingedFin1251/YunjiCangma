@@ -1,10 +1,11 @@
-import { Theme } from '../../common/constants/ThemeConstants';
+import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
 import { EmptyState } from '../../common/components/EmptyState';
 import { GitHubAPIService } from '../../services/GitHubAPIService';
 import type { GitHubNotification } from '../../models/User';
 
 @Component
 export struct InboxTab {
+  @StorageLink(THEME_KEY) themeMode: string = 'dark'; private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
   private inboxStack: NavPathStack = new NavPathStack();
   @State selectedFilter: number = 0;
   @State notifications: GitHubNotification[] = [];
@@ -44,10 +45,10 @@ export struct InboxTab {
 
   private getNotifIconColor(notif: GitHubNotification): string {
     const stype: string = notif.subject.type;
-    if (stype === 'Issue') return Theme.issueGreen;
-    if (stype === 'PullRequest') return Theme.prBlue;
-    if (stype === 'Discussion') return Theme.discussionPurple;
-    return Theme.textSecondary;
+    if (stype === 'Issue') return this.T().issueGreen;
+    if (stype === 'PullRequest') return this.T().prBlue;
+    if (stype === 'Discussion') return this.T().discussionPurple;
+    return this.T().textSecondary;
   }
 
   @Builder
@@ -61,7 +62,7 @@ export struct InboxTab {
           Text($r('app.string.page_title_inbox'))
             .fontSize(26)
             .fontWeight(FontWeight.Bold)
-            .fontColor(Theme.textPrimary)
+            .fontColor(this.T().textPrimary)
             .layoutWeight(1)
 
           // 右侧功能图标：更多
@@ -85,21 +86,21 @@ export struct InboxTab {
                 Text(tab)
                   .fontSize(14)
                   .fontColor(this.selectedFilter === index
-                    ? Theme.textPrimary
-                    : Theme.textSecondary)
+                    ? this.T().textPrimary
+                    : this.T().textSecondary)
                 // 下拉指示器
                 if (index === 0 || index === 3) {
                   Text('▼')
                     .fontSize(8)
                     .fontColor(this.selectedFilter === index
-                      ? Theme.textPrimary
-                      : Theme.textSecondary)
+                      ? this.T().textPrimary
+                      : this.T().textSecondary)
                     .margin({ left: 4 })
                 }
               }
               .padding({ left: 16, right: 16, top: 8, bottom: 8 })
               .backgroundColor(this.selectedFilter === index
-                ? Theme.surfaceElevated
+                ? this.T().surfaceElevated
                 : Color.Transparent)
               .borderRadius(8)
               .onClick(() => {
@@ -113,19 +114,19 @@ export struct InboxTab {
         .scrollBar(BarState.Off)
         .width('100%')
         .height(40)
-        .backgroundColor(Theme.surface)
+        .backgroundColor(this.T().surface)
 
         // 分割线
         Divider()
-          .color(Theme.border)
+          .color(this.T().border)
           .width('100%')
 
         // === 主内容区 ===
         if (this.isInboxLoading) {
           Column() {
-            LoadingProgress().width(32).height(32).color(Theme.accent).margin({ top: 80 })
+            LoadingProgress().width(32).height(32).color(this.T().accent).margin({ top: 80 })
           }
-          .width('100%').height('100%').backgroundColor(Theme.background)
+          .width('100%').height('100%').backgroundColor(this.themeMode === 'dark' ? this.T().background : this.T().background)
         } else if (this.getFilteredNotifications().length > 0) {
           this.buildNotificationList()
         } else {
@@ -135,10 +136,10 @@ export struct InboxTab {
       .width('100%')
       .height('100%')
       .padding({ top: 32, bottom: 64 })
-      .backgroundColor(Theme.background)
+      .backgroundColor(this.themeMode === 'dark' ? this.T().background : this.T().background)
     }
     .navDestination(this.inboxPageMap)
-    .backgroundColor(Theme.background)
+    .backgroundColor(this.themeMode === 'dark' ? this.T().background : this.T().background)
     .width('100%')
     .height('100%')
     .mode(NavigationMode.Stack)
@@ -162,12 +163,12 @@ export struct InboxTab {
             Column() {
               Text(item.subject.title)
                 .fontSize(14)
-                .fontColor(Theme.textPrimary)
+                .fontColor(this.T().textPrimary)
                 .maxLines(1)
                 .textOverflow({ overflow: TextOverflow.Ellipsis })
               Text(item.repository.full_name)
                 .fontSize(12)
-                .fontColor(Theme.textTertiary)
+                .fontColor(this.T().textTertiary)
                 .margin({ top: 2 })
             }
             .alignItems(HorizontalAlign.Start)
@@ -178,7 +179,7 @@ export struct InboxTab {
               Circle()
                 .width(8)
                 .height(8)
-                .fill(Theme.accent)
+                .fill(this.T().accent)
             }
           }
           .width('100%')
@@ -193,6 +194,6 @@ export struct InboxTab {
     .scrollBar(BarState.Off)
     .width('100%')
     .height('100%')
-    .backgroundColor(Theme.background)
+    .backgroundColor(this.T().background)
   }
 }

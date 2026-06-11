@@ -1,11 +1,12 @@
 import { router } from '@kit.ArkUI';
 import { webview } from '@kit.ArkWeb';
 import { AuthService } from '../services/AuthService';
-import { Theme } from '../common/constants/ThemeConstants';
+import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../common/constants/ThemeConstants';
 
 @Entry
 @Component
 struct LoginPage {
+  @StorageLink(THEME_KEY) themeMode: string = 'dark'; private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
   @State isLoading: boolean = false;
   @State errorMessage: string = '';
   @State oauthUrl: string = '';
@@ -51,7 +52,7 @@ struct LoginPage {
         Button() {
           Text('✕')
             .fontSize(20)
-            .fontColor(Theme.textPrimary)
+            .fontColor(this.T().textPrimary)
         }
         .width(36)
         .height(36)
@@ -65,7 +66,7 @@ struct LoginPage {
         Text($r('app.string.login_title'))
           .fontSize($r('app.float.text_size_section'))
           .fontWeight(FontWeight.Bold)
-          .fontColor(Theme.textPrimary)
+          .fontColor(this.T().textPrimary)
 
         Blank()
 
@@ -74,23 +75,23 @@ struct LoginPage {
       .width('100%')
       .height(52)
       .padding({ left: 12, right: 12 })
-      .backgroundColor(Theme.background)
+      .backgroundColor(this.T().background)
 
       if (this.isLoading) {
         Column({ space: 12 }) {
           LoadingProgress()
             .width(40)
             .height(40)
-            .color(Theme.accent)
+            .color(this.T().accent)
           Text($r('app.string.login_loading'))
             .fontSize($r('app.float.text_size_body'))
-            .fontColor(Theme.textSecondary)
+            .fontColor(this.T().textSecondary)
         }
         .justifyContent(FlexAlign.Center)
         .alignItems(HorizontalAlign.Center)
         .width('100%')
         .layoutWeight(1)
-        .backgroundColor(Theme.background)
+        .backgroundColor(this.T().background)
       } else if (this.webSrc) {
         Web({ src: this.webSrc, controller: this.webController })
           .javaScriptAccess(true)
@@ -119,8 +120,8 @@ struct LoginPage {
 
           Button($r('app.string.login_retry'))
             .fontSize(14)
-            .fontColor(Theme.textPrimary)
-            .backgroundColor(Theme.accent)
+            .fontColor(this.T().textPrimary)
+            .backgroundColor(this.T().accent)
             .borderRadius(6)
             .height(40)
             .padding({ left: 24, right: 24 })
@@ -133,20 +134,20 @@ struct LoginPage {
         }
         .width('100%')
         .padding(20)
-        .backgroundColor(Theme.surface)
+        .backgroundColor(this.T().surface)
         .alignItems(HorizontalAlign.Center)
       }
 
       Text($r('app.string.login_note'))
         .fontSize(11)
-        .fontColor(Theme.textSecondary)
+        .fontColor(this.T().textSecondary)
         .textAlign(TextAlign.Center)
         .width('100%')
         .padding({ left: 20, right: 20, top: 12, bottom: 20 })
-        .backgroundColor(Theme.background)
+        .backgroundColor(this.T().background)
     }
     .width('100%')
     .height('100%')
-    .backgroundColor(Theme.background)
+    .backgroundColor(this.T().background)
   }
 }
