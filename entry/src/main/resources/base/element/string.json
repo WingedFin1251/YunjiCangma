@@ -2,51 +2,51 @@
   "string": [
     {
       "name": "module_desc",
-      "value": "GitHub client for HarmonyOS NEXT"
+      "value": "云笈藏码 - 第三方开源代码仓库浏览客户端"
     },
     {
       "name": "EntryAbility_desc",
-      "value": "GitHub client entry ability"
+      "value": "云笈藏码"
     },
     {
       "name": "EntryAbility_label",
-      "value": "GitHub"
+      "value": "云笈"
     },
     {
       "name": "tab_home",
-      "value": "主页"
+      "value": "首页"
     },
     {
       "name": "tab_inbox",
-      "value": "收件箱"
+      "value": "消息"
     },
     {
       "name": "tab_explore",
-      "value": "探索"
+      "value": "发现"
     },
     {
       "name": "tab_profile",
-      "value": "个人资料"
+      "value": "我的"
     },
     {
       "name": "page_title_home",
-      "value": "主页"
+      "value": "首页"
     },
     {
       "name": "page_title_inbox",
-      "value": "Inbox"
+      "value": "消息"
     },
     {
       "name": "page_title_explore",
-      "value": "探索"
+      "value": "发现"
     },
     {
       "name": "section_my_work",
-      "value": "我的工作"
+      "value": "我的项目"
     },
     {
       "name": "section_favorites",
-      "value": "收藏夹"
+      "value": "我的星标"
     },
     {
       "name": "section_discover",
@@ -54,7 +54,7 @@
     },
     {
       "name": "section_activity",
-      "value": "活动"
+      "value": "动态"
     },
     {
       "name": "my_work_issues",
@@ -110,63 +110,87 @@
     },
     {
       "name": "empty_inbox_title",
-      "value": "都赶上了！"
+      "value": "暂无新消息"
     },
     {
       "name": "empty_inbox_subtitle",
-      "value": "休息一下，写一些代码，做您最擅长的事"
+      "value": "所有通知已查看，随心探索开源仓库"
+    },
+    {
+      "name": "empty_repo_title",
+      "value": "暂无仓库"
+    },
+    {
+      "name": "empty_repo_subtitle",
+      "value": "前往发现更多优质开源项目"
     },
     {
       "name": "profile_repos",
       "value": "仓库"
     },
     {
-      "name": "profile_orgs",
-      "value": "组织"
+      "name": "profile_following",
+      "value": "关注中"
     },
     {
-      "name": "profile_starred",
-      "value": "已加星标"
+      "name": "profile_followers",
+      "value": "粉丝"
     },
     {
       "name": "status_placeholder",
-      "value": "Set status..."
+      "value": "设置状态..."
     },
     {
       "name": "login_title",
-      "value": "Sign In"
+      "value": "云笈 · 账号登录"
     },
     {
       "name": "sign_in_button",
-      "value": "Sign In with GitHub"
+      "value": "登录账号"
     },
     {
       "name": "sign_out_button",
-      "value": "Log Out"
+      "value": "退出登录"
     },
     {
       "name": "profile_not_logged_in",
-      "value": "Sign in to GitHub"
+      "value": "登录云笈，探索开源世界"
     },
     {
       "name": "login_loading",
-      "value": "Connecting to GitHub..."
+      "value": "正在连接 GitHub..."
     },
     {
       "name": "login_success",
-      "value": "Signed in successfully"
+      "value": "登录成功"
     },
     {
       "name": "login_failed",
-      "value": "Authentication failed"
+      "value": "授权失败"
     },
     {
       "name": "login_retry",
-      "value": "Try Again"
+      "value": "重试"
     },
     {
       "name": "login_note",
-      "value": "Your credentials are never stored. Only an access token is saved locally."
+      "value": "您的账号密码不会被存储\n仅保存官方授权令牌用于数据访问"
+    },
+    {
+      "name": "repo_list_title",
+      "value": "我的仓库"
+    },
+    {
+      "name": "repo_detail_title",
+      "value": "仓库详情"
+    },
+    {
+      "name": "followers_title",
+      "value": "粉丝"
+    },
+    {
+      "name": "following_title",
+      "value": "关注中"
     }
   ]
 }

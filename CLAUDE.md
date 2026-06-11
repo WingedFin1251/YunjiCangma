@@ -4,7 +4,7 @@
 
 ## 项目概述
 
-**Github** — HarmonyOS NEXT 平台上的 GitHub 移动客户端。
+**云笈藏码** — HarmonyOS NEXT 平台上的第三方开源代码仓库浏览客户端。
 
 - **Bundle**: `com.github.web` | **API**: 6.1.0 (23)
 - **语言**: ArkTS (TypeScript 严格子集)
@@ -33,20 +33,26 @@
 | `getCurrentUser()` | `GET /user` | `User` |
 | `getUser(username)` | `GET /users/{u}` | `User` |
 | `getStarredRepos()` | `GET /user/starred` | `Repository[]` |
+| `getMyRepos()` | `GET /user/repos?type=all` | `Repository[]` |
+| `getUserRepos(u)` | `GET /users/{u}/repos` | `Repository[]` |
 | `getNotifications()` | `GET /notifications` | `GitHubNotification[]` |
 | `getTrendingRepos()` | `GET /search/repositories?sort=stars` | `SearchResult` |
 | `getReceivedEvents(u)` | `GET /users/{u}/received_events` | `Object[]` |
+| `getUserFollowers(u)` | `GET /users/{u}/followers` | `Object[]` |
+| `getUserFollowing(u)` | `GET /users/{u}/following` | `Object[]` |
+| `getRepoContents(o,r,p)` | `GET /repos/{o}/{r}/contents/{p}` | `Object[]` |
 
 ## 目录结构
 
 ```
 entry/src/main/ets/
-├── entryability/EntryAbility.ets    # 启动: Auth init + 全屏配置
+├── entryability/EntryAbility.ets    # 启动: Auth.init(context) + await loadToken + 全屏
 ├── pages/
 │   ├── MainPage.ets                 # @Entry — Tabs(4 tab, 52dp, 小白条沉浸)
-│   ├── LoginPage.ets                # @Entry — WebView OAuth(onLoadIntercept)
-│   └── tabs/{Home,Inbox,Explore,Profile}Tab.ets
+│   ├── LoginPage.ets                # @Entry — WebView OAuth(onLoadIntercept + 防抖)
+│   └── tabs/{Home,Inbox,Explore,Profile}Tab.ets  # 首页/消息/发现/我的
 ├── services/{Auth,GitHubAPI}Service.ets
+│   AuthService: UIAbilityContext 替代废弃的 getContext()
 ├── models/{User(含Repository/Notification),AuthModels}.ets
 └── common/
     ├── constants/{Theme,API}Constants.ets

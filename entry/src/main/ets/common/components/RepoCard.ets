@@ -1,4 +1,4 @@
-import { DarkTheme } from '../constants/ThemeConstants';
+import { Theme } from '../constants/ThemeConstants';
 
 /**
  * 仓库卡片组件（全局复用）
@@ -38,10 +38,10 @@ export struct RepoCard {
         Text(this.avatarChar.toUpperCase())
           .fontSize(14)
           .fontWeight(FontWeight.Bold)
-          .fontColor(DarkTheme.textPrimary)
+          .fontColor(Theme.textPrimary)
           .width(32)
           .height(32)
-          .backgroundColor(DarkTheme.surfaceElevated)
+          .backgroundColor(Theme.surfaceElevated)
           .borderRadius(16)
           .textAlign(TextAlign.Center)
           .lineHeight(32)
@@ -49,13 +49,13 @@ export struct RepoCard {
         Column() {
           Text(`${this.owner} / `)
             .fontSize(16)
-            .fontColor(DarkTheme.textPrimary)
+            .fontColor(Theme.textPrimary)
             .maxLines(1)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
           Text(this.repo)
             .fontSize(16)
             .fontWeight(FontWeight.Bold)
-            .fontColor(DarkTheme.textPrimary)
+            .fontColor(Theme.textPrimary)
             .maxLines(1)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
         }
@@ -70,7 +70,7 @@ export struct RepoCard {
       if (this.description) {
         Text(this.description)
           .fontSize(14)
-          .fontColor(DarkTheme.textSecondary)
+          .fontColor(Theme.textSecondary)
           .maxLines(2)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width('100%')
@@ -84,10 +84,10 @@ export struct RepoCard {
             Circle()
               .width(8)
               .height(8)
-              .fill(DarkTheme.accent)
+              .fill(Theme.accent)
             Text(this.language)
               .fontSize(12)
-              .fontColor(DarkTheme.textTertiary)
+              .fontColor(Theme.textTertiary)
               .margin({ left: 4 })
           }
         }
@@ -98,7 +98,7 @@ export struct RepoCard {
             .margin({ left: 12 })
           Text(this.formatStars())
             .fontSize(12)
-            .fontColor(DarkTheme.textTertiary)
+            .fontColor(Theme.textTertiary)
             .margin({ left: 2 })
         }
 
@@ -108,11 +108,11 @@ export struct RepoCard {
         Button() {
           Text(this.starred ? '★' : '☆')
             .fontSize(16)
-            .fontColor(this.starred ? DarkTheme.starYellow : DarkTheme.textSecondary)
+            .fontColor(this.starred ? Theme.starYellow : Theme.textSecondary)
         }
         .width(36)
         .height(36)
-        .backgroundColor(DarkTheme.surfaceElevated)
+        .backgroundColor(Theme.surfaceElevated)
         .borderRadius(6)
         .onClick(() => {
           this.starred = !this.starred;
@@ -124,7 +124,7 @@ export struct RepoCard {
     }
     .width('100%')
     .padding(16)
-    .backgroundColor(DarkTheme.surface)
+    .backgroundColor(Theme.surface)
     .borderRadius(8)
     .shadow({
       radius: 6,

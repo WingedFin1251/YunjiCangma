@@ -1,4 +1,4 @@
-import { DarkTheme } from '../constants/ThemeConstants';
+import { Theme } from '../constants/ThemeConstants';
 
 /**
  * 空状态组件（收件箱专用）
@@ -30,12 +30,12 @@ export struct EmptyState {
       Text(this.title)
         .fontSize(20)
         .fontWeight(FontWeight.Medium)
-        .fontColor(DarkTheme.textPrimary)
+        .fontColor(Theme.textPrimary)
         .textAlign(TextAlign.Center)
 
       Text(this.subtitle)
         .fontSize(14)
-        .fontColor(DarkTheme.textSecondary)
+        .fontColor(Theme.textSecondary)
         .textAlign(TextAlign.Center)
         .padding({ left: 40, right: 40 })
     }
