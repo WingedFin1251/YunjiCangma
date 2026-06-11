@@ -207,7 +207,7 @@ export struct ProfileTab {
           }
 
           Blank().height(24)
-        }.width('100%').alignItems(HorizontalAlign.Center).padding({ top: 32, bottom: 64 })
+        }.width('100%').alignItems(HorizontalAlign.Center).padding({ top: 24, bottom: 20 })
       }.scrollable(ScrollDirection.Vertical).scrollBar(BarState.Off)
         .width('100%').height('100%').backgroundColor(this.themeMode === 'dark' ? this.T().background : this.T().background)
     }
