@@ -98,8 +98,8 @@ export struct ProfileTab {
       NavDestination() {
         Web({ src: this.webUrl, controller: this.webCtl })
           .width('100%').height('100%')
-          .darkMode(WebDarkMode.On)
-          .backgroundColor(Color.Black)
+          .darkMode(this.themeMode === 'dark' ? WebDarkMode.On : WebDarkMode.Off)
+          .backgroundColor(this.themeMode === 'dark' ? Color.Black : Color.White)
       }.title('仓库详情').backgroundColor(this.T().background).padding({ top: 32 })
     } else if (name === 'followers' || name === 'following') {
       NavDestination() {
