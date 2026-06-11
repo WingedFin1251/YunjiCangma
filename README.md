@@ -19,11 +19,14 @@
 - [x] 🔐 GitHub OAuth WebView 登录（自定义 Scheme + onLoadIntercept + 防抖）
 - [x] 🖼️ 用户头像 + Octocat 应用图标
 - [x] 🖥️ 全屏沉浸（透明状态栏 + 底部小白条 + 浅色适配）
-- [x] 📡 11 个真实 API 端点（Star/通知/热门/活动/仓库/粉丝/关注/议题/PR/组织）
+- [x] 📡 12 个 API 端点（Star/通知/热门/活动/仓库/粉丝/关注/议题/PR/组织/搜索）
 - [x] 🔄 登录自动刷新 + 主题持久化（preferences 存取）
-- [x] 🌐 仓库详情 WebView 浏览（深浅自适应）
+- [x] 🌐 仓库详情 WebView 浏览（深浅自适应 + 搜索结果打开）
+- [x] 🔍 全局搜索（搜索 GitHub 仓库 → 点击 WebView 查看）
+- [x] 🎨 GitHub Linguist 语言颜色映射（30+ 语言官方色值）
 - [x] ⚙️ 设置页（深色开关 + 使用教程 + 隐私协议 + 关于）
 - [x] 📋 首页工作项子页面（议题/PR/仓库/组织/已加星标，登录门控）
+- [x] 📁 页面分层（tabs/ + sub/）
 - [x] 🧩 组件库：RepoCard / ListItem / EmptyState / FilterTabBar / TabBarBuilder
 
 ## 快速开始
@@ -72,7 +75,7 @@ entry/src/main/ets/
 
 | Tab | 主要元素 | 数据源 |
 |-----|----------|--------|
-| 首页 | 标题栏 + 我的项目（7项→子页面）+ 我的星标（RepoCard） | `GET /starred` + `GET /issues` + `GET /repos` + `GET /orgs` |
+| 首页 | 标题栏（搜索/新增/更多）+ 我的项目（7项→子页面）+ 我的星标（RepoCard） | `GET /starred` + `GET /issues` + `GET /repos` + `GET /orgs` + `GET /search` |
 | 消息 | 标题栏 + 筛选标签栏 + 通知列表/空状态 | `GET /notifications` |
 | 发现 | 标题栏 + 发现入口 + 动态 + 热门仓库→WebView | `GET /search/repos` + `GET /received_events` |
 | 我的 | 头像 + 统计 + 仓库/粉丝/关注列表 + ☰→设置 | `GET /user` + `GET /user/repos` + WebView |
