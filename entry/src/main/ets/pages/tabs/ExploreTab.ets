@@ -1,3 +1,4 @@
+import { webview } from '@kit.ArkWeb';
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
 import { RepoCard } from '../../common/components/RepoCard';
 import { GitHubAPIService } from '../../services/GitHubAPIService';
@@ -25,6 +26,8 @@ export struct ExploreTab {
   @State trendingRepos: Repository[] = [];
   @State activities: ActivityItem[] = [];
   @State isExploreLoading: boolean = true;
+  @State webUrl: string = '';
+  private webCtl: webview.WebviewController = new webview.WebviewController();
 
   aboutToAppear(): void {
     this.loadExploreData();
@@ -66,7 +69,16 @@ export struct ExploreTab {
   }
 
   @Builder
-  explorePageMap(name: string, param: ESObject) {}
+  explorePageMap(name: string, param: ESObject) {
+    if (name === 'repoWeb') {
+      NavDestination() {
+        Web({ src: this.webUrl, controller: this.webCtl })
+          .width('100%').height('100%')
+          .darkMode(this.themeMode === 'dark' ? WebDarkMode.On : WebDarkMode.Off)
+          .backgroundColor(this.themeMode === 'dark' ? Color.Black : Color.White)
+      }.title('仓库详情').backgroundColor(this.T().background).padding({ top: 32 })
+    }
+  }
 
   build() {
     Navigation(this.exploreStack) {
@@ -122,14 +134,23 @@ export struct ExploreTab {
 
           Column({ space: 12 }) {
             ForEach(this.trendingRepos, (repo: Repository, index: number) => {
-              RepoCard({
-                avatarChar: repo.owner.login.charAt(0),
-                owner: repo.owner.login,
-                repo: repo.name,
-                description: repo.description || '',
-                language: repo.language || '',
-                stars: repo.stargazers_count,
-                isStarred: false
+              Column() {
+                RepoCard({
+                  avatarChar: repo.owner.login.charAt(0),
+                  owner: repo.owner.login,
+                  repo: repo.name,
+                  description: repo.description || '',
+                  language: repo.language || '',
+                  stars: repo.stargazers_count,
+                  isStarred: false
+                })
+              }
+              .width('100%')
+              .onClick(() => {
+                if (repo.html_url) {
+                  this.webUrl = repo.html_url;
+                  this.exploreStack.pushPath({ name: 'repoWeb' });
+                }
               })
             }, (repo: Repository) => repo.id.toString())
           }

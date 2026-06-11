@@ -32,14 +32,15 @@ export default class EntryAbility extends UIAbility {
     const savedTheme: string = await AuthService.loadTheme();
     AppStorage.setOrCreate('currentTheme', savedTheme);
 
-    // 全屏沉浸
+    // 全屏沉浸 — 状态栏透明叠加，窗口延伸至屏幕顶部
     try {
       const mainWindow = windowStage.getMainWindowSync();
       mainWindow.setWindowLayoutFullScreen(true);
-      mainWindow.setWindowSystemBarEnable(['status']);
+      const isDark: boolean = savedTheme !== 'light';
       mainWindow.setWindowSystemBarProperties({
-        statusBarColor: '#121212',
-        navigationBarColor: '#1E1E1E'
+        statusBarColor: '#00FFFFFF',
+        statusBarContentColor: isDark ? '#FFFFFF' : '#1F2328',
+        navigationBarColor: isDark ? '#1E1E1E' : '#F6F8FA'
       });
     } catch (err) {
       hilog.warn(DOMAIN, 'testTag', 'Failed to set immersive window. Cause: %{public}s', JSON.stringify(err));
