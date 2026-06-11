@@ -1,4 +1,4 @@
-import { Theme } from '../../common/constants/ThemeConstants';
+import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
 import { RepoCard } from '../../common/components/RepoCard';
 import { GitHubAPIService } from '../../services/GitHubAPIService';
 import { AUTH_LOGIN_KEY } from '../../common/constants/APIConstants';
@@ -37,18 +37,19 @@ class FavoriteRepo {
 @Component
 export struct HomeTab {
   private homeStack: NavPathStack = new NavPathStack();
+  @StorageLink(THEME_KEY) themeMode: string = 'dark'; private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
   @StorageLink(AUTH_LOGIN_KEY) @Watch('onLoginChanged') isLoggedIn: boolean = false;
   @State starredRepos: FavoriteRepo[] = [];
   @State isStarredLoading: boolean = true;
 
   private workItems: WorkItem[] = [
-    new WorkItem('●', '议题', Theme.issueGreen),
-    new WorkItem('⇄', '拉取请求', Theme.prBlue),
-    new WorkItem('◈', '讨论', Theme.discussionPurple),
-    new WorkItem('⊞', '项目', Theme.accent),
-    new WorkItem('⊡', '仓库', Theme.textSecondary),
-    new WorkItem('◎', '组织', Theme.orgOrange),
-    new WorkItem('★', '已加星标', Theme.starYellow),
+    new WorkItem('●', '议题', this.T().issueGreen),
+    new WorkItem('⇄', '拉取请求', this.T().prBlue),
+    new WorkItem('◈', '讨论', this.T().discussionPurple),
+    new WorkItem('⊞', '项目', this.T().accent),
+    new WorkItem('⊡', '仓库', this.T().textSecondary),
+    new WorkItem('◎', '组织', this.T().orgOrange),
+    new WorkItem('★', '已加星标', this.T().starYellow),
   ];
 
   aboutToAppear(): void {
@@ -85,7 +86,7 @@ export struct HomeTab {
             Text($r('app.string.page_title_home'))
               .fontSize(26)
               .fontWeight(FontWeight.Bold)
-              .fontColor(Theme.textPrimary)
+              .fontColor(this.T().textPrimary)
               .layoutWeight(1)
             Row({ space: 20 }) {
               this.navIcon('⌕')
@@ -107,7 +108,7 @@ export struct HomeTab {
           }
 
           Divider()
-            .color(Theme.border)
+            .color(this.T().border)
             .width('100%')
             .margin({ top: 24, bottom: 8 })
 
@@ -138,10 +139,10 @@ export struct HomeTab {
       .scrollBar(BarState.Off)
       .width('100%')
       .height('100%')
-      .backgroundColor(Theme.background)
+      .backgroundColor(this.themeMode === 'dark' ? this.T().background : this.T().background)
     }
     .navDestination(this.homePageMap)
-    .backgroundColor(Theme.background)
+    .backgroundColor(this.themeMode === 'dark' ? this.T().background : this.T().background)
     .width('100%')
     .height('100%')
     .mode(NavigationMode.Stack)
@@ -155,11 +156,11 @@ export struct HomeTab {
       Text(title)
         .fontSize(20)
         .fontWeight(FontWeight.Medium)
-        .fontColor(Theme.textPrimary)
+        .fontColor(this.T().textPrimary)
         .layoutWeight(1)
       Text('⋯')
         .fontSize(18)
-        .fontColor(Theme.textSecondary)
+        .fontColor(this.T().textSecondary)
         .width(44)
         .height(44)
         .textAlign(TextAlign.Center)
@@ -181,18 +182,18 @@ export struct HomeTab {
         .textAlign(TextAlign.Center)
       Text(item.label)
         .fontSize(16)
-        .fontColor(Theme.textPrimary)
+        .fontColor(this.T().textPrimary)
         .margin({ left: 12 })
         .layoutWeight(1)
       Text('›')
         .fontSize(20)
-        .fontColor(Theme.textSecondary)
+        .fontColor(this.T().textSecondary)
     }
     .width('100%')
     .height(52)
     .padding({ left: 16, right: 16 })
     .alignItems(VerticalAlign.Center)
-    .backgroundColor(Theme.background)
+    .backgroundColor(this.T().background)
     .onClick(() => {})
   }
 

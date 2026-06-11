@@ -1,4 +1,4 @@
-import { Theme } from '../constants/ThemeConstants';
+import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../constants/ThemeConstants';
 
 /**
  * 底部 Tab 栏构建器
@@ -12,6 +12,7 @@ import { Theme } from '../constants/ThemeConstants';
  */
 @Component
 export struct TabBarItem {
+  @StorageLink(THEME_KEY) themeMode: string = 'dark'; private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
   @Prop label: string = '';
   @Prop icon: string = '';
   @Prop isSelected: boolean = false;
@@ -20,11 +21,11 @@ export struct TabBarItem {
     Column() {
       Text(this.icon)
         .fontSize(22)
-        .fontColor(this.isSelected ? Theme.accent : Theme.textSecondary)
+        .fontColor(this.isSelected ? this.T().accent : this.T().textSecondary)
       Text(this.label)
         .fontSize(12)
         .fontWeight(FontWeight.Light)
-        .fontColor(this.isSelected ? Theme.accent : Theme.textSecondary)
+        .fontColor(this.isSelected ? this.T().accent : this.T().textSecondary)
         .margin({ top: 2 })
     }
     .justifyContent(FlexAlign.Center)
