@@ -46,6 +46,11 @@ export default class EntryAbility extends UIAbility {
       hilog.warn(DOMAIN, 'testTag', 'Failed to set immersive window. Cause: %{public}s', JSON.stringify(err));
     }
 
+    // 同步系统颜色模式 → NavDestination 标题/返回按钮可见
+    this.context.getApplicationContext().setColorMode(
+      savedTheme !== 'light' ? ConfigurationConstant.ColorMode.COLOR_MODE_DARK : ConfigurationConstant.ColorMode.COLOR_MODE_LIGHT
+    );
+
     windowStage.loadContent('pages/MainPage', (err) => {
       if (err.code) {
         hilog.error(DOMAIN, 'testTag', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err));
