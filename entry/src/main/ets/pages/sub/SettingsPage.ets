@@ -1,5 +1,5 @@
-import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../common/constants/ThemeConstants';
-import { AuthService } from '../services/AuthService';
+import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
+import { AuthService } from '../../services/AuthService';
 
 @Component
 export struct SettingsPage {

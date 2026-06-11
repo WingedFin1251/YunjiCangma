@@ -160,7 +160,7 @@ export struct ExploreTab {
         .backgroundColor(this.themeMode === 'dark' ? this.T().background : this.T().background)
     }
     .width('100%').height('100%')
-    .padding({ top: 24, bottom: 20 })
+    .padding({ top: 32, bottom: 20 })
     .backgroundColor(this.themeMode === 'dark' ? this.T().background : this.T().background)
     }
     .navDestination(this.explorePageMap)
