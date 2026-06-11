@@ -65,3 +65,22 @@ function lightColors(): ThemeColors {
     prBlue: '#0969DA', discussionPurple: '#8250DF', orgOrange: '#CF6A00',
     starYellow: '#9A6700', clickFeedback: '#E0E4E8' };
 }
+
+/** GitHub Linguist 语言颜色映射 */
+export function langColor(lang: string): string {
+  const m: Record<string, string> = {
+    'JavaScript': '#F1E05A', 'TypeScript': '#3178C6', 'Python': '#3572A5',
+    'Java': '#B07219', 'C': '#555555', 'C++': '#F34B7D', 'C#': '#178600',
+    'Go': '#00ADD8', 'Rust': '#DEA584', 'Swift': '#FFAC45', 'Kotlin': '#A97BFF',
+    'Dart': '#00B4AB', 'Ruby': '#701516', 'PHP': '#4F5D95', 'HTML': '#E34C26',
+    'CSS': '#563D7C', 'Vue': '#2C3E50', 'Shell': '#89E051', 'SCSS': '#C6538C',
+    'Markdown': '#083FA1', 'JSON': '#292929', 'YAML': '#CB171E', 'Scala': '#C22D40',
+    'R': '#198CE7', 'Lua': '#000080', 'Haskell': '#5E5086', 'Clojure': '#DB5855',
+    'Elixir': '#6E4A7E', 'Erlang': '#B83998', 'Groovy': '#4298B8', 'Julia': '#A270BA',
+    'Objective-C': '#438EFF', 'Perl': '#0298C3', 'PowerShell': '#012456',
+    'Sass': '#A53B70', 'Vim script': '#199F4B', 'CMake': '#DA3434',
+    'Dockerfile': '#384D54', 'Makefile': '#427819', 'Jupyter Notebook': '#DA5B0B',
+    'Assembly': '#6E4C13', 'Batchfile': '#C1F12E', 'TeX': '#3D6117'
+  };
+  return m[lang] || '#B3B3B3';
+}

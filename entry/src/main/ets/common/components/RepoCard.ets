@@ -1,4 +1,4 @@
-import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../constants/ThemeConstants';
+import { DarkTheme, LightTheme, THEME_KEY, ThemeColors, langColor } from '../constants/ThemeConstants';
 
 /**
  * 仓库卡片组件（全局复用）
@@ -85,7 +85,7 @@ export struct RepoCard {
             Circle()
               .width(8)
               .height(8)
-              .fill(this.T().accent)
+              .fill(langColor(this.language))
             Text(this.language)
               .fontSize(12)
               .fontColor(this.T().textTertiary)
