@@ -44,6 +44,9 @@
 | `getUserFollowers(u)` | `GET /users/{u}/followers` | `Object[]` |
 | `getUserFollowing(u)` | `GET /users/{u}/following` | `Object[]` |
 | `getRepoContents(o,r,p)` | `GET /repos/{o}/{r}/contents/{p}` | `Object[]` |
+| `getIssues()` | `GET /issues` | `Object[]` |
+| `getOrgs()` | `GET /user/orgs` | `Object[]` |
+| `searchRepos(q)` | `GET /search/repositories?q=` | `Object` |
 
 ## 目录结构
 
