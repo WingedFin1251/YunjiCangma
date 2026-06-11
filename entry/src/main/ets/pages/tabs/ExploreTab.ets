@@ -82,19 +82,16 @@ export struct ExploreTab {
 
   build() {
     Navigation(this.exploreStack) {
-      Scroll() {
-        Column() {
-          Row() {
-            Text($r('app.string.page_title_explore'))
-              .fontSize(26)
-              .fontWeight(FontWeight.Bold)
-              .fontColor(this.T().textPrimary)
-              .layoutWeight(1)
-          }
-          .width('100%')
-          .height(56)
-          .padding({ left: 16, right: 16 })
-          .alignItems(VerticalAlign.Center)
+      Column() {
+        // 标题栏 — 固定不滚动
+        Row() {
+          Text($r('app.string.page_title_explore'))
+            .fontSize(26).fontWeight(FontWeight.Bold).fontColor(this.T().textPrimary).layoutWeight(1)
+        }.width('100%').height(56).padding({ left: 16, right: 16 }).alignItems(VerticalAlign.Center)
+
+        // 内容区 — 可滚动
+        Scroll() {
+          Column() {
 
           Row({ space: 12 }) {
             this.discoverItem('◈', '热门仓库')
@@ -158,24 +155,18 @@ export struct ExploreTab {
           .margin({ top: 12 })
 
           Blank().height(24)
-        }
-        .width('100%')
-        .alignItems(HorizontalAlign.Start)
-        .padding({ top: 32, bottom: 64 })
-      }
-      .scrollable(ScrollDirection.Vertical)
-      .scrollBar(BarState.Off)
-      .width('100%')
-      .height('100%')
-      .backgroundColor(this.themeMode === 'dark' ? this.T().background : this.T().background)
+        }.width('100%').alignItems(HorizontalAlign.Start)
+      }.scrollBar(BarState.Off).width('100%')
+        .backgroundColor(this.themeMode === 'dark' ? this.T().background : this.T().background)
+    }
+    .width('100%').height('100%')
+    .padding({ top: 24, bottom: 20 })
+    .backgroundColor(this.themeMode === 'dark' ? this.T().background : this.T().background)
     }
     .navDestination(this.explorePageMap)
     .backgroundColor(this.themeMode === 'dark' ? this.T().background : this.T().background)
-    .width('100%')
-    .height('100%')
-    .mode(NavigationMode.Stack)
-    .hideTitleBar(true)
-    .hideToolBar(true)
+    .width('100%').height('100%')
+    .mode(NavigationMode.Stack).hideTitleBar(true).hideToolBar(true)
   }
 
   @Builder
