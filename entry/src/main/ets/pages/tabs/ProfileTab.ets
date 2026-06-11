@@ -6,9 +6,9 @@ import { AuthService } from '../../services/AuthService';
 import { GitHubAPIService } from '../../services/GitHubAPIService';
 import type { User } from '../../models/User';
 import { AUTH_LOGIN_KEY } from '../../common/constants/APIConstants';
-import { SettingsPage } from '../SettingsPage';
-import { TutorialPage } from '../TutorialPage';
-import { PrivacyPage } from '../PrivacyPage';
+import { SettingsPage } from '../sub/SettingsPage';
+import { TutorialPage } from '../sub/TutorialPage';
+import { PrivacyPage } from '../sub/PrivacyPage';
 
 @Component
 export struct ProfileTab {
@@ -148,14 +148,11 @@ export struct ProfileTab {
         Column() {
           Row() {
             Blank()
-            Row({ space: 20 }) {
-              this.navIcon('↗')
-              Text('☰').fontSize($r('app.float.icon_size_normal'))
-                .width($r('app.float.size_nav_icon_hit')).height($r('app.float.size_nav_icon_hit'))
-                .textAlign(TextAlign.Center).lineHeight($r('app.float.size_nav_icon_hit'))
-                .onClick(() => { this.profileStack.pushPath({ name: 'settings' }); })
-            }
-          }.width('100%').height(52).padding({ left: 16, right: 16 }).alignItems(VerticalAlign.Center)
+            Text('☰').fontSize($r('app.float.icon_size_normal'))
+              .width($r('app.float.size_nav_icon_hit')).height($r('app.float.size_nav_icon_hit'))
+              .textAlign(TextAlign.Center).lineHeight($r('app.float.size_nav_icon_hit'))
+              .onClick(() => { this.profileStack.pushPath({ name: 'settings' }); })
+          }.width('100%').padding({ left: 16, right: 16 }).alignItems(VerticalAlign.Center).margin({ top: 4 })
 
           if (this.isLoading) {
             LoadingProgress().width(40).height(40).color(this.T().accent).margin({ top: 60 })
@@ -207,9 +204,9 @@ export struct ProfileTab {
           }
 
           Blank().height(24)
-        }.width('100%').alignItems(HorizontalAlign.Center).padding({ top: 24, bottom: 20 })
+        }.width('100%').alignItems(HorizontalAlign.Center).padding({ top: 32, bottom: 20 })
       }.scrollable(ScrollDirection.Vertical).scrollBar(BarState.Off)
-        .width('100%').height('100%').backgroundColor(this.themeMode === 'dark' ? this.T().background : this.T().background)
+        .width('100%').backgroundColor(this.themeMode === 'dark' ? this.T().background : this.T().background)
     }
     .navDestination(this.profilePageMap).backgroundColor(this.themeMode === 'dark' ? this.T().background : this.T().background)
     .width('100%').height('100%').mode(NavigationMode.Stack).hideTitleBar(true).hideToolBar(true)
