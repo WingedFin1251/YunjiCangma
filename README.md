@@ -14,15 +14,16 @@
 
 ## 已实现
 
-- [x] 🎨 深色/浅色双主题（14 色值，手动切换，状态栏 + WebView 联动适配）
-- [x] 🏠 4 Tab 导航：首页 / 消息 / 发现 / 我的
+- [x] 🎨 深色/浅色双主题（14 色值，状态栏 + WebView + 系统 ColorMode 联动）
+- [x] 🏠 4 Tab 导航（标题栏固定不滚动 + 底部小白条沉浸）
 - [x] 🔐 GitHub OAuth WebView 登录（自定义 Scheme + onLoadIntercept + 防抖）
 - [x] 🖼️ 用户头像 + Octocat 应用图标
-- [x] 🖥️ 全屏沉浸（透明状态栏 + 底部小白条延伸 + 浅色适配）
-- [x] 📡 真实 API：已 Star / 通知 / 热门仓库 / 活动流 / 个人仓库 / 粉丝 / 关注
+- [x] 🖥️ 全屏沉浸（透明状态栏 + 底部小白条 + 浅色适配）
+- [x] 📡 11 个真实 API 端点（Star/通知/热门/活动/仓库/粉丝/关注/议题/PR/组织）
 - [x] 🔄 登录自动刷新 + 主题持久化（preferences 存取）
 - [x] 🌐 仓库详情 WebView 浏览（深浅自适应）
-- [x] 🗜️ 平板 Navigation.Stack 模式 + 安全区适配
+- [x] ⚙️ 设置页（深色开关 + 使用教程 + 隐私协议 + 关于）
+- [x] 📋 首页工作项子页面（议题/PR/仓库/组织/已加星标，登录门控）
 - [x] 🧩 组件库：RepoCard / ListItem / EmptyState / FilterTabBar / TabBarBuilder
 
 ## 快速开始
@@ -71,10 +72,10 @@ entry/src/main/ets/
 
 | Tab | 主要元素 | 数据源 |
 |-----|----------|--------|
-| 首页 | 我的项目（7 项）+ 我的星标（登录联动刷新） | `GET /user/starred` |
-| 消息 | 筛选标签栏 + 通知列表/空状态（类型图标） | `GET /notifications` |
-| 发现 | 热门仓库卡片（点击→WebView）+ 活动流 | `GET /search/repos` + `GET /received_events` |
-| 我的 | 头像 + 统计 + 仓库/粉丝/关注列表 + 登录/主题开关 | `GET /user` + `GET /user/repos` + WebView |
+| 首页 | 标题栏 + 我的项目（7项→子页面）+ 我的星标（RepoCard） | `GET /starred` + `GET /issues` + `GET /repos` + `GET /orgs` |
+| 消息 | 标题栏 + 筛选标签栏 + 通知列表/空状态 | `GET /notifications` |
+| 发现 | 标题栏 + 发现入口 + 动态 + 热门仓库→WebView | `GET /search/repos` + `GET /received_events` |
+| 我的 | 头像 + 统计 + 仓库/粉丝/关注列表 + ☰→设置 | `GET /user` + `GET /user/repos` + WebView |
 
 ## 主题系统
 

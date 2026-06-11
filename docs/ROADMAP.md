@@ -1,21 +1,17 @@
 # 路线图
 
-## 当前版本: v0.5.0（深浅双主题 + WebView 联动 + 品牌落地）
+## 当前版本: v0.6.0（设置页 + 工作项子页面 + 标题栏统一）
 
-- [x] 项目初始化 + GitHub 适配 + 品牌命名「云笈藏码」
-- [x] 4 Tab 底部导航（首页 / 消息 / 发现 / 我的）
-- [x] NavigationMode.Stack 平板修复 + 安全区适配
-- [x] 深色/浅色双主题（ThemeColors 接口 + T() 方法 + preferences 持久化）
-- [x] 状态栏自适应（透明沉浸 + statusBarContentColor 深浅切换）
-- [x] WebView 深浅联动（WebDarkMode.On/Off + 背景色跟随）
-- [x] 全局组件库（RepoCard / ListItem / EmptyState / FilterTabBar）
-- [x] 统一几何图标 + 功能色值区分
-- [x] `services/GitHubAPIService.ets`（11 端点）+ `AuthService.ets`（含主题存取）
-- [x] `models/User.ets`（含 Repository/Notification/SearchResult）
-- [x] OAuth WebView 登录（自定义 Scheme + onLoadIntercept + 防抖）
-- [x] 登录/未登录双态 UI + @StorageLink + @Watch 自动刷新
-- [x] 全屏沉浸 + 底部小白条延伸 + 浅色系统栏适配
-- [x] 探索页热门仓库 → WebView；我的页仓库列表 → RepoCard → WebView
+- [x] 项目初始化 + GitHub 适配 + 品牌「云笈藏码」
+- [x] 4 Tab（首页/消息/发现/我的）+ 标题栏固定不滚动 + Scroll 顶部对齐
+- [x] NavigationMode.Stack 平板修复 + 顶部 24dp + 底部 20dp + layoutWeight 移除
+- [x] 深色/浅色双主题（ThemeColors + T() + preferences 持久化）
+- [x] 状态栏透明沉浸 + statusBarContentColor 深浅切换 + 系统 ColorMode 同步
+- [x] WebView 深浅联动（WebDarkMode.On/Off + 背景自适应）
+- [x] 11 个 API 端点（Star/通知/热门/活动/仓库/粉丝/关注/议题/PR/组织）
+- [x] 首页工作项子页面（议题/PR/仓库/组织/已加星标，未登录→提示）
+- [x] 设置页（深色模式 + 使用教程 + 隐私协议 + 关于）
+- [x] OAuth WebView 登录 + 防抖 + @Watch 自动刷新
 
 ## v0.4.0 — 数据对接 ✅ 已完成
 
