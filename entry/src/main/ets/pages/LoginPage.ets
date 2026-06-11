@@ -1,7 +1,7 @@
 import { router } from '@kit.ArkUI';
 import { webview } from '@kit.ArkWeb';
 import { AuthService } from '../services/AuthService';
-import { DarkTheme } from '../common/constants/ThemeConstants';
+import { Theme } from '../common/constants/ThemeConstants';
 
 @Entry
 @Component
@@ -51,7 +51,7 @@ struct LoginPage {
         Button() {
           Text('✕')
             .fontSize(20)
-            .fontColor(DarkTheme.textPrimary)
+            .fontColor(Theme.textPrimary)
         }
         .width(36)
         .height(36)
@@ -65,7 +65,7 @@ struct LoginPage {
         Text($r('app.string.login_title'))
           .fontSize($r('app.float.text_size_section'))
           .fontWeight(FontWeight.Bold)
-          .fontColor(DarkTheme.textPrimary)
+          .fontColor(Theme.textPrimary)
 
         Blank()
 
@@ -74,23 +74,23 @@ struct LoginPage {
       .width('100%')
       .height(52)
       .padding({ left: 12, right: 12 })
-      .backgroundColor(DarkTheme.background)
+      .backgroundColor(Theme.background)
 
       if (this.isLoading) {
         Column({ space: 12 }) {
           LoadingProgress()
             .width(40)
             .height(40)
-            .color(DarkTheme.accent)
+            .color(Theme.accent)
           Text($r('app.string.login_loading'))
             .fontSize($r('app.float.text_size_body'))
-            .fontColor(DarkTheme.textSecondary)
+            .fontColor(Theme.textSecondary)
         }
         .justifyContent(FlexAlign.Center)
         .alignItems(HorizontalAlign.Center)
         .width('100%')
         .layoutWeight(1)
-        .backgroundColor(DarkTheme.background)
+        .backgroundColor(Theme.background)
       } else if (this.webSrc) {
         Web({ src: this.webSrc, controller: this.webController })
           .javaScriptAccess(true)
@@ -119,8 +119,8 @@ struct LoginPage {
 
           Button($r('app.string.login_retry'))
             .fontSize(14)
-            .fontColor(DarkTheme.textPrimary)
-            .backgroundColor(DarkTheme.accent)
+            .fontColor(Theme.textPrimary)
+            .backgroundColor(Theme.accent)
             .borderRadius(6)
             .height(40)
             .padding({ left: 24, right: 24 })
@@ -133,20 +133,20 @@ struct LoginPage {
         }
         .width('100%')
         .padding(20)
-        .backgroundColor(DarkTheme.surface)
+        .backgroundColor(Theme.surface)
         .alignItems(HorizontalAlign.Center)
       }
 
       Text($r('app.string.login_note'))
         .fontSize(11)
-        .fontColor(DarkTheme.textSecondary)
+        .fontColor(Theme.textSecondary)
         .textAlign(TextAlign.Center)
         .width('100%')
         .padding({ left: 20, right: 20, top: 12, bottom: 20 })
-        .backgroundColor(DarkTheme.background)
+        .backgroundColor(Theme.background)
     }
     .width('100%')
     .height('100%')
-    .backgroundColor(DarkTheme.background)
+    .backgroundColor(Theme.background)
   }
 }

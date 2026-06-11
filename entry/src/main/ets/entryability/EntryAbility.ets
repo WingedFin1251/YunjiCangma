@@ -27,8 +27,10 @@ export default class EntryAbility extends UIAbility {
   async onWindowStageCreate(windowStage: window.WindowStage): Promise<void> {
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onWindowStageCreate');
 
-    // 先加载持久化 token，再渲染页面
+    // 加载持久化 token + 主题
     await AuthService.loadToken();
+    const savedTheme: string = await AuthService.loadTheme();
+    AppStorage.setOrCreate('currentTheme', savedTheme);
 
     // 全屏沉浸
     try {

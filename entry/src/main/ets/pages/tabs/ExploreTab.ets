@@ -1,4 +1,4 @@
-import { DarkTheme } from '../../common/constants/ThemeConstants';
+import { Theme } from '../../common/constants/ThemeConstants';
 import { RepoCard } from '../../common/components/RepoCard';
 import { GitHubAPIService } from '../../services/GitHubAPIService';
 import type { Repository } from '../../models/User';
@@ -65,7 +65,7 @@ export struct ExploreTab {
   }
 
   @Builder
-  explorePageMap(name: string, param: Object | null) {}
+  explorePageMap(name: string, param: ESObject) {}
 
   build() {
     Navigation(this.exploreStack) {
@@ -75,7 +75,7 @@ export struct ExploreTab {
             Text($r('app.string.page_title_explore'))
               .fontSize(26)
               .fontWeight(FontWeight.Bold)
-              .fontColor(DarkTheme.textPrimary)
+              .fontColor(Theme.textPrimary)
               .layoutWeight(1)
           }
           .width('100%')
@@ -92,15 +92,15 @@ export struct ExploreTab {
           .justifyContent(FlexAlign.SpaceBetween)
 
           Divider()
-            .color(DarkTheme.border)
+            .color(Theme.border)
             .width('100%')
             .margin({ top: 24, bottom: 8 })
 
           Row() {
-            Text('活动')
+            Text('动态')
               .fontSize(20)
               .fontWeight(FontWeight.Medium)
-              .fontColor(DarkTheme.textPrimary)
+              .fontColor(Theme.textPrimary)
               .layoutWeight(1)
             Text('▼')
               .fontSize(18)
@@ -145,10 +145,10 @@ export struct ExploreTab {
       .scrollBar(BarState.Off)
       .width('100%')
       .height('100%')
-      .backgroundColor(DarkTheme.background)
+      .backgroundColor(Theme.background)
     }
     .navDestination(this.explorePageMap)
-    .backgroundColor(DarkTheme.background)
+    .backgroundColor(Theme.background)
     .width('100%')
     .height('100%')
     .mode(NavigationMode.Stack)
@@ -162,10 +162,10 @@ export struct ExploreTab {
       Text(item.avatar.toUpperCase())
         .fontSize(14)
         .fontWeight(FontWeight.Bold)
-        .fontColor(DarkTheme.textPrimary)
+        .fontColor(Theme.textPrimary)
         .width(32)
         .height(32)
-        .backgroundColor(DarkTheme.surfaceElevated)
+        .backgroundColor(Theme.surfaceElevated)
         .borderRadius(16)
         .textAlign(TextAlign.Center)
         .lineHeight(32)
@@ -175,21 +175,21 @@ export struct ExploreTab {
           Text(item.user)
             .fontSize(16)
             .fontWeight(FontWeight.Bold)
-            .fontColor(DarkTheme.textPrimary)
+            .fontColor(Theme.textPrimary)
           Text(` ${item.action} `)
             .fontSize(16)
-            .fontColor(DarkTheme.textSecondary)
+            .fontColor(Theme.textSecondary)
           Text(item.repo)
             .fontSize(16)
             .fontWeight(FontWeight.Bold)
-            .fontColor(DarkTheme.accent)
+            .fontColor(Theme.accent)
             .maxLines(1)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
         }
         .width('100%')
         Text(item.time)
           .fontSize(12)
-          .fontColor(DarkTheme.textTertiary)
+          .fontColor(Theme.textTertiary)
           .margin({ top: 2 })
       }
       .alignItems(HorizontalAlign.Start)
@@ -211,14 +211,14 @@ export struct ExploreTab {
         .height(24)
       Text(label)
         .fontSize(16)
-        .fontColor(DarkTheme.textPrimary)
+        .fontColor(Theme.textPrimary)
         .margin({ left: 12 })
         .layoutWeight(1)
     }
     .width('48%')
     .height(52)
     .padding({ left: 16, right: 16 })
-    .backgroundColor(DarkTheme.surface)
+    .backgroundColor(Theme.surface)
     .borderRadius(8)
     .alignItems(VerticalAlign.Center)
     .onClick(() => {})
