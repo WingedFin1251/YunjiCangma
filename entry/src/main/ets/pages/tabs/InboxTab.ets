@@ -135,7 +135,7 @@ export struct InboxTab {
       }
       .width('100%')
       .height('100%')
-      .padding({ top: 32, bottom: 64 })
+      .padding({ top: 24, bottom: 20 })
       .backgroundColor(this.themeMode === 'dark' ? this.T().background : this.T().background)
     }
     .navDestination(this.inboxPageMap)

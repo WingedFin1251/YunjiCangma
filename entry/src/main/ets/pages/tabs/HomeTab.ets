@@ -149,74 +149,29 @@ export struct HomeTab {
 
   build() {
     Navigation(this.homeStack) {
-      Scroll() {
-        Column() {
-          Row() {
-            Text($r('app.string.page_title_home'))
-              .fontSize(26)
-              .fontWeight(FontWeight.Bold)
-              .fontColor(this.T().textPrimary)
-              .layoutWeight(1)
-            Row({ space: 20 }) {
-              this.navIcon('⌕')
-              this.navIcon('＋')
-              this.navIcon('⋯')
-            }
-          }
-          .width('100%')
-          .height(56)
-          .padding({ left: 16, right: 16 })
-          .alignItems(VerticalAlign.Center)
+      Column() {
+        Row() {
+          Text($r('app.string.page_title_home')).fontSize(26).fontWeight(FontWeight.Bold).fontColor(this.T().textPrimary).layoutWeight(1)
+          Row({ space: 20 }) { this.navIcon('⌕'); this.navIcon('＋'); this.navIcon('⋯') }
+        }.width('100%').padding({ left: 16, right: 16 }).alignItems(VerticalAlign.Bottom)
 
-          this.sectionHeader('我的项目')
-
+        Scroll() {
           Column() {
-            ForEach(this.workItems, (item: WorkItem, index: number) => {
-              this.workListItem(item)
-            }, (item: WorkItem) => item.label)
-          }
-
-          Divider()
-            .color(this.T().border)
-            .width('100%')
-            .margin({ top: 24, bottom: 8 })
-
-          this.sectionHeader('我的星标')
-
-          Column({ space: 12 }) {
-            ForEach(this.starredRepos, (repo: FavoriteRepo, index: number) => {
-              RepoCard({
-                avatarChar: repo.avatarChar,
-                owner: repo.owner,
-                repo: repo.repo,
-                description: repo.description,
-                language: repo.language,
-                stars: repo.stars,
-                isStarred: repo.isStarred
-              })
-            }, (repo: FavoriteRepo) => repo.repo)
-          }
-          .padding({ left: 16, right: 16 })
-
-          Blank().height(24)
-        }
-        .width('100%')
-        .alignItems(HorizontalAlign.Start)
-        .padding({ top: 32, bottom: 64 })
+            this.sectionHeader('我的项目')
+            Column() { ForEach(this.workItems, (item: WorkItem, index: number) => { this.workListItem(item) }, (item: WorkItem) => item.label) }
+            Divider().color(this.T().border).width('100%').margin({ top: 12, bottom: 8 })
+            this.sectionHeader('我的星标')
+            Column({ space: 12 }) {
+              ForEach(this.starredRepos, (repo: FavoriteRepo, index: number) => { RepoCard({ avatarChar: repo.avatarChar, owner: repo.owner, repo: repo.repo, description: repo.description, language: repo.language, stars: repo.stars, isStarred: repo.isStarred }) }, (repo: FavoriteRepo) => repo.repo)
+            }.padding({ left: 16, right: 16 })
+            Blank().height(12)
+          }.width('100%').alignItems(HorizontalAlign.Start)
+        }.scrollBar(BarState.Off).width('100%').backgroundColor(this.T().background)
       }
-      .scrollable(ScrollDirection.Vertical)
-      .scrollBar(BarState.Off)
-      .width('100%')
-      .height('100%')
-      .backgroundColor(this.themeMode === 'dark' ? this.T().background : this.T().background)
+      .width('100%').height('100%').backgroundColor(this.T().background).padding({ top: 24, bottom: 20 })
     }
-    .navDestination(this.homePageMap)
-    .backgroundColor(this.themeMode === 'dark' ? this.T().background : this.T().background)
-    .width('100%')
-    .height('100%')
-    .mode(NavigationMode.Stack)
-    .hideTitleBar(true)
-    .hideToolBar(true)
+    .navDestination(this.homePageMap).backgroundColor(this.T().background).width('100%').height('100%')
+    .mode(NavigationMode.Stack).hideTitleBar(true).hideToolBar(true)
   }
 
   @Builder
@@ -235,9 +190,7 @@ export struct HomeTab {
         .textAlign(TextAlign.Center)
     }
     .width('100%')
-    .height(44)
     .padding({ left: 16, right: 16 })
-    .margin({ top: 16, bottom: 4 })
   }
 
   @Builder
