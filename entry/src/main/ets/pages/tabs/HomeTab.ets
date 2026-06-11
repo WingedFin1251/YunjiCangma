@@ -1,4 +1,4 @@
-import { DarkTheme } from '../../common/constants/ThemeConstants';
+import { Theme } from '../../common/constants/ThemeConstants';
 import { RepoCard } from '../../common/components/RepoCard';
 import { GitHubAPIService } from '../../services/GitHubAPIService';
 import { AUTH_LOGIN_KEY } from '../../common/constants/APIConstants';
@@ -42,13 +42,13 @@ export struct HomeTab {
   @State isStarredLoading: boolean = true;
 
   private workItems: WorkItem[] = [
-    new WorkItem('●', '议题', DarkTheme.issueGreen),
-    new WorkItem('⇄', '拉取请求', DarkTheme.prBlue),
-    new WorkItem('◈', '讨论', DarkTheme.discussionPurple),
-    new WorkItem('⊞', '项目', DarkTheme.accent),
-    new WorkItem('⊡', '仓库', DarkTheme.textSecondary),
-    new WorkItem('◎', '组织', DarkTheme.orgOrange),
-    new WorkItem('★', '已加星标', DarkTheme.starYellow),
+    new WorkItem('●', '议题', Theme.issueGreen),
+    new WorkItem('⇄', '拉取请求', Theme.prBlue),
+    new WorkItem('◈', '讨论', Theme.discussionPurple),
+    new WorkItem('⊞', '项目', Theme.accent),
+    new WorkItem('⊡', '仓库', Theme.textSecondary),
+    new WorkItem('◎', '组织', Theme.orgOrange),
+    new WorkItem('★', '已加星标', Theme.starYellow),
   ];
 
   aboutToAppear(): void {
@@ -75,7 +75,7 @@ export struct HomeTab {
   }
 
   @Builder
-  homePageMap(name: string, param: Object | null) {}
+  homePageMap(name: string, param: ESObject) {}
 
   build() {
     Navigation(this.homeStack) {
@@ -85,7 +85,7 @@ export struct HomeTab {
             Text($r('app.string.page_title_home'))
               .fontSize(26)
               .fontWeight(FontWeight.Bold)
-              .fontColor(DarkTheme.textPrimary)
+              .fontColor(Theme.textPrimary)
               .layoutWeight(1)
             Row({ space: 20 }) {
               this.navIcon('⌕')
@@ -98,7 +98,7 @@ export struct HomeTab {
           .padding({ left: 16, right: 16 })
           .alignItems(VerticalAlign.Center)
 
-          this.sectionHeader('我的工作')
+          this.sectionHeader('我的项目')
 
           Column() {
             ForEach(this.workItems, (item: WorkItem, index: number) => {
@@ -107,11 +107,11 @@ export struct HomeTab {
           }
 
           Divider()
-            .color(DarkTheme.border)
+            .color(Theme.border)
             .width('100%')
             .margin({ top: 24, bottom: 8 })
 
-          this.sectionHeader('收藏夹')
+          this.sectionHeader('我的星标')
 
           Column({ space: 12 }) {
             ForEach(this.starredRepos, (repo: FavoriteRepo, index: number) => {
@@ -138,10 +138,10 @@ export struct HomeTab {
       .scrollBar(BarState.Off)
       .width('100%')
       .height('100%')
-      .backgroundColor(DarkTheme.background)
+      .backgroundColor(Theme.background)
     }
     .navDestination(this.homePageMap)
-    .backgroundColor(DarkTheme.background)
+    .backgroundColor(Theme.background)
     .width('100%')
     .height('100%')
     .mode(NavigationMode.Stack)
@@ -155,11 +155,11 @@ export struct HomeTab {
       Text(title)
         .fontSize(20)
         .fontWeight(FontWeight.Medium)
-        .fontColor(DarkTheme.textPrimary)
+        .fontColor(Theme.textPrimary)
         .layoutWeight(1)
       Text('⋯')
         .fontSize(18)
-        .fontColor(DarkTheme.textSecondary)
+        .fontColor(Theme.textSecondary)
         .width(44)
         .height(44)
         .textAlign(TextAlign.Center)
@@ -181,18 +181,18 @@ export struct HomeTab {
         .textAlign(TextAlign.Center)
       Text(item.label)
         .fontSize(16)
-        .fontColor(DarkTheme.textPrimary)
+        .fontColor(Theme.textPrimary)
         .margin({ left: 12 })
         .layoutWeight(1)
       Text('›')
         .fontSize(20)
-        .fontColor(DarkTheme.textSecondary)
+        .fontColor(Theme.textSecondary)
     }
     .width('100%')
     .height(52)
     .padding({ left: 16, right: 16 })
     .alignItems(VerticalAlign.Center)
-    .backgroundColor(DarkTheme.background)
+    .backgroundColor(Theme.background)
     .onClick(() => {})
   }
 

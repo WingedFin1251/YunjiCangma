@@ -1,7 +1,7 @@
 {
   "app": {
     "bundleName": "com.github.web",
-    "vendor": "example",
+    "vendor": "云笈藏码",
     "versionCode": 1000000,
     "versionName": "1.0.0",
     "buildVersion": "1",

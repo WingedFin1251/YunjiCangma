@@ -93,8 +93,34 @@ export class GitHubAPIService {
     return GitHubAPIService.get<SearchResult>('/search/repositories?q=stars:%3E1&sort=stars&order=desc&per_page=10');
   }
 
-  /** GET /users/{username}/received_events — 用户活动 */
+  /** GET /users/{username}/received_events */
   static async getReceivedEvents(username: string): Promise<Object[]> {
     return GitHubAPIService.get<Object[]>('/users/' + username + '/received_events?per_page=10');
+  }
+
+  /** GET /user/repos — 当前用户所有仓库（含私有） */
+  static async getMyRepos(): Promise<Repository[]> {
+    return GitHubAPIService.get<Repository[]>('/user/repos?type=all&per_page=50&sort=updated');
+  }
+
+  /** GET /users/{username}/repos — 指定用户公开仓库 */
+  static async getUserRepos(username: string): Promise<Repository[]> {
+    return GitHubAPIService.get<Repository[]>('/users/' + username + '/repos?per_page=30&sort=updated');
+  }
+
+  /** GET /repos/{o}/{r}/contents/{path} — 仓库文件树 */
+  static async getRepoContents(owner: string, repo: string, path: string): Promise<Object[]> {
+    const encodedPath: string = path ? '/' + encodeURIComponent(path) : '';
+    return GitHubAPIService.get<Object[]>('/repos/' + owner + '/' + repo + '/contents' + encodedPath);
+  }
+
+  /** 获取关注列表（简化版：返回 User[] 或 string[]） */
+  static async getUserFollowers(username: string): Promise<Object[]> {
+    return GitHubAPIService.get<Object[]>('/users/' + username + '/followers?per_page=30');
+  }
+
+  /** 获取正在关注列表 */
+  static async getUserFollowing(username: string): Promise<Object[]> {
+    return GitHubAPIService.get<Object[]>('/users/' + username + '/following?per_page=30');
   }
 }

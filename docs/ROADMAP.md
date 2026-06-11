@@ -25,6 +25,9 @@
 - [x] Inbox Tab — 通知列表对接 `GET /notifications` 真实 API
 - [x] Explore Tab — 热门仓库 `GET /search/repositories` + 活动流 `GET /received_events`
 - [x] Profile Tab — 用户头像 `Image` 组件加载 + @Watch 实时刷新
+- [x] Profile Tab — 仓库列表（RepoCard）+ 点击 → WebView 详情 + 粉丝/关注列表
+- [x] API — `GET /user/repos`(含私有) + `GET /followers` + `GET /following` + `GET /contents`
+- [x] 登录防抖（isProcessing 守卫）+ Token 持久化（UIAbilityContext）
 
 ## v0.5.0 — 仓库浏览
 

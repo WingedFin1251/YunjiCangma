@@ -1,4 +1,4 @@
-# Github
+# 云笈藏码
 
 ![HarmonyOS](https://img.shields.io/badge/HarmonyOS-NEXT-blue?logo=harmonyos)
 ![API](https://img.shields.io/badge/API-6.1.0-green)
@@ -6,22 +6,23 @@
 ![Theme](https://img.shields.io/badge/Theme-Dark%20Only-218BFE)
 ![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
-**HarmonyOS NEXT 平台上的 GitHub 客户端**，使用 ArkTS + Stage Model 构建。
+> 云笈纳万卷，一码藏乾坤
 
-支持 OAuth 登录、仓库浏览、Issue、PR、用户动态等 GitHub 核心功能。
+**云笈藏码** — HarmonyOS NEXT 平台的第三方开源代码仓库浏览客户端。
+
+> 本应用为第三方非官方客户端，非 GitHub 官方产品。所有数据均通过 GitHub 官方开放接口获取。
 
 ## 已实现
 
-- [x] 🎨 全局深色模式（V1.0 规范，14 色值，无浅色）
-- [x] 🏠 4 Tab 导航：主页 / 收件箱 / 探索 / 个人资料
-- [x] 🔐 GitHub OAuth WebView 登录（自定义 Scheme + onLoadIntercept 拦截）
-- [x] 🖼️ 用户头像图片加载（Image 组件 + 圆形裁切）
+- [x] 🎨 全局深色模式（V1.0 规范，14 色值）
+- [x] 🏠 4 Tab 导航：首页 / 消息 / 发现 / 我的
+- [x] 🔐 GitHub OAuth WebView 登录（自定义 Scheme + onLoadIntercept）
+- [x] 🖼️ 用户头像 + GitHub Octocat 应用图标
 - [x] 🖥️ 全屏沉浸（状态栏融合 + 底部小白条延伸）
-- [x] 🗜️ 平板 SafeArea + Navigation Stack 模式
-- [x] 📡 真实 API 数据：已 Star 仓库 / 通知列表 / 热门仓库 / 活动流
-- [x] 🔄 登录状态自动刷新（@StorageLink + @Watch）
-- [x] 🧩 组件库：RepoCard / ListItem / EmptyState / FilterTabBar / TabBarBuilder
-- [x] 🔣 统一几何图标体系（◉⇄◈⊞⊡★，功能色值区分）
+- [x] 📡 真实 API：已 Star 仓库 / 通知 / 热门仓库 / 活动流 / 个人仓库 / 粉丝 / 关注
+- [x] 🔄 登录自动刷新（@StorageLink + @Watch）+ 防抖守卫
+- [x] 🌐 仓库详情 WebView 浏览（强制深色模式）
+- [x] 🧩 组件库：RepoCard / ListItem / EmptyState / FilterTabBar
 
 ## 快速开始
 
@@ -69,10 +70,10 @@ entry/src/main/ets/
 
 | Tab | 主要元素 | 数据源 |
 |-----|----------|--------|
-| 主页 | 我的工作（7 项）+ 收藏夹（已 Star 仓库卡片） | `GET /user/starred` |
-| 收件箱 | 筛选标签栏 + 通知列表 / 空状态 | `GET /notifications` |
-| 探索 | 发现入口（2 列）+ 活动流 + 热门仓库卡片 | `GET /search/repositories` + `GET /users/{u}/received_events` |
-| 个人资料 | GitHub 头像 + 用户名/统计 + 资源列表 + 登录/登出 | `GET /user` + `Image` 组件 |
+| 首页 | 我的项目（7 项）+ 我的星标（仓库卡片） | `GET /user/starred` |
+| 消息 | 筛选标签栏 + 通知列表 / 空状态 | `GET /notifications` |
+| 发现 | 发现入口（2 列）+ 动态 + 热门仓库卡片 | `GET /search/repositories` + `GET /received_events` |
+| 我的 | 头像 + 用户名/统计 + 仓库/粉丝/关注列表 + 登录/登出 | `GET /user` + `GET /user/repos` + WebView |
 
 ## 文档
 

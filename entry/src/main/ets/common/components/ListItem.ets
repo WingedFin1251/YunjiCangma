@@ -1,4 +1,4 @@
-import { DarkTheme } from '../constants/ThemeConstants';
+import { Theme } from '../constants/ThemeConstants';
 
 /**
  * 列表功能项组件
@@ -16,7 +16,7 @@ import { DarkTheme } from '../constants/ThemeConstants';
 export struct ListItem {
   @Prop icon: string = '';
   @Prop label: string = '';
-  @Prop iconColor: ResourceColor = DarkTheme.accent;
+  @Prop iconColor: ResourceColor = Theme.accent;
   @Prop showArrow: boolean = false;
   @Prop badgeCount: number = 0;
   onItemClick?: () => void;
@@ -33,7 +33,7 @@ export struct ListItem {
       // 功能名称
       Text(this.label)
         .fontSize(16)
-        .fontColor(DarkTheme.textPrimary)
+        .fontColor(Theme.textPrimary)
         .margin({ left: 12 })
         .layoutWeight(1)
 
@@ -41,7 +41,7 @@ export struct ListItem {
       if (this.badgeCount > 0) {
         Text(this.badgeCount.toString())
           .fontSize(12)
-          .fontColor(DarkTheme.textTertiary)
+          .fontColor(Theme.textTertiary)
           .margin({ right: 8 })
       }
 
@@ -49,14 +49,14 @@ export struct ListItem {
       if (this.showArrow) {
         Text('›')
           .fontSize(20)
-          .fontColor(DarkTheme.textSecondary)
+          .fontColor(Theme.textSecondary)
       }
     }
     .width('100%')
     .height(52)
     .padding({ left: 16, right: 16 })
     .alignItems(VerticalAlign.Center)
-    .backgroundColor(DarkTheme.background)
+    .backgroundColor(Theme.background)
     .onClick(() => {
       if (this.onItemClick) {
         this.onItemClick();
