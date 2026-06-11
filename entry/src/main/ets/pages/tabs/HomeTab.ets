@@ -2,6 +2,7 @@ import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/cons
 import { RepoCard } from '../../common/components/RepoCard';
 import { GitHubAPIService } from '../../services/GitHubAPIService';
 import { AUTH_LOGIN_KEY } from '../../common/constants/APIConstants';
+import { WorkPage } from '../sub/WorkPage';
 import type { Repository } from '../../models/User';
 
 class WorkItem {
@@ -71,80 +72,17 @@ export struct HomeTab {
     }
   }
 
-  @State subItems: Object[] = [];
-  @State subLoading: boolean = true;
-
-  private async loadWorkData(type: string): Promise<void> {
-    this.subLoading = true; this.subItems = [];
-    try {
-      const u: string = '';
-      if (type === 'issues') this.subItems = await GitHubAPIService.getIssues();
-      else if (type === 'pulls') this.subItems = await GitHubAPIService.getPullRequests('');
-      else if (type === 'repos') this.subItems = await GitHubAPIService.getMyRepos();
-      else if (type === 'orgs') this.subItems = await GitHubAPIService.getOrgs();
-      else if (type === 'starred') this.subItems = await GitHubAPIService.getStarredRepos();
-    } catch (err) { this.subItems = []; }
-    finally { this.subLoading = false; }
+  private getWorkTitle(name: string): string {
+    if (name === 'issues') return '议题'; if (name === 'pulls') return '拉取请求';
+    if (name === 'discussions') return '讨论'; if (name === 'projects') return '项目';
+    if (name === 'repos') return '仓库'; if (name === 'orgs') return '组织';
+    if (name === 'starred') return '已加星标'; return '';
   }
 
   @Builder
   homePageMap(name: string, param: ESObject) {
-    NavDestination() {
-      Column() {
-        if (!this.isLoggedIn) {
-          Column({ space: 12 }) {
-            Text('🔐').fontSize(40)
-            Text('请先登录').fontSize(18).fontWeight(FontWeight.Medium).fontColor(this.T().textPrimary)
-            Text('登录 GitHub 账号后即可查看').fontSize(14).fontColor(this.T().textSecondary)
-          }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center)
-            .width('100%').height('100%').backgroundColor(this.T().background)
-        } else if (this.subLoading) {
-          LoadingProgress().width(32).height(32).color(this.T().accent).margin({ top: 80 })
-        } else if (this.subItems.length === 0) {
-          Column({ space: 8 }) {
-            Text('✉').fontSize(40)
-            Text('暂无内容').fontSize(14).fontColor(this.T().textSecondary)
-          }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center)
-            .width('100%').height('100%').backgroundColor(this.T().background)
-        } else {
-          Scroll() {
-            Column() {
-              ForEach(this.subItems, (item: Object, idx: number) => {
-                Column() {
-                  Text(((item as Record<string, Object>).title as string) || ((item as Record<string, Object>).login as string) || ((item as Record<string, Object>).full_name as string) || ((item as Record<string, Object>).name as string) || '')
-                    .fontSize(16).fontColor(this.T().textPrimary).maxLines(2)
-                    .textOverflow({ overflow: TextOverflow.Ellipsis })
-                  if ((item as Record<string, Object>).repository_url || (item as Record<string, Object>).html_url) {
-                    Text((((item as Record<string, Object>).repository_url as string) || ((item as Record<string, Object>).html_url as string) || '')
-                      .replace('https://api.github.com/repos/', ''))
-                      .fontSize(12).fontColor(this.T().textTertiary).maxLines(1)
-                      .textOverflow({ overflow: TextOverflow.Ellipsis })
-                  }
-                }.width('100%').padding({ left: 16, right: 16, top: 12, bottom: 12 })
-                .onClick(() => {
-                  const html: string = ((item as Record<string, Object>).html_url as string) || '';
-                  if (html && param) {
-                    (param as Record<string, string>).url = html;
-                  }
-                })
-              }, (item: Object, idx: number) => idx.toString())
-            }.width('100%')
-          }.scrollBar(BarState.Off).width('100%').height('100%').backgroundColor(this.T().background)
-        }
-      }.width('100%').height('100%').backgroundColor(this.T().background).padding({ top: 8 })
-    }
-    .title(this.getWorkTitle(name)).backgroundColor(this.T().background).padding({ top: 32 })
-  }
-
-  private getWorkTitle(name: string): string {
-    if (name === 'issues') return '议题';
-    if (name === 'pulls') return '拉取请求';
-    if (name === 'discussions') return '讨论';
-    if (name === 'projects') return '项目';
-    if (name === 'repos') return '仓库';
-    if (name === 'orgs') return '组织';
-    if (name === 'starred') return '已加星标';
-    return '';
+    NavDestination() { WorkPage({ _title: this.getWorkTitle(name), dataType: name }) }
+      .title(this.getWorkTitle(name)).backgroundColor(this.T().background).padding({ top: 32 })
   }
 
   build() {
@@ -168,7 +106,7 @@ export struct HomeTab {
           }.width('100%').alignItems(HorizontalAlign.Start)
         }.scrollBar(BarState.Off).width('100%').backgroundColor(this.T().background)
       }
-      .width('100%').height('100%').backgroundColor(this.T().background).padding({ top: 24, bottom: 20 })
+      .width('100%').height('100%').backgroundColor(this.T().background).padding({ top: 32, bottom: 20 })
     }
     .navDestination(this.homePageMap).backgroundColor(this.T().background).width('100%').height('100%')
     .mode(NavigationMode.Stack).hideTitleBar(true).hideToolBar(true)
@@ -216,7 +154,7 @@ export struct HomeTab {
     .padding({ left: 16, right: 16 })
     .alignItems(VerticalAlign.Center)
     .backgroundColor(this.T().background)
-    .onClick(() => { this.loadWorkData(item.route); this.homeStack.pushPath({ name: item.route }); })
+    .onClick(() => { this.homeStack.pushPath({ name: item.route }); })
   }
 
   @Builder
