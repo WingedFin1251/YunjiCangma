@@ -123,4 +123,19 @@ export class GitHubAPIService {
   static async getUserFollowing(username: string): Promise<Object[]> {
     return GitHubAPIService.get<Object[]>('/users/' + username + '/following?per_page=30');
   }
+
+  /** GET /issues — 当前用户相关议题 */
+  static async getIssues(): Promise<Object[]> {
+    return GitHubAPIService.get<Object[]>('/issues?per_page=30&state=all');
+  }
+
+  /** GET /search/issues — 当前用户拉取请求 */
+  static async getPullRequests(username: string): Promise<Object[]> {
+    return GitHubAPIService.get<Object[]>('/search/issues?q=is:pr+author:' + username + '&per_page=20');
+  }
+
+  /** GET /user/orgs — 当前用户组织 */
+  static async getOrgs(): Promise<Object[]> {
+    return GitHubAPIService.get<Object[]>('/user/orgs?per_page=30');
+  }
 }
