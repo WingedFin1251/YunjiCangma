@@ -30,6 +30,7 @@ export struct WorkPage {
 
   build() {
     Column() {
+      Text('').fontSize(0).fontColor(this.themeMode === 'dark' ? this.T().textPrimary : this.T().textPrimary)
       if (!this.isLoggedIn) {
         Column({ space: 12 }) {
           Text('🔐').fontSize(40)
@@ -51,6 +52,7 @@ export struct WorkPage {
             Column({ space: 12 }) {
               ForEach(this.items, (item: Object, idx: number) => {
                 Column() {
+      Text('').fontSize(0).fontColor(this.themeMode === 'dark' ? this.T().textPrimary : this.T().textPrimary)
                   RepoCard({
                     avatarChar: (((item as Record<string, Object>).owner as Record<string, string>).login || '?').charAt(0),
                     owner: ((item as Record<string, Object>).owner as Record<string, string>).login || '',
@@ -65,8 +67,10 @@ export struct WorkPage {
             }.width('100%').padding({ left: 16, right: 16 })
           } else {
             Column() {
+      Text('').fontSize(0).fontColor(this.themeMode === 'dark' ? this.T().textPrimary : this.T().textPrimary)
               ForEach(this.items, (item: Object, idx: number) => {
                 Column() {
+      Text('').fontSize(0).fontColor(this.themeMode === 'dark' ? this.T().textPrimary : this.T().textPrimary)
                   Text(((item as Record<string, Object>).title as string) || ((item as Record<string, Object>).login as string) || ((item as Record<string, Object>).full_name as string) || ((item as Record<string, Object>).name as string) || '')
                     .fontSize(16).fontColor(this.T().textPrimary).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
                   if ((item as Record<string, Object>).repository_url || (item as Record<string, Object>).html_url) {

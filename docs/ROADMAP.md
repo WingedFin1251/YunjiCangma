@@ -1,15 +1,15 @@
 # 路线图
 
-## 当前版本: v0.6.0（设置页 + 工作项子页面 + 标题栏统一）
+## 当前版本: v0.7.0（搜索 + 语言颜色 + 页面分层）
 
-- [x] 项目初始化 + GitHub 适配 + 品牌「云笈藏码」
-- [x] 4 Tab（首页/消息/发现/我的）+ 标题栏固定不滚动 + Scroll 顶部对齐
-- [x] NavigationMode.Stack 平板修复 + 顶部 24dp + 底部 20dp + layoutWeight 移除
-- [x] 深色/浅色双主题（ThemeColors + T() + preferences 持久化）
-- [x] 状态栏透明沉浸 + statusBarContentColor 深浅切换 + 系统 ColorMode 同步
-- [x] WebView 深浅联动（WebDarkMode.On/Off + 背景自适应）
-- [x] 11 个 API 端点（Star/通知/热门/活动/仓库/粉丝/关注/议题/PR/组织）
-- [x] 首页工作项子页面（议题/PR/仓库/组织/已加星标，未登录→提示）
+- [x] 项目初始化 + 品牌「云笈藏码」
+- [x] 4 Tab + 标题栏固定 + Scroll 顶部对齐 + top 32/bottom 20
+- [x] 深色/浅色双主题 + 状态栏透明沉浸 + WebView 联动
+- [x] 12 个 API 端点（含搜索 `GET /search/repositories`）
+- [x] 🔍 全局搜索（搜索→WebView 查看仓库）
+- [x] 🎨 GitHub Linguist 语言颜色（30+ 语言，RepoCard 圆圈）
+- [x] 📁 页面分层（pages/tabs/ + pages/sub/）
+- [x] WorkPage 通用工作项组件（议题/PR/仓库/组织/已加星标）
 - [x] 设置页（深色模式 + 使用教程 + 隐私协议 + 关于）
 - [x] OAuth WebView 登录 + 防抖 + @Watch 自动刷新
 
