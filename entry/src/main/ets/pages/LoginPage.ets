@@ -48,6 +48,7 @@ struct LoginPage {
 
   build() {
     Column() {
+      Blank().height(32)
       Row() {
         Button() {
           Text('✕')
