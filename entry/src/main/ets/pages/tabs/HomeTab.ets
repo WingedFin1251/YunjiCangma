@@ -1,8 +1,10 @@
+import { webview } from '@kit.ArkWeb';
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
 import { RepoCard } from '../../common/components/RepoCard';
 import { GitHubAPIService } from '../../services/GitHubAPIService';
 import { AUTH_LOGIN_KEY } from '../../common/constants/APIConstants';
 import { WorkPage } from '../sub/WorkPage';
+import { SearchPage } from '../sub/SearchPage';
 import type { Repository } from '../../models/User';
 
 class WorkItem {
@@ -38,6 +40,8 @@ export struct HomeTab {
   @StorageLink(AUTH_LOGIN_KEY) @Watch('onLoginChanged') isLoggedIn: boolean = false;
   @State starredRepos: FavoriteRepo[] = [];
   @State isStarredLoading: boolean = true;
+  @State webUrl: string = '';
+  private webCtl: webview.WebviewController = new webview.WebviewController();
 
   private workItems: WorkItem[] = [
     new WorkItem('●', '议题', '#2EA44F', 'issues'),
@@ -81,8 +85,19 @@ export struct HomeTab {
 
   @Builder
   homePageMap(name: string, param: ESObject) {
-    NavDestination() { WorkPage({ _title: this.getWorkTitle(name), dataType: name }) }
-      .title(this.getWorkTitle(name)).backgroundColor(this.T().background).padding({ top: 32 })
+    if (name === 'search') {
+      NavDestination() { SearchPage({ onOpenRepo: (url: string) => { this.webUrl = url; this.homeStack.pushPath({ name: 'repoWeb' }); } }) }
+        .title('搜索').backgroundColor(this.T().background).padding({ top: 32 })
+    } else if (name === 'repoWeb') {
+      NavDestination() {
+        Web({ src: this.webUrl, controller: this.webCtl }).width('100%').height('100%')
+          .darkMode(this.themeMode === 'dark' ? WebDarkMode.On : WebDarkMode.Off)
+          .backgroundColor(this.themeMode === 'dark' ? Color.Black : Color.White)
+      }.title('仓库详情').backgroundColor(this.T().background).padding({ top: 32 })
+    } else {
+      NavDestination() { WorkPage({ _title: this.getWorkTitle(name), dataType: name }) }
+        .title(this.getWorkTitle(name)).backgroundColor(this.T().background).padding({ top: 32 })
+    }
   }
 
   build() {
@@ -90,7 +105,11 @@ export struct HomeTab {
       Column() {
         Row() {
           Text($r('app.string.page_title_home')).fontSize(26).fontWeight(FontWeight.Bold).fontColor(this.T().textPrimary).layoutWeight(1)
-          Row({ space: 20 }) { this.navIcon('⌕'); this.navIcon('＋'); this.navIcon('⋯') }
+          Row({ space: 20 }) {
+            Text('⌕').fontSize(20).width(44).height(44).textAlign(TextAlign.Center).lineHeight(44)
+              .onClick(() => { this.homeStack.pushPath({ name: 'search' }); })
+            this.navIcon('＋'); this.navIcon('⋯')
+          }
         }.width('100%').padding({ left: 16, right: 16 }).alignItems(VerticalAlign.Bottom)
 
         Scroll() {

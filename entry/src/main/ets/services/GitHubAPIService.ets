@@ -138,4 +138,9 @@ export class GitHubAPIService {
   static async getOrgs(): Promise<Object[]> {
     return GitHubAPIService.get<Object[]>('/user/orgs?per_page=30');
   }
+
+  /** GET /search/repositories — 搜索仓库 */
+  static async searchRepos(query: string): Promise<Object> {
+    return GitHubAPIService.get<Object>('/search/repositories?q=' + encodeURIComponent(query) + '&per_page=20');
+  }
 }
