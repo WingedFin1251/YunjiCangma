@@ -9,14 +9,17 @@
 - **Bundle**: `com.github.web` | **API**: 6.1.0 (23)
 - **语言**: ArkTS (TypeScript 严格子集)
 - **架构**: Stage Model + ArkUI
-- **主题**: 全局深色唯一（V1.0 规范，14 色值 DarkTheme 类）
+- **主题**: 深色/浅色双模式（14 色值，ThemeColors 接口 + T() 方法，preferences 持久化）
 - **OAuth**: GitHub OAuth App → 自定义 Scheme `githubclient://auth/callback` → WebView `onLoadIntercept` 拦截
+- **状态栏**: 透明沉浸（#00FFFFFF）+ statusBarContentColor 深浅切换 + 运行时更新
 
 ## 关键架构决策
 
 | 决策 | 方案 | 原因 |
 |------|------|------|
-| 主题 | `DarkTheme` 静态类 (14 `static readonly`) | ArkTS 禁止裸对象字面量 |
+| 主题 | `DarkTheme`/`LightTheme` 静态类 + 组件内 `T()` 方法返回 `ThemeColors` 对象 | ArkTS 禁止裸对象字面量 + 类不能作为对象传递 |
+| 主题联动 | 每个组件 `@StorageLink(THEME_KEY)` + `this.T().xxx` | 所有组件即时响应切换 |
+| 主题持久化 | `preferences` + `AuthService.loadTheme/saveTheme` | 重启保持 |
 | 平板适配 | `Navigation.mode(Stack)` | 默认 Split 分栏导致内容区黑屏 |
 | 全屏沉浸 | `setWindowLayoutFullScreen(true)` | 状态栏与内容融合 |
 | 小白条 | MainPage Column + bottom Row(20, surface) | 底栏色延伸至手势指示条 |

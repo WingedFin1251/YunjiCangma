@@ -1,3 +1,4 @@
+import { window } from '@kit.ArkUI';
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../common/constants/ThemeConstants';
 import { AuthService } from '../services/AuthService';
 import { HomeTab } from './tabs/HomeTab';
@@ -15,6 +16,15 @@ struct MainPage {
 
   onThemeChange(): void {
     AuthService.saveTheme(this.currentTheme);
+    try {
+      const isDark: boolean = this.currentTheme !== 'light';
+      window.getLastWindow(getContext()).then((w) => {
+        w.setWindowSystemBarProperties({
+          statusBarContentColor: isDark ? '#FFFFFF' : '#1F2328'
+        });
+        w.setWindowBackgroundColor(isDark ? '#121212' : '#F6F8FA');
+      });
+    } catch (_) {}
   }
 
   @Builder
