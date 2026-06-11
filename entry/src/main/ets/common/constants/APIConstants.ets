@@ -15,7 +15,7 @@ export const GITHUB_OAUTH_CLIENT_ID: string = 'Ov23ling48xkbpVRtB13';
 export const GITHUB_OAUTH_CLIENT_SECRET: string = 'fdef59a78c28b625ac534924656cd312a39f8e3e';
 
 /** OAuth 授权范围 */
-export const GITHUB_OAUTH_SCOPES: string = 'repo,user,notifications';
+export const GITHUB_OAUTH_SCOPES: string = 'repo,user';
 
 /** OAuth 回调 URL — 自定义 Scheme（需与 GitHub OAuth App 设置一致） */
 export const GITHUB_OAUTH_REDIRECT_URI: string = 'githubclient://auth/callback';

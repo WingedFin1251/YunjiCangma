@@ -1,4 +1,4 @@
-import { DarkTheme } from '../constants/ThemeConstants';
+import { Theme } from '../constants/ThemeConstants';
 
 /**
  * 筛选标签栏组件
@@ -30,11 +30,11 @@ export struct FilterTabBar {
           Text(tab)
             .fontSize(14)
             .fontColor(this.selectedIndex === index
-              ? DarkTheme.textPrimary
-              : DarkTheme.textSecondary)
+              ? Theme.textPrimary
+              : Theme.textSecondary)
             .padding({ left: 16, right: 16, top: 8, bottom: 8 })
             .backgroundColor(this.selectedIndex === index
-              ? DarkTheme.surfaceElevated
+              ? Theme.surfaceElevated
               : Color.Transparent)
             .borderRadius(8)
             .onClick(() => {
@@ -49,6 +49,6 @@ export struct FilterTabBar {
     .scrollBar(BarState.Off)
     .width('100%')
     .height(40)
-    .backgroundColor(DarkTheme.surface)
+    .backgroundColor(Theme.surface)
   }
 }

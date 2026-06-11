@@ -121,6 +121,25 @@ export class AuthService {
     }
   }
 
+  static async loadTheme(): Promise<string> {
+    try {
+      const prefs = await preferences.getPreferences(AuthService.getContext(), PREFERENCES_NAME);
+      return await prefs.get('app_theme', 'dark') as string;
+    } catch (err) {
+      return 'dark';
+    }
+  }
+
+  static async saveTheme(theme: string): Promise<void> {
+    try {
+      const prefs = await preferences.getPreferences(AuthService.getContext(), PREFERENCES_NAME);
+      await prefs.put('app_theme', theme);
+      await prefs.flush();
+    } catch (err) {
+      console.error('Failed to save theme:', JSON.stringify(err));
+    }
+  }
+
   static isOAuthCallback(url: string): boolean {
     return url.includes('code=') &&
       (url.startsWith('githubclient://') ||

@@ -1,4 +1,4 @@
-import { DarkTheme } from '../constants/ThemeConstants';
+import { Theme } from '../constants/ThemeConstants';
 
 /**
  * 底部 Tab 栏构建器
@@ -20,11 +20,11 @@ export struct TabBarItem {
     Column() {
       Text(this.icon)
         .fontSize(22)
-        .fontColor(this.isSelected ? DarkTheme.accent : DarkTheme.textSecondary)
+        .fontColor(this.isSelected ? Theme.accent : Theme.textSecondary)
       Text(this.label)
         .fontSize(12)
         .fontWeight(FontWeight.Light)
-        .fontColor(this.isSelected ? DarkTheme.accent : DarkTheme.textSecondary)
+        .fontColor(this.isSelected ? Theme.accent : Theme.textSecondary)
         .margin({ top: 2 })
     }
     .justifyContent(FlexAlign.Center)

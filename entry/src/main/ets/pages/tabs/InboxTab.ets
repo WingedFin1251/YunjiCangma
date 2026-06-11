@@ -1,4 +1,4 @@
-import { DarkTheme } from '../../common/constants/ThemeConstants';
+import { Theme } from '../../common/constants/ThemeConstants';
 import { EmptyState } from '../../common/components/EmptyState';
 import { GitHubAPIService } from '../../services/GitHubAPIService';
 import type { GitHubNotification } from '../../models/User';
@@ -44,14 +44,14 @@ export struct InboxTab {
 
   private getNotifIconColor(notif: GitHubNotification): string {
     const stype: string = notif.subject.type;
-    if (stype === 'Issue') return DarkTheme.issueGreen;
-    if (stype === 'PullRequest') return DarkTheme.prBlue;
-    if (stype === 'Discussion') return DarkTheme.discussionPurple;
-    return DarkTheme.textSecondary;
+    if (stype === 'Issue') return Theme.issueGreen;
+    if (stype === 'PullRequest') return Theme.prBlue;
+    if (stype === 'Discussion') return Theme.discussionPurple;
+    return Theme.textSecondary;
   }
 
   @Builder
-  inboxPageMap(name: string, param: Object | null) {}
+  inboxPageMap(name: string, param: ESObject) {}
 
   build() {
     Navigation(this.inboxStack) {
@@ -61,7 +61,7 @@ export struct InboxTab {
           Text($r('app.string.page_title_inbox'))
             .fontSize(26)
             .fontWeight(FontWeight.Bold)
-            .fontColor(DarkTheme.textPrimary)
+            .fontColor(Theme.textPrimary)
             .layoutWeight(1)
 
           // 右侧功能图标：更多
@@ -85,21 +85,21 @@ export struct InboxTab {
                 Text(tab)
                   .fontSize(14)
                   .fontColor(this.selectedFilter === index
-                    ? DarkTheme.textPrimary
-                    : DarkTheme.textSecondary)
+                    ? Theme.textPrimary
+                    : Theme.textSecondary)
                 // 下拉指示器
                 if (index === 0 || index === 3) {
                   Text('▼')
                     .fontSize(8)
                     .fontColor(this.selectedFilter === index
-                      ? DarkTheme.textPrimary
-                      : DarkTheme.textSecondary)
+                      ? Theme.textPrimary
+                      : Theme.textSecondary)
                     .margin({ left: 4 })
                 }
               }
               .padding({ left: 16, right: 16, top: 8, bottom: 8 })
               .backgroundColor(this.selectedFilter === index
-                ? DarkTheme.surfaceElevated
+                ? Theme.surfaceElevated
                 : Color.Transparent)
               .borderRadius(8)
               .onClick(() => {
@@ -113,32 +113,32 @@ export struct InboxTab {
         .scrollBar(BarState.Off)
         .width('100%')
         .height(40)
-        .backgroundColor(DarkTheme.surface)
+        .backgroundColor(Theme.surface)
 
         // 分割线
         Divider()
-          .color(DarkTheme.border)
+          .color(Theme.border)
           .width('100%')
 
         // === 主内容区 ===
         if (this.isInboxLoading) {
           Column() {
-            LoadingProgress().width(32).height(32).color(DarkTheme.accent).margin({ top: 80 })
+            LoadingProgress().width(32).height(32).color(Theme.accent).margin({ top: 80 })
           }
-          .width('100%').height('100%').backgroundColor(DarkTheme.background)
+          .width('100%').height('100%').backgroundColor(Theme.background)
         } else if (this.getFilteredNotifications().length > 0) {
           this.buildNotificationList()
         } else {
-          EmptyState({ icon: '✉', title: '都赶上了！', subtitle: '休息一下，写一些代码，做您最擅长的事' })
+          EmptyState({ icon: '✉', title: '暂无新消息', subtitle: '所有通知已查看，随心探索开源仓库' })
         }
       }
       .width('100%')
       .height('100%')
       .padding({ top: 32, bottom: 64 })
-      .backgroundColor(DarkTheme.background)
+      .backgroundColor(Theme.background)
     }
     .navDestination(this.inboxPageMap)
-    .backgroundColor(DarkTheme.background)
+    .backgroundColor(Theme.background)
     .width('100%')
     .height('100%')
     .mode(NavigationMode.Stack)
@@ -162,12 +162,12 @@ export struct InboxTab {
             Column() {
               Text(item.subject.title)
                 .fontSize(14)
-                .fontColor(DarkTheme.textPrimary)
+                .fontColor(Theme.textPrimary)
                 .maxLines(1)
                 .textOverflow({ overflow: TextOverflow.Ellipsis })
               Text(item.repository.full_name)
                 .fontSize(12)
-                .fontColor(DarkTheme.textTertiary)
+                .fontColor(Theme.textTertiary)
                 .margin({ top: 2 })
             }
             .alignItems(HorizontalAlign.Start)
@@ -178,7 +178,7 @@ export struct InboxTab {
               Circle()
                 .width(8)
                 .height(8)
-                .fill(DarkTheme.accent)
+                .fill(Theme.accent)
             }
           }
           .width('100%')
@@ -193,6 +193,6 @@ export struct InboxTab {
     .scrollBar(BarState.Off)
     .width('100%')
     .height('100%')
-    .backgroundColor(DarkTheme.background)
+    .backgroundColor(Theme.background)
   }
 }
