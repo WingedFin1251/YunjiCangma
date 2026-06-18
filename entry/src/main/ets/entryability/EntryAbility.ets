@@ -16,6 +16,7 @@ export default class EntryAbility extends UIAbility {
     AuthService.init(this.context);
     AppStorage.setOrCreate('authToken', '');
     AppStorage.setOrCreate('isLoggedIn', false);
+    AppStorage.setOrCreate('userFilterEnabled', true);
 
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onCreate');
   }

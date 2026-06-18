@@ -1,6 +1,6 @@
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
 import { EmptyState } from '../../common/components/EmptyState';
-import { GitHubAPIService } from '../../services/GitHubAPIService';
+import { SearchRepository } from '../../services/SearchRepository';
 import type { GitHubNotification } from '../../models/User';
 
 @Component
@@ -18,7 +18,7 @@ export struct InboxTab {
 
   private async loadNotifications(): Promise<void> {
     try {
-      this.notifications = await GitHubAPIService.getNotifications();
+      this.notifications = await SearchRepository.getNotifications();
     } catch (err) {
       this.notifications = [];
     } finally {

@@ -4,6 +4,7 @@ import { AuthService } from '../../services/AuthService';
 @Component
 export struct SettingsPage {
   @StorageLink(THEME_KEY) themeMode: string = 'dark';
+  @StorageLink('userFilterEnabled') userFilterEnabled: boolean = true;
   onNavigate?: (name: string) => void;
   private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
 
@@ -12,6 +13,14 @@ export struct SettingsPage {
       Column({ space: 0 }) {
         // 深色模式
         this.settingRow('🌙 深色模式', true)
+        Divider().color(this.T().border).width('90%')
+
+        // 手动屏蔽词开关
+        Row() {
+          Text('🛡️ 手动屏蔽词').fontSize(16).fontColor(this.T().textPrimary).layoutWeight(1)
+          Toggle({ type: ToggleType.Switch, isOn: this.userFilterEnabled })
+            .onChange((isOn: boolean) => { AppStorage.setOrCreate('userFilterEnabled', isOn); })
+        }.width('100%').height(52).padding({ left: 20, right: 20 }).alignItems(VerticalAlign.Center)
         Divider().color(this.T().border).width('90%')
 
         // 使用教程
