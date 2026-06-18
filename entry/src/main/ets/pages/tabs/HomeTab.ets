@@ -1,10 +1,12 @@
 import { webview } from '@kit.ArkWeb';
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
 import { RepoCard } from '../../common/components/RepoCard';
-import { GitHubAPIService } from '../../services/GitHubAPIService';
+import { RepoRepository } from '../../services/RepoRepository';
 import { AUTH_LOGIN_KEY } from '../../common/constants/APIConstants';
 import { WorkPage } from '../sub/WorkPage';
 import { SearchPage } from '../sub/SearchPage';
+import { DevProfilePage } from '../sub/DevProfilePage';
+import { RepoDetailPage } from '../sub/RepoDetailPage';
 import type { Repository } from '../../models/User';
 
 class WorkItem {
@@ -22,6 +24,7 @@ class FavoriteRepo {
   language: string = '';
   stars: number = 0;
   isStarred: boolean = true;
+  htmlUrl: string = '';
   constructor(r: Repository) {
     this.avatarChar = r.owner.login.charAt(0);
     this.owner = r.owner.login;
@@ -30,6 +33,7 @@ class FavoriteRepo {
     this.language = r.language || '';
     this.stars = r.stargazers_count;
     this.isStarred = true;
+    this.htmlUrl = r.html_url || '';
   }
 }
 
@@ -41,6 +45,8 @@ export struct HomeTab {
   @State starredRepos: FavoriteRepo[] = [];
   @State isStarredLoading: boolean = true;
   @State webUrl: string = '';
+  @State repoOwner: string = '';
+  @State repoName: string = '';
   private webCtl: webview.WebviewController = new webview.WebviewController();
 
   private workItems: WorkItem[] = [
@@ -67,7 +73,7 @@ export struct HomeTab {
 
   private async loadStarredRepos(): Promise<void> {
     try {
-      const repos: Repository[] = await GitHubAPIService.getStarredRepos();
+      const repos: Repository[] = await RepoRepository.getStarredRepos();
       this.starredRepos = repos.map((r: Repository) => new FavoriteRepo(r));
     } catch (err) {
       this.starredRepos = [];
@@ -86,16 +92,23 @@ export struct HomeTab {
   @Builder
   homePageMap(name: string, param: ESObject) {
     if (name === 'search') {
-      NavDestination() { SearchPage({ onOpenRepo: (url: string) => { this.webUrl = url; this.homeStack.pushPath({ name: 'repoWeb' }); } }) }
+      NavDestination() { SearchPage({ onOpenRepo: (owner: string, repo: string) => { this.repoOwner = owner; this.repoName = repo; this.homeStack.pushPath({ name: 'repoWeb' }); } }) }
         .title('搜索').backgroundColor(this.T().background).padding({ top: 32 })
     } else if (name === 'repoWeb') {
+      NavDestination() {
+        RepoDetailPage({ owner: this.repoOwner, repoName: this.repoName, onOpenWebView: (url: string) => { this.webUrl = url; this.homeStack.pushPath({ name: 'repoWebView' }); }, onOpenDev: (uname: string) => { this.repoOwner = uname; this.homeStack.pushPath({ name: 'devProfile' }); } })
+      }.title('仓库详情').backgroundColor(this.T().background).padding({ top: 32 })
+    } else if (name === 'devProfile') {
+      NavDestination() { DevProfilePage({ username: this.repoOwner, onOpenRepo: (o: string, r: string) => { this.repoOwner = o; this.repoName = r; this.homeStack.pushPath({ name: 'repoWeb' }); }, onOpenWebView: (u: string) => { this.webUrl = u; this.homeStack.pushPath({ name: 'repoWebView' }); } }) }
+        .title('开发者').backgroundColor(this.T().background).padding({ top: 32 })
+    } else if (name === 'repoWebView') {
       NavDestination() {
         Web({ src: this.webUrl, controller: this.webCtl }).width('100%').height('100%')
           .darkMode(this.themeMode === 'dark' ? WebDarkMode.On : WebDarkMode.Off)
           .backgroundColor(this.themeMode === 'dark' ? Color.Black : Color.White)
-      }.title('仓库详情').backgroundColor(this.T().background).padding({ top: 32 })
+      }.title('GitHub').backgroundColor(this.T().background).padding({ top: 32 })
     } else {
-      NavDestination() { WorkPage({ _title: this.getWorkTitle(name), dataType: name }) }
+      NavDestination() { WorkPage({ _title: this.getWorkTitle(name), dataType: name, onOpenRepo: (o: string, r: string) => { this.repoOwner = o; this.repoName = r; this.homeStack.pushPath({ name: 'repoWeb' }); } }) }
         .title(this.getWorkTitle(name)).backgroundColor(this.T().background).padding({ top: 32 })
     }
   }
@@ -119,7 +132,11 @@ export struct HomeTab {
             Divider().color(this.T().border).width('100%').margin({ top: 12, bottom: 8 })
             this.sectionHeader('我的星标')
             Column({ space: 12 }) {
-              ForEach(this.starredRepos, (repo: FavoriteRepo, index: number) => { RepoCard({ avatarChar: repo.avatarChar, owner: repo.owner, repo: repo.repo, description: repo.description, language: repo.language, stars: repo.stars, isStarred: repo.isStarred }) }, (repo: FavoriteRepo) => repo.repo)
+              ForEach(this.starredRepos, (repo: FavoriteRepo, index: number) => {
+                Column() {
+                  RepoCard({ avatarChar: repo.avatarChar, owner: repo.owner, repo: repo.repo, description: repo.description, language: repo.language, stars: repo.stars, isStarred: repo.isStarred })
+                }.width('100%').onClick(() => { this.repoOwner = repo.owner; this.repoName = repo.repo; this.webUrl = repo.htmlUrl; this.homeStack.pushPath({ name: 'repoWeb' }); })
+              }, (repo: FavoriteRepo) => repo.repo)
             }.padding({ left: 16, right: 16 })
             Blank().height(12)
           }.width('100%').alignItems(HorizontalAlign.Start)

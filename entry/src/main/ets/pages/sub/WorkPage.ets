@@ -1,6 +1,8 @@
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
 import { AUTH_LOGIN_KEY } from '../../common/constants/APIConstants';
-import { GitHubAPIService } from '../../services/GitHubAPIService';
+import { RepoRepository } from '../../services/RepoRepository';
+import { UserRepository } from '../../services/UserRepository';
+import { SearchRepository } from '../../services/SearchRepository';
 import { RepoCard } from '../../common/components/RepoCard';
 
 @Component
@@ -11,6 +13,7 @@ export struct WorkPage {
   @State loading: boolean = true;
   @Prop _title: string = '';
   @Prop dataType: string = '';
+  onOpenRepo?: (owner: string, repo: string) => void;
   private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
 
   aboutToAppear(): void { if (this.isLoggedIn) this.loadData(); else { this.items = []; this.loading = false; } }
@@ -19,11 +22,11 @@ export struct WorkPage {
   async loadData(): Promise<void> {
     this.loading = true; this.items = [];
     try {
-      if (this.dataType === 'issues') this.items = await GitHubAPIService.getIssues();
-      else if (this.dataType === 'pulls') this.items = await GitHubAPIService.getPullRequests('');
-      else if (this.dataType === 'repos') this.items = await GitHubAPIService.getMyRepos();
-      else if (this.dataType === 'orgs') this.items = await GitHubAPIService.getOrgs();
-      else if (this.dataType === 'starred') this.items = await GitHubAPIService.getStarredRepos();
+      if (this.dataType === 'issues') this.items = await SearchRepository.getIssues();
+      else if (this.dataType === 'pulls') this.items = await SearchRepository.getPullRequests('');
+      else if (this.dataType === 'repos') this.items = await RepoRepository.getMyRepos();
+      else if (this.dataType === 'orgs') this.items = await UserRepository.getOrgs();
+      else if (this.dataType === 'starred') this.items = await RepoRepository.getStarredRepos();
     } catch (e) { this.items = []; }
     finally { this.loading = false; }
   }
@@ -63,6 +66,12 @@ export struct WorkPage {
                     isStarred: true
                   })
                 }.width('100%')
+                .onClick(() => {
+                  const it = item as Record<string, Object>;
+                  const rOwner: string = ((it.owner as Record<string, string>).login as string) || '';
+                  const rName: string = (it.name as string) || '';
+                  if (this.onOpenRepo && rOwner && rName) this.onOpenRepo(rOwner, rName);
+                })
               }, (item: Object, idx: number) => idx.toString())
             }.width('100%').padding({ left: 16, right: 16 })
           } else {

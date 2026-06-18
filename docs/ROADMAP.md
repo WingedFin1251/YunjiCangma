@@ -1,17 +1,17 @@
 # 路线图
 
-## 当前版本: v0.7.0（搜索 + 语言颜色 + 页面分层）
+## 当前版本: v0.8.0（仓库详情页 + 开发者资料 + 贡献热力图）
 
 - [x] 项目初始化 + 品牌「云笈藏码」
-- [x] 4 Tab + 标题栏固定 + Scroll 顶部对齐 + top 32/bottom 20
+- [x] Repository 分层 API（HttpClient → Repo/User/Search/Auth）
 - [x] 深色/浅色双主题 + 状态栏透明沉浸 + WebView 联动
-- [x] 12 个 API 端点（含搜索 `GET /search/repositories`）
-- [x] 🔍 全局搜索（搜索→WebView 查看仓库）
-- [x] 🎨 GitHub Linguist 语言颜色（30+ 语言，RepoCard 圆圈）
-- [x] 📁 页面分层（pages/tabs/ + pages/sub/）
-- [x] WorkPage 通用工作项组件（议题/PR/仓库/组织/已加星标）
-- [x] 设置页（深色模式 + 使用教程 + 隐私协议 + 关于）
-- [x] OAuth WebView 登录 + 防抖 + @Watch 自动刷新
+- [x] 12 个 API 端点（含 GraphQL 贡献查询）
+- [x] 🔍 全局搜索（屏蔽词 → RepoDetailPage）
+- [x] 📦 仓库详情页（HEADER/Stats/Release/Info/README/Issues/PR/Security）
+- [x] 👤 开发者资料页（头像/统计/仓库搜索/筛选/贡献热力图）
+- [x] 📊 GitHub 风格贡献热力图（5 级色阶 + 横向滚动）
+- [x] 🔒 Release 代码混淆（属性/全局/文件名/导出 + remove-log）
+- [x] ⚙️ 设置页（深色模式 + 手动屏蔽词 + 使用教程 + 隐私协议）
 
 ## v0.4.0 — 数据对接 ✅ 已完成
 
