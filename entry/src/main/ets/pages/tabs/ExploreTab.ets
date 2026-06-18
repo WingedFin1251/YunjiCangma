@@ -1,7 +1,10 @@
 import { webview } from '@kit.ArkWeb';
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
 import { RepoCard } from '../../common/components/RepoCard';
-import { GitHubAPIService } from '../../services/GitHubAPIService';
+import { RepoRepository } from '../../services/RepoRepository';
+import { UserRepository } from '../../services/UserRepository';
+import { RepoDetailPage } from '../sub/RepoDetailPage';
+import { DevProfilePage } from '../sub/DevProfilePage';
 import type { Repository } from '../../models/User';
 
 class ActivityItem {
@@ -27,6 +30,8 @@ export struct ExploreTab {
   @State activities: ActivityItem[] = [];
   @State isExploreLoading: boolean = true;
   @State webUrl: string = '';
+  @State detailOwner: string = '';
+  @State detailRepo: string = '';
   private webCtl: webview.WebviewController = new webview.WebviewController();
 
   aboutToAppear(): void {
@@ -35,13 +40,13 @@ export struct ExploreTab {
 
   private async loadExploreData(): Promise<void> {
     try {
-      const trending = await GitHubAPIService.getTrendingRepos();
+      const trending = await RepoRepository.getTrendingRepos();
       this.trendingRepos = trending.items.slice(0, 5);
     } catch (err) {
       this.trendingRepos = [];
     }
     try {
-      const events = await GitHubAPIService.getReceivedEvents('github');
+      const events = await UserRepository.getReceivedEvents('github');
       const items: ActivityItem[] = [];
       for (let i = 0; i < Math.min(events.length, 5); i++) {
         const evt = events[i] as Record<string, Object>;
@@ -70,13 +75,19 @@ export struct ExploreTab {
 
   @Builder
   explorePageMap(name: string, param: ESObject) {
-    if (name === 'repoWeb') {
+    if (name === 'repoDetail') {
+      NavDestination() { RepoDetailPage({ owner: this.detailOwner, repoName: this.detailRepo, onOpenWebView: (u: string) => { this.webUrl = u; this.exploreStack.pushPath({ name: 'repoWeb' }); }, onOpenDev: (uname: string) => { this.detailOwner = uname; this.exploreStack.pushPath({ name: 'devProfile' }); } }) }
+        .title('仓库详情').backgroundColor(this.T().background).padding({ top: 32 })
+    } else if (name === 'devProfile') {
+      NavDestination() { DevProfilePage({ username: this.detailOwner, onOpenRepo: (o: string, r: string) => { this.detailOwner = o; this.detailRepo = r; this.exploreStack.pushPath({ name: 'repoDetail' }); }, onOpenWebView: (u: string) => { this.webUrl = u; this.exploreStack.pushPath({ name: 'repoWeb' }); } }) }
+        .title('开发者').backgroundColor(this.T().background).padding({ top: 32 })
+    } else if (name === 'repoWeb') {
       NavDestination() {
         Web({ src: this.webUrl, controller: this.webCtl })
           .width('100%').height('100%')
           .darkMode(this.themeMode === 'dark' ? WebDarkMode.On : WebDarkMode.Off)
           .backgroundColor(this.themeMode === 'dark' ? Color.Black : Color.White)
-      }.title('仓库详情').backgroundColor(this.T().background).padding({ top: 32 })
+      }.title('GitHub').backgroundColor(this.T().background).padding({ top: 32 })
     }
   }
 
@@ -144,10 +155,10 @@ export struct ExploreTab {
               }
               .width('100%')
               .onClick(() => {
-                if (repo.html_url) {
-                  this.webUrl = repo.html_url;
-                  this.exploreStack.pushPath({ name: 'repoWeb' });
-                }
+                this.detailOwner = repo.owner.login;
+                this.detailRepo = repo.name;
+                this.webUrl = repo.html_url || '';
+                this.exploreStack.pushPath({ name: 'repoDetail' });
               })
             }, (repo: Repository) => repo.id.toString())
           }

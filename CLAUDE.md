@@ -47,6 +47,10 @@
 | `getIssues()` | `GET /issues` | `Object[]` |
 | `getOrgs()` | `GET /user/orgs` | `Object[]` |
 | `searchRepos(q)` | `GET /search/repositories?q=` | `Object` |
+| `getRepoDetail(o,r)` | `GET /repos/{o}/{r}` | `Object` |
+| `getReadme(o,r)` | `GET /repos/{o}/{r}/readme` | `Object` |
+| `getLatestRelease(o,r)` | `GET /repos/{o}/{r}/releases/latest` | `Object` |
+| `getContributions(u)` | `POST /graphql` | `Object` |
 
 ## 目录结构
 

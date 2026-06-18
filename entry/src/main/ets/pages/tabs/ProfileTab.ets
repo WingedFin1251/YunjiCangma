@@ -3,7 +3,10 @@ import { webview } from '@kit.ArkWeb';
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
 import { RepoCard } from '../../common/components/RepoCard';
 import { AuthService } from '../../services/AuthService';
-import { GitHubAPIService } from '../../services/GitHubAPIService';
+import { RepoRepository } from '../../services/RepoRepository';
+import { UserRepository } from '../../services/UserRepository';
+import { RepoDetailPage } from '../sub/RepoDetailPage';
+import { DevProfilePage } from '../sub/DevProfilePage';
 import type { User } from '../../models/User';
 import { AUTH_LOGIN_KEY } from '../../common/constants/APIConstants';
 import { SettingsPage } from '../sub/SettingsPage';
@@ -19,6 +22,8 @@ export struct ProfileTab {
   @State listItems: Object[] = [];
   @State listLoading: boolean = true;
   @State webUrl: string = '';
+  @State detailOwner: string = '';
+  @State detailRepo: string = '';
   private profileStack: NavPathStack = new NavPathStack();
   private webCtl: webview.WebviewController = new webview.WebviewController();
 
@@ -32,7 +37,7 @@ export struct ProfileTab {
     await AuthService.loadToken();
     if (AuthService.isLoggedIn()) {
       this.isLoading = true;
-      try { this.user = await GitHubAPIService.getCurrentUser(); }
+      try { this.user = await UserRepository.getCurrentUser(); }
       catch (err) { await AuthService.logout(); this.user = null; }
       finally { this.isLoading = false; }
     }
@@ -42,9 +47,9 @@ export struct ProfileTab {
     this.listLoading = true; this.listItems = [];
     try {
       const u: string = this.user?.login || '';
-      if (type === 'repoList') { this.listItems = await GitHubAPIService.getMyRepos(); }
-      else if (type === 'followers') { this.listItems = await GitHubAPIService.getUserFollowers(u); }
-      else if (type === 'following') { this.listItems = await GitHubAPIService.getUserFollowing(u); }
+      if (type === 'repoList') { this.listItems = await RepoRepository.getMyRepos(); }
+      else if (type === 'followers') { this.listItems = await UserRepository.getFollowers(u); }
+      else if (type === 'following') { this.listItems = await UserRepository.getFollowing(u); }
     } catch (err) { this.listItems = []; }
     finally { this.listLoading = false; }
   }
@@ -88,8 +93,11 @@ export struct ProfileTab {
                   }
                   .width('100%')
                   .onClick(() => {
-                    const url: string = ((item as Record<string, Object>).html_url as string) || '';
-                    if (url) { this.webUrl = url; this.profileStack.pushPath({ name: 'repoWeb' }); }
+                    const it = item as Record<string, Object>;
+                    this.detailOwner = ((it.owner as Record<string, string>).login as string) || '';
+                    this.detailRepo = (it.name as string) || '';
+                    this.webUrl = (it.html_url as string) || '';
+                    this.profileStack.pushPath({ name: 'repoDetail' });
                   })
                 }, (item: Object, idx: number) => idx.toString())
               }.width('100%').padding({ left: 16, right: 16 })
@@ -97,13 +105,19 @@ export struct ProfileTab {
           }
         }.width('100%').height('100%').backgroundColor(this.T().background).padding({ top: 8 })
       }.title('我的仓库').backgroundColor(this.T().background).padding({ top: 32 })
+    } else if (name === 'repoDetail') {
+      NavDestination() { RepoDetailPage({ owner: this.detailOwner, repoName: this.detailRepo, onOpenWebView: (u: string) => { this.webUrl = u; this.profileStack.pushPath({ name: 'repoWeb' }); }, onOpenDev: (uname: string) => { this.detailOwner = uname; this.profileStack.pushPath({ name: 'devProfile' }); } }) }
+        .title('仓库详情').backgroundColor(this.T().background).padding({ top: 32 })
+    } else if (name === 'devProfile') {
+      NavDestination() { DevProfilePage({ username: this.detailOwner, onOpenRepo: (o: string, r: string) => { this.detailOwner = o; this.detailRepo = r; this.profileStack.pushPath({ name: 'repoDetail' }); }, onOpenWebView: (u: string) => { this.webUrl = u; this.profileStack.pushPath({ name: 'repoWeb' }); } }) }
+        .title('开发者').backgroundColor(this.T().background).padding({ top: 32 })
     } else if (name === 'repoWeb') {
       NavDestination() {
         Web({ src: this.webUrl, controller: this.webCtl })
           .width('100%').height('100%')
           .darkMode(this.themeMode === 'dark' ? WebDarkMode.On : WebDarkMode.Off)
           .backgroundColor(this.themeMode === 'dark' ? Color.Black : Color.White)
-      }.title('仓库详情').backgroundColor(this.T().background).padding({ top: 32 })
+      }.title('GitHub').backgroundColor(this.T().background).padding({ top: 32 })
     } else if (name === 'followers' || name === 'following') {
       NavDestination() {
         Column() {

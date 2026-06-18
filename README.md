@@ -19,15 +19,15 @@
 - [x] 🔐 GitHub OAuth WebView 登录（自定义 Scheme + onLoadIntercept + 防抖）
 - [x] 🖼️ 用户头像 + Octocat 应用图标
 - [x] 🖥️ 全屏沉浸（透明状态栏 + 底部小白条 + 浅色适配）
-- [x] 📡 12 个 API 端点（Star/通知/热门/活动/仓库/粉丝/关注/议题/PR/组织/搜索）
+- [x] 📡 Repository 分层 API（HttpClient → Repo/User/Search/Auth Repository）
 - [x] 🔄 登录自动刷新 + 主题持久化（preferences 存取）
-- [x] 🌐 仓库详情 WebView 浏览（深浅自适应 + 搜索结果打开）
-- [x] 🔍 全局搜索（搜索 GitHub 仓库 → 点击 WebView 查看）
-- [x] 🎨 GitHub Linguist 语言颜色映射（30+ 语言官方色值）
-- [x] ⚙️ 设置页（深色开关 + 使用教程 + 隐私协议 + 关于）
-- [x] 📋 首页工作项子页面（议题/PR/仓库/组织/已加星标，登录门控）
-- [x] 📁 页面分层（tabs/ + sub/）
-- [x] 🧩 组件库：RepoCard / ListItem / EmptyState / FilterTabBar / TabBarBuilder
+- [x] 🌐 仓库详情页 RepoDetailPage（HEADER + Stats + Release + README + 开发者入口）
+- [x] 🔍 全局搜索（屏蔽词 + Linguist 颜色 → RepoDetailPage）
+- [x] 👤 开发者资料页 DevProfilePage（头像/统计/仓库列表/搜索/筛选/贡献热力图）
+- [x] 📊 贡献热力图（GraphQL API + 5 级色阶 + 横向滚动）
+- [x] ⚙️ 设置页（深色开关 + 手动屏蔽词 + 使用教程 + 隐私协议 + 关于）
+- [x] 📋 首页工作项子页面（议题/PR/仓库/组织/已加星标 → RepoDetailPage）
+- [x] 📁 页面分层（tabs/ + sub/） + 🔒 代码混淆（Release）
 
 ## 快速开始
 
