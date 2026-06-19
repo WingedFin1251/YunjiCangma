@@ -5,6 +5,7 @@ import { RepoRepository } from '../../services/RepoRepository';
 import { UserRepository } from '../../services/UserRepository';
 import { RepoDetailPage } from '../sub/RepoDetailPage';
 import { DevProfilePage } from '../sub/DevProfilePage';
+import { IssuesPage } from '../sub/IssuesPage';
 import type { Repository } from '../../models/User';
 
 class ActivityItem {
@@ -76,7 +77,7 @@ export struct ExploreTab {
   @Builder
   explorePageMap(name: string, param: ESObject) {
     if (name === 'repoDetail') {
-      NavDestination() { RepoDetailPage({ owner: this.detailOwner, repoName: this.detailRepo, onOpenWebView: (u: string) => { this.webUrl = u; this.exploreStack.pushPath({ name: 'repoWeb' }); }, onOpenDev: (uname: string) => { this.detailOwner = uname; this.exploreStack.pushPath({ name: 'devProfile' }); } }) }
+      NavDestination() { RepoDetailPage({ owner: this.detailOwner, repoName: this.detailRepo, onOpenWebView: (u: string) => { this.webUrl = u; this.exploreStack.pushPath({ name: 'repoWeb' }); }, onOpenDev: (uname: string) => { this.detailOwner = uname; this.exploreStack.pushPath({ name: 'devProfile' }); }, onOpenRepo: (o: string, r: string) => { this.detailOwner = o; this.detailRepo = r; this.exploreStack.pushPath({ name: 'repoDetail' }); }, onOpenIssues: (o: string, r: string) => { this.detailOwner = o; this.detailRepo = r; this.exploreStack.pushPath({ name: 'issues' }); } }) }
         .title('仓库详情').backgroundColor(this.T().background).padding({ top: 32 })
     } else if (name === 'devProfile') {
       NavDestination() { DevProfilePage({ username: this.detailOwner, onOpenRepo: (o: string, r: string) => { this.detailOwner = o; this.detailRepo = r; this.exploreStack.pushPath({ name: 'repoDetail' }); }, onOpenWebView: (u: string) => { this.webUrl = u; this.exploreStack.pushPath({ name: 'repoWeb' }); } }) }
