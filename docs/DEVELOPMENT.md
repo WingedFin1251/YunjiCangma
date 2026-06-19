@@ -15,7 +15,7 @@
 ### 1. 克隆项目
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/Github.git
+git clone https://github.com/WingedFin1251/Github.git
 cd Github
 ```
 
@@ -37,7 +37,7 @@ cd Github
 # Debug
 hvigorw assembleHap --mode module -p product=default -p buildMode=debug
 
-# Release  
+# Release
 hvigorw assembleHap --mode module -p product=default -p buildMode=release
 ```
 
@@ -47,27 +47,41 @@ hvigorw assembleHap --mode module -p product=default -p buildMode=release
 
 | 类型 | 规范 | 示例 |
 |------|------|------|
-| 页面组件 | `pages/XxxPage.ets` | `RepoDetailPage.ets` |
 | Tab 页面 | `pages/tabs/XxxTab.ets` | `HomeTab.ets` |
-| Service | `services/XxxService.ets` | `RepoService.ets` |
-| Model | `models/Xxx.ets` | `Repository.ets` |
+| 子页面 | `pages/sub/XxxPage.ets` | `RepoDetailPage.ets` |
+| 独立页面 | `pages/XxxPage.ets` | `LoginPage.ets` |
+| Repository | `services/XxxRepository.ets` | `RepoRepository.ets` |
+| 认证/工具服务 | `services/XxxService.ets` | `AuthService.ets` |
+| HTTP 引擎 | `services/HttpClient.ets` | — |
+| Model | `models/Xxx.ets` | `User.ets` |
 | 公共组件 | `common/components/Xxx.ets` | `RepoCard.ets` |
 | 常量 | `common/constants/XxxConstants.ets` | `APIConstants.ets` |
-| 测试 | `test/Xxx.test.ets` | `RepoService.test.ets` |
+| 工具常量 | `common/constants/Xxx.ets` | `SensitiveWords.ets` |
+| 测试 | `test/Xxx.test.ets` | `RepoRepository.test.ets` |
 
 ### ArkTS 编码规范
 
 ```typescript
-// ✅ 推荐：声明式 UI
+// ✅ 推荐：声明式 UI + 主题联动
 @Component
 struct MyPage {
-  @State data: string = '';
+  @StorageLink('currentTheme') themeMode: string = 'dark';
+
+  private T(): ThemeColors {
+    const d = this.themeMode === 'dark';
+    return {
+      background: d ? DarkTheme.background : LightTheme.background,
+      // ... 14 色值
+    };
+  }
 
   build() {
     Column() {
-      Text(this.data)
+      Text('Hello')
         .fontSize(16)
+        .fontColor(this.T().textPrimary)
     }
+    .backgroundColor(this.T().background)
   }
 }
 
@@ -91,13 +105,17 @@ struct MyPage {
 class WorkItem {
   icon: string = '';
   label: string = '';
-  constructor(icon: string, label: string) {
+  color: string = '';
+  route: string = '';
+  constructor(icon: string, label: string, color: string, route: string) {
     this.icon = icon;
     this.label = label;
+    this.color = color;
+    this.route = route;
   }
 }
 private workItems: WorkItem[] = [
-  new WorkItem('🟢', '议题'),
+  new WorkItem('●', '议题', '#2EA44F', 'issues'),
 ];
 
 // ❌ 避免：内联对象
@@ -109,28 +127,29 @@ private items: Array<{icon: string; label: string}> = [
 ### 新增功能流程
 
 1. **数据模型** — `models/` 中定义数据结构，与 GitHub API 返回结构对应
-2. **API 封装** — `services/` 中添加 API 调用方法，统一错误处理
-3. **页面组件** — `pages/` 中创建 UI 组件
-4. **路由注册** — 如需独立页面入口，在 `main_pages.json` 注册
-5. **权限声明** — 在 `module.json5` 的 `requestPermissions` 中添加权限
-6. **编写测试** — 在 `test/` 中写单元测试
+2. **API 封装** — 在对应 `services/XxxRepository.ets` 中添加方法，通过 `HttpClient.get<T>()` 调用
+3. **页面组件** — `pages/` 或 `pages/sub/` 中创建 UI 组件
+4. **路由注册** — 独立页面在 `main_pages.json` 注册；Tab 内子页通过 `NavPathStack.pushPath()` 导航
+5. **路由映射** — 在父组件的 `@Builder pageMap(name, param)` 中添加 `NavDestination` 分支
+6. **权限声明** — 在 `module.json5` 的 `requestPermissions` 中添加权限
+7. **编写测试** — 在 `test/` 中写单元测试
 
 ### 新增页面步骤
 
-1. 在 `pages/` 创建 `.ets` 文件
-2. 在 `main_pages.json` 的 `src` 数组中添加路径
-3. 若为 Tab 内子页面：通过 `NavPathStack.pushPath()` 导航
-4. 若为独立页面：通过 `router.pushUrl()` 或 Navigation 导航
-
-```json
-// main_pages.json
-{
-  "src": [
-    "pages/MainPage",
-    "pages/RepoDetailPage"
-  ]
-}
-```
+1. 在 `pages/sub/` 创建 `.ets` 文件
+2. 在对应 Tab 的 `pageMap` Builder 中添加路由分支：
+   ```typescript
+   @Builder
+   homePageMap(name: string, param: ESObject) {
+     if (name === 'newPage') {
+       NavDestination() { NewPage({ ... }) }
+         .title('新页面').backgroundColor(this.T().background).padding({ top: 32 })
+     }
+     // ... 其他路由
+   }
+   ```
+3. 通过 `this.xxxStack.pushPath({ name: 'newPage' })` 导航
+4. 如需独立入口（非 Tab 内），在 `main_pages.json` 注册后通过 `router.pushUrl()` 跳转
 
 ### Git 提交规范
 

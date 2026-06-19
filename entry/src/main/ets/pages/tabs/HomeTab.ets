@@ -6,6 +6,7 @@ import { AUTH_LOGIN_KEY } from '../../common/constants/APIConstants';
 import { WorkPage } from '../sub/WorkPage';
 import { SearchPage } from '../sub/SearchPage';
 import { DevProfilePage } from '../sub/DevProfilePage';
+import { IssuesPage } from '../sub/IssuesPage';
 import { RepoDetailPage } from '../sub/RepoDetailPage';
 import type { Repository } from '../../models/User';
 
@@ -92,11 +93,12 @@ export struct HomeTab {
   @Builder
   homePageMap(name: string, param: ESObject) {
     if (name === 'search') {
+} else if (name === 'issues') {      NavDestination() { IssuesPage({ owner: this.repoOwner, repoName: this.repoName, onOpenWebView: (u: string) => { this.webUrl = u; this.homeStack.pushPath({ name: 'repoWebView' }); } }) }        .title('议题').backgroundColor(this.T().background).padding({ top: 32 })
       NavDestination() { SearchPage({ onOpenRepo: (owner: string, repo: string) => { this.repoOwner = owner; this.repoName = repo; this.homeStack.pushPath({ name: 'repoWeb' }); } }) }
         .title('搜索').backgroundColor(this.T().background).padding({ top: 32 })
     } else if (name === 'repoWeb') {
       NavDestination() {
-        RepoDetailPage({ owner: this.repoOwner, repoName: this.repoName, onOpenWebView: (url: string) => { this.webUrl = url; this.homeStack.pushPath({ name: 'repoWebView' }); }, onOpenDev: (uname: string) => { this.repoOwner = uname; this.homeStack.pushPath({ name: 'devProfile' }); } })
+        RepoDetailPage({ owner: this.repoOwner, repoName: this.repoName, onOpenWebView: (url: string) => { this.webUrl = url; this.homeStack.pushPath({ name: 'repoWebView' }); }, onOpenDev: (uname: string) => { this.repoOwner = uname; this.homeStack.pushPath({ name: 'devProfile' }); }, onOpenRepo: (o: string, r: string) => { this.repoOwner = o; this.repoName = r; this.homeStack.pushPath({ name: 'repoWeb' }); }, onOpenIssues: (o: string, r: string) => { this.repoOwner = o; this.repoName = r; this.homeStack.pushPath({ name: 'issues' }); } })
       }.title('仓库详情').backgroundColor(this.T().background).padding({ top: 32 })
     } else if (name === 'devProfile') {
       NavDestination() { DevProfilePage({ username: this.repoOwner, onOpenRepo: (o: string, r: string) => { this.repoOwner = o; this.repoName = r; this.homeStack.pushPath({ name: 'repoWeb' }); }, onOpenWebView: (u: string) => { this.webUrl = u; this.homeStack.pushPath({ name: 'repoWebView' }); } }) }

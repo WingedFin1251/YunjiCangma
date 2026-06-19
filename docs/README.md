@@ -6,11 +6,11 @@
 
 | 文档 | 说明 |
 |------|------|
-| [ARCHITECTURE.md](ARCHITECTURE.md) | 系统架构 — 组件树、数据流、模块分层、路由设计 |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | 系统架构 — 组件树、数据流、模块分层、路由设计、主题架构 |
 | [DEVELOPMENT.md](DEVELOPMENT.md) | 开发指南 — 环境搭建、编码规范、工作流、调试技巧 |
-| [API.md](API.md) | API 集成 — GitHub REST API v3 封装、认证、端点参考 |
-| [DESIGN.md](DESIGN.md) | 设计系统 — 主题色彩、UI 组件规范、交互模式 |
-| [ROADMAP.md](ROADMAP.md) | 路线图 — 功能规划、版本计划 |
+| [API.md](API.md) | API 集成 — GitHub REST API v3 + GraphQL 封装、认证、端点参考 |
+| [DESIGN.md](DESIGN.md) | 设计系统 — 深色/浅色双主题色彩、UI 组件规范、交互模式 |
+| [ROADMAP.md](ROADMAP.md) | 路线图 — 功能规划、版本历史 |
 
 ## 快速导航
 
@@ -25,6 +25,8 @@
 - **平台**: HarmonyOS NEXT (API 6.1.0)
 - **语言**: ArkTS（TypeScript 严格子集）
 - **架构**: Stage Model + ArkUI 声明式 UI
-- **数据源**: GitHub REST API v3 + OAuth Web Flow
-- **设计**: 全局深色模式（V1.0 规范，唯一主题）
-- **底部导航**: 主页 / 收件箱 / 探索 / 个人资料
+- **数据源**: GitHub REST API v3 + GraphQL + OAuth Web Flow
+- **设计**: 深色/浅色双主题（14 色值 ×2，preferences 持久化 + 系统 ColorMode 联动）
+- **服务层**: HttpClient（HTTP 引擎）→ RepoRepository / UserRepository / SearchRepository / AuthService
+- **底部导航**: 主页 / 收件箱 / 探索 / 个人资料（4 Tab，独立 NavPathStack）
+- **子页面**: SearchPage / WorkPage / RepoDetailPage / DevProfilePage / IssuesPage / SettingsPage / TutorialPage / PrivacyPage
