@@ -1,6 +1,23 @@
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors, langColor } from '../../common/constants/ThemeConstants';
+import { MarkdownView } from '../../common/components/MarkdownView';
 import { RepoRepository } from '../../services/RepoRepository';
 
+const B64CHARS: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+function b64decode(b64: string): string {
+  let s: string = b64.replace(/[^A-Za-z0-9+/=]/g, '');
+  let out: string = ''; let i: number = 0;
+  while (i < s.length) {
+    const a: number = B64CHARS.indexOf(s.charAt(i++));
+    const b: number = B64CHARS.indexOf(s.charAt(i++));
+    const c: number = B64CHARS.indexOf(s.charAt(i++));
+    const d: number = B64CHARS.indexOf(s.charAt(i++));
+    const n: number = (a << 18) | (b << 12) | ((c & 63) << 6) | (d & 63);
+    out += String.fromCharCode((n >> 16) & 255);
+    if (c !== 64) out += String.fromCharCode((n >> 8) & 255);
+    if (d !== 64) out += String.fromCharCode(n & 255);
+  }
+  try { return decodeURIComponent(escape(out)); } catch (e) { return out; }
+}
 function fmt(n: number): string {
   if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
   if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
@@ -31,15 +48,19 @@ function stripMd(md: string): string {
 export struct RepoDetailPage {
   @StorageLink(THEME_KEY) themeMode: string = 'dark';
   @State repo: Object | null = null;
-  @State readmeText: string = '';
+  private readmeText: string = '';
   @State readmeLoaded: boolean = false;
-  @State showFullReadme: boolean = false;
+  @State readmeLoading: boolean = false;
+  @State readmeExpanded: boolean = false;
+  @State releaseExpanded: boolean = false;
   @State latestRelease: Object | null = null;
   @State loading: boolean = true;
   @Prop @Watch('loadRepo') owner: string = '';
   @Prop @Watch('loadRepo') repoName: string = '';
   onOpenWebView?: (url: string) => void;
   onOpenDev?: (username: string) => void;
+  onOpenIssues?: (owner: string, repo: string) => void;
+  onOpenRepo?: (owner: string, repo: string) => void;
   private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
 
   aboutToAppear(): void { if (this.owner && this.repoName) this.loadRepo(); }
@@ -59,16 +80,18 @@ export struct RepoDetailPage {
   }
 
   async loadReadme(): Promise<void> {
+    this.readmeLoading = true;
     try {
       const data: Object = await RepoRepository.getReadme(this.owner, this.repoName);
-      const content: string = (data as Record<string, Object>).content as string || '';
-      this.readmeText = content;
-      const enc: string = (data as Record<string, Object>).encoding as string || '';
-      if (enc === 'base64' && content) {
-        this.readmeText = '[README.md — 点击查看完整内容]';
-      }
-      this.readmeLoaded = true;
+      const raw: string = (data as Record<string, Object>).content as string || '';
+      // 后台解码，不阻塞 UI
+      setTimeout(() => {
+        try { this.readmeText = b64decode(raw); }
+        catch (e) { this.readmeText = raw; }
+        this.readmeLoaded = true;
+      }, 50);
     } catch (e) { this.readmeText = ''; this.readmeLoaded = true; }
+    finally { this.readmeLoading = false; }
   }
 
   build() {
@@ -178,10 +201,19 @@ export struct RepoDetailPage {
                     .fontSize(12).fontColor(this.T().textTertiary).margin({ top: 4 })
                 }
                 if ((this.latestRelease as Record<string, Object>).body) {
-                  Text(stripMd(((this.latestRelease as Record<string, Object>).body as string)).substring(0, Math.min(stripMd(((this.latestRelease as Record<string, Object>).body as string)).length, 800)))
-                    .fontSize(13).fontColor(this.T().textSecondary).lineHeight(20).maxLines(15)
-                    .textOverflow({ overflow: TextOverflow.Ellipsis })
-                    .width('100%').margin({ top: 10 })
+                  if (this.releaseExpanded) {
+                    MarkdownView({ content: ((this.latestRelease as Record<string, Object>).body as string), fontSize: 13, onOpenRepo: this.onOpenRepo, onOpenWebView: this.onOpenWebView }).margin({ top: 10 })
+                    Row() { Text('收起').fontSize(13).fontColor(this.T().textTertiary) }
+                      .width('100%').margin({ top: 8 })
+                      .onClick(() => { this.releaseExpanded = false; })
+                  } else {
+                    Text(stripMd(((this.latestRelease as Record<string, Object>).body as string)).substring(0, Math.min(stripMd(((this.latestRelease as Record<string, Object>).body as string)).length, 500)))
+                      .fontSize(13).fontColor(this.T().textSecondary).lineHeight(20).maxLines(10)
+                      .textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%').margin({ top: 10 })
+                    Row() { Text('展开阅读').fontSize(13).fontColor(this.T().accent) }
+                      .width('100%').margin({ top: 8 })
+                      .onClick(() => { this.releaseExpanded = true; })
+                  }
                 }
                 Row() {
                   Text('查看完整 Release').fontSize(14).fontColor(this.T().accent)
@@ -230,40 +262,43 @@ export struct RepoDetailPage {
             .border({ width: 1, color: this.T().border }).padding(20)
             .padding({ left: 16, right: 16 })
 
-            // ===== 7. README 预览 =====
-            if (this.readmeLoaded && this.readmeText) {
+            // ===== 7. README =====
+            if (this.readmeLoading) {
               Column() {
                 this.sectionTitle('📄 README')
-                if (this.showFullReadme) {
-                  Text(stripMd(this.readmeText))
-                    .fontSize(13).fontColor(this.T().textSecondary).lineHeight(20)
-                    .width('100%').padding(20)
-                } else {
-                  Text(stripMd(this.readmeText).substring(0, Math.min(stripMd(this.readmeText).length, 1500)))
-                    .fontSize(13).fontColor(this.T().textSecondary).lineHeight(20).maxLines(30)
-                    .textOverflow({ overflow: TextOverflow.Ellipsis })
-                    .width('100%').padding({ left: 20, right: 20 })
+                LoadingProgress().width(20).height(20).color(this.T().accent).margin({ top: 8, bottom: 8 })
+              }
+              .width('100%').backgroundColor(this.T().surface).borderRadius(16)
+              .border({ width: 1, color: this.T().border }).padding(20)
+              .padding({ left: 16, right: 16 })
+            } else if (this.readmeLoaded && this.readmeText) {
+              Column() {
+                this.sectionTitle('📄 README')
+                if (this.readmeExpanded) {
+                  MarkdownView({ content: this.readmeText, fontSize: 14, onOpenRepo: this.onOpenRepo, onOpenWebView: this.onOpenWebView })
                   Row() {
-                    Text('展开查看').fontSize(14).fontColor(this.T().accent)
-                  }.width('100%').padding({ left: 20, right: 20, bottom: 14 })
-                  .onClick(() => { this.showFullReadme = true; })
+                    Text('收起').fontSize(14).fontColor(this.T().textTertiary)
+                  }.width('100%').padding({ top: 8 })
+                  .onClick(() => { this.readmeExpanded = false; })
+                } else {
+                  Text(stripMd(this.readmeText).substring(0, Math.min(stripMd(this.readmeText).length, 1000)))
+                    .fontSize(13).fontColor(this.T().textSecondary).lineHeight(20).maxLines(20)
+                    .textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%')
+                  Row() {
+                    Text('展开阅读').fontSize(14).fontColor(this.T().accent)
+                  }.width('100%').padding({ top: 8 })
+                  .onClick(() => { this.readmeExpanded = true; })
                 }
                 Row() {
-                  Text('在浏览器中查看完整 README').fontSize(14).fontColor(this.T().accent)
-                }.width('100%').padding({ left: 20, right: 20, bottom: 16 })
+                  Text('在浏览器中查看').fontSize(14).fontColor(this.T().accent)
+                }.width('100%').padding({ top: 8 })
                 .onClick(() => {
                   const readmeUrl: string = 'https://github.com/' + this.owner + '/' + this.repoName + '#readme';
                   if (this.onOpenWebView) this.onOpenWebView(readmeUrl);
                 })
-                if (this.showFullReadme) {
-                  Row() {
-                    Text('收起').fontSize(14).fontColor(this.T().textTertiary)
-                  }.width('100%').padding({ left: 20, right: 20, bottom: 14 })
-                  .onClick(() => { this.showFullReadme = false; })
-                }
               }
               .width('100%').backgroundColor(this.T().surface).borderRadius(16)
-              .border({ width: 1, color: this.T().border })
+              .border({ width: 1, color: this.T().border }).padding(20)
               .padding({ left: 16, right: 16 })
             }
           }
@@ -289,7 +324,7 @@ export struct RepoDetailPage {
       .border({ width: 1, color: this.T().border })
       .onClick(() => {
         const baseUrl: string = 'https://github.com/' + this.owner + '/' + this.repoName;
-        if (label.includes('议题')) this.openWeb(baseUrl + '/issues');
+        if (label.includes('议题') && this.onOpenIssues) this.onOpenIssues(this.owner, this.repoName);
         else if (label.includes('PR')) this.openWeb(baseUrl + '/pulls');
         else if (label.includes('安全')) this.openWeb(baseUrl + '/security');
       })

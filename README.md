@@ -57,18 +57,31 @@ entry/src/main/ets/
 ├── pages/
 │   ├── MainPage.ets                 # @Entry — Tabs(52dp, 小白条沉浸, 主题监听)
 │   ├── LoginPage.ets                # @Entry — WebView OAuth(onLoadIntercept + 防抖)
-│   └── tabs/
-│       ├── HomeTab.ets              # 首页（我的项目 + 我的星标）
-│       ├── InboxTab.ets             # 消息（筛选标签 + 通知列表/空状态）
-│       ├── ExploreTab.ets           # 发现（热门仓库→WebView + 活动流）
-│       └── ProfileTab.ets           # 我的（头像 + 列表 + 登录 + 主题开关）
+│   ├── tabs/
+│   │   ├── HomeTab.ets              # 首页（我的项目 + 我的星标）
+│   │   ├── InboxTab.ets             # 消息（筛选标签 + 通知列表/空状态）
+│   │   ├── ExploreTab.ets           # 发现（热门仓库 + 活动流 → RepoDetailPage）
+│   │   └── ProfileTab.ets           # 我的（头像 + 列表 + 登录 + 设置入口）
+│   └── sub/
+│       ├── SearchPage.ets           # 全局搜索（敏感词过滤 + Linguist 颜色）
+│       ├── WorkPage.ets             # 工作项子页（议题/PR/仓库/组织/已加星标）
+│       ├── RepoDetailPage.ets       # 仓库详情（HEADER/Stats/Release/README/Info）
+│       ├── DevProfilePage.ets       # 开发者资料（统计/仓库/贡献热力图）
+│       ├── IssuesPage.ets           # Issue 列表
+│       ├── SettingsPage.ets         # 设置（深色开关/屏蔽词/教程/隐私/关于）
+│       ├── TutorialPage.ets         # 使用教程
+│       └── PrivacyPage.ets          # 隐私协议
 ├── services/
+│   ├── HttpClient.ets               # HTTP 引擎（泛型 get/post，Bearer 自动注入）
 │   ├── AuthService.ets              # OAuth + Token CRUD + 主题存取
-│   └── GitHubAPIService.ets         # HTTP 封装（Bearer 自动注入 + 11 端点）
-├── models/{User,AuthModels}.ets
+│   ├── RepoRepository.ets          # 仓库端点（Starred/Trending/Detail/Contents/Readme/Release）
+│   ├── UserRepository.ets          # 用户端点（Profile/Followers/Following/Events/Orgs/GraphQL）
+│   └── SearchRepository.ets        # 搜索/通知端点（Search/Notifications/Issues/PR）
+├── models/{User,AuthModels}.ets     # User/Repository/GitHubNotification/SearchResult
 └── common/
     ├── constants/{Theme,API}Constants.ets  # DarkTheme/LightTheme/ThemeColors + API 端点
-    └── components/  # RepoCard / ListItem / EmptyState / FilterTabBar / TabBarBuilder
+    ├── constants/SensitiveWords.ets        # 内置敏感词库（120+ 词）
+    └── components/  # RepoCard / ListItem / EmptyState / FilterTabBar / MarkdownView / TabBarBuilder
 ```
 
 ## 页面概览
