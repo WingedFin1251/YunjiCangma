@@ -84,7 +84,7 @@ struct MainPage {
 
       Text(label)
         .fontSize(10)
-        .fontWeight(FontWeight.Lighter)
+        .fontWeight(this.currentIndex === index ? FontWeight.Bold : FontWeight.Medium)
         .fontColor(this.currentIndex === index ? this.T().accent : this.T().textSecondary)
         .maxLines(1)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
