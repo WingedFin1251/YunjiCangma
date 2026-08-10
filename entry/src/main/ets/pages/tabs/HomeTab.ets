@@ -64,7 +64,7 @@ export struct HomeTab {
     new WorkItem('⊞', '项目', '#218BFE', 'projects'),
     new WorkItem('⊡', '仓库', '#B3B3B3', 'repos'),
     new WorkItem('◎', '组织', '#FF9529', 'orgs'),
-    new WorkItem('★', '已加星标', '#FFD33D', 'starred'),
+    new WorkItem('★', '已加星标', '#FFD33D', 'starredPage'),
   ];
 
   aboutToAppear(): void {
