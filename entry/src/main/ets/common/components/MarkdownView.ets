@@ -243,14 +243,21 @@ function parseInline(text: string): MdInline[] {
   const cached: MdInline[] | undefined = inlineCache.get(text);
   if (cached) return cached;
   const segments: MdInline[] = [];
-  const imgRe: RegExp = /!\[([^\]]*)\]\(([^)\s]+)\)/g;
   let last: number = 0;
-  let m: RegExpMatchArray | null = imgRe.exec(text);
-  while (m) {
-    if (m.index > last) segments.push(new MdInline('text', parseSpans(text.substring(last, m.index)), '', ''));
-    segments.push(new MdInline('img', [], m[2], m[1] || ''));
-    last = m.index + m[0].length;
-    m = imgRe.exec(text);
+  let idx: number = text.indexOf('![');
+  while (idx >= 0) {
+    const closeB: number = text.indexOf(']', idx + 2);
+    if (closeB < 0) break;
+    const openP: number = text.indexOf('(', closeB + 1);
+    if (openP !== closeB + 1) { idx = text.indexOf('![', closeB + 1); continue; }
+    const closeP: number = text.indexOf(')', openP + 1);
+    if (closeP < 0) break;
+    const alt: string = text.substring(idx + 2, closeB);
+    const url: string = text.substring(openP + 1, closeP);
+    if (idx > last) segments.push(new MdInline('text', parseSpans(text.substring(last, idx)), '', ''));
+    segments.push(new MdInline('img', [], url, alt));
+    last = closeP + 1;
+    idx = text.indexOf('![', closeP + 1);
   }
   if (last < text.length) segments.push(new MdInline('text', parseSpans(text.substring(last)), '', ''));
   if (segments.length === 0) segments.push(new MdInline('text', [], '', ''));
