@@ -15,6 +15,13 @@ import { SettingsPage } from '../sub/SettingsPage';
 import { TutorialPage } from '../sub/TutorialPage';
 import { PrivacyPage } from '../sub/PrivacyPage';
 
+/** 仓库跳转参数（避免共享状态被当前页绑定，造成双重导航） */
+class RepoParam {
+  owner: string = '';
+  repo: string = '';
+  constructor(o: string, r: string) { this.owner = o; this.repo = r; }
+}
+
 @Component
 export struct ProfileTab {
   @StorageLink(AUTH_LOGIN_KEY) @Watch('onLoginChanged') isLoggedIn: boolean = false;
@@ -22,6 +29,14 @@ export struct ProfileTab {
   private mica(): Array<[ResourceColor, number]> {
     const d: boolean = this.themeMode === 'dark';
     return [[d ? DarkTheme.micaStart : LightTheme.micaStart, 0], [d ? DarkTheme.micaEnd : LightTheme.micaEnd, 1]];
+  }
+  private paramOwner(param: ESObject): string {
+    const p = param as RepoParam;
+    return p && p.owner ? p.owner : this.detailOwner;
+  }
+  private paramRepo(param: ESObject): string {
+    const p = param as RepoParam;
+    return p && p.repo ? p.repo : this.detailRepo;
   }
   @State user: User | null = null;
   @State isLoading: boolean = false;
@@ -101,10 +116,10 @@ export struct ProfileTab {
                   .width('100%')
                   .onClick(() => {
                     const it = item as Record<string, Object>;
-                    this.detailOwner = ((it.owner as Record<string, string>).login as string) || '';
-                    this.detailRepo = (it.name as string) || '';
                     this.webUrl = (it.html_url as string) || '';
-                    this.profileStack.pushPath({ name: 'repoDetail' });
+                    const o: string = ((it.owner as Record<string, string>).login as string) || '';
+                    const r: string = (it.name as string) || '';
+                    this.profileStack.pushPath({ name: 'repoDetail', param: new RepoParam(o, r) });
                   })
                 }, (item: Object, idx: number) => idx.toString())
               }.width('100%').padding({ left: 16, right: 16 })
@@ -116,13 +131,13 @@ export struct ProfileTab {
       NavDestination() { IssuesPage({ owner: this.detailOwner, repoName: this.detailRepo, onOpenWebView: (u: string) => { this.webUrl = u; this.profileStack.pushPath({ name: 'repoWeb' }); }, onOpenIssue: (o: string, r: string, n: number) => { this.detailOwner = o; this.detailRepo = r; this.detailIssueNumber = n; this.profileStack.pushPath({ name: 'issueDetail' }); } }) }
         .title('议题').backgroundColor(this.T().background).padding({ top: 32 })
     } else if (name === 'issueDetail') {
-      NavDestination() { IssueDetailPage({ owner: this.detailOwner, repoName: this.detailRepo, issueNumber: this.detailIssueNumber, onOpenWebView: (u: string) => { this.webUrl = u; this.profileStack.pushPath({ name: 'repoWeb' }); }, onOpenRepo: (o: string, r: string) => { this.detailOwner = o; this.detailRepo = r; this.profileStack.pushPath({ name: 'repoDetail' }); } }) }
+      NavDestination() { IssueDetailPage({ owner: this.detailOwner, repoName: this.detailRepo, issueNumber: this.detailIssueNumber, onOpenWebView: (u: string) => { this.webUrl = u; this.profileStack.pushPath({ name: 'repoWeb' }); }, onOpenRepo: (o: string, r: string) => { this.profileStack.pushPath({ name: 'repoDetail', param: new RepoParam(o, r) }); } }) }
         .title('议题详情').backgroundColor(this.T().background).padding({ top: 32 })
     } else if (name === 'repoDetail') {
-      NavDestination() { RepoDetailPage({ owner: this.detailOwner, repoName: this.detailRepo, onOpenWebView: (u: string) => { this.webUrl = u; this.profileStack.pushPath({ name: 'repoWeb' }); }, onOpenDev: (uname: string) => { this.detailOwner = uname; this.profileStack.pushPath({ name: 'devProfile' }); }, onOpenRepo: (o: string, r: string) => { this.detailOwner = o; this.detailRepo = r; this.profileStack.pushPath({ name: 'repoDetail' }); }, onOpenIssues: (o: string, r: string) => { this.detailOwner = o; this.detailRepo = r; this.profileStack.pushPath({ name: 'issues' }); } }) }
+      NavDestination() { RepoDetailPage({ owner: this.paramOwner(param), repoName: this.paramRepo(param), onOpenWebView: (u: string) => { this.webUrl = u; this.profileStack.pushPath({ name: 'repoWeb' }); }, onOpenDev: (uname: string) => { this.detailOwner = uname; this.profileStack.pushPath({ name: 'devProfile' }); }, onOpenRepo: (o: string, r: string) => { this.profileStack.pushPath({ name: 'repoDetail', param: new RepoParam(o, r) }); }, onOpenIssues: (o: string, r: string) => { this.detailOwner = o; this.detailRepo = r; this.profileStack.pushPath({ name: 'issues' }); } }) }
         .title('仓库详情').linearGradient({ colors: this.mica(), direction: GradientDirection.RightBottom }).padding({ top: 32 })
     } else if (name === 'devProfile') {
-      NavDestination() { DevProfilePage({ username: this.detailOwner, onOpenRepo: (o: string, r: string) => { this.detailOwner = o; this.detailRepo = r; this.profileStack.pushPath({ name: 'repoDetail' }); }, onOpenWebView: (u: string) => { this.webUrl = u; this.profileStack.pushPath({ name: 'repoWeb' }); } }) }
+      NavDestination() { DevProfilePage({ username: this.detailOwner, onOpenRepo: (o: string, r: string) => { this.profileStack.pushPath({ name: 'repoDetail', param: new RepoParam(o, r) }); }, onOpenWebView: (u: string) => { this.webUrl = u; this.profileStack.pushPath({ name: 'repoWeb' }); } }) }
         .title('开发者').linearGradient({ colors: this.mica(), direction: GradientDirection.RightBottom }).padding({ top: 32 })
     } else if (name === 'repoWeb') {
       NavDestination() {
