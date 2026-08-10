@@ -65,7 +65,8 @@ export class AuthService {
       }
       throw new Error(`Token exchange failed: HTTP ${response.responseCode}`);
     } catch (e) {
-      throw e;
+      if (e instanceof Error) { throw e; }
+      throw new Error(JSON.stringify(e));
     } finally {
       httpRequest.destroy();
     }
