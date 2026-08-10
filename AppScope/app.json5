@@ -1,6 +1,6 @@
 {
   "app": {
-    "bundleName": "com.github.web",
+    "bundleName": "com.yunjicangma.app",
     "vendor": "云笈藏码",
     "versionCode": 1000000,
     "versionName": "1.0.0",

@@ -6,7 +6,7 @@
 - [x] Repository 分层 API（HttpClient → Repo/User/Search/Auth Repository）
 - [x] 深色/浅色双主题 + 状态栏透明沉浸 + WebView 联动 + 系统 ColorMode 同步
 - [x] 15 个 REST 端点 + 1 个 GraphQL 端点（贡献热力图）
-- [x] 🔍 全局搜索（120+ 敏感词过滤 + 30+ Linguist 语言颜色 → RepoDetailPage）
+- [x] 🔍 全局搜索（手动屏蔽词 + 30+ Linguist 语言颜色 → RepoDetailPage）
 - [x] 📦 仓库详情页（HEADER/Stats/Release/Info/README/Issues/PR/Security）
 - [x] 👤 开发者资料页（头像/统计/仓库搜索/筛选/贡献热力图 5 级色阶）
 - [x] 📊 GitHub 风格贡献热力图（GraphQL API + 横向滚动）
@@ -14,7 +14,8 @@
 - [x] ⚙️ 设置页（深色开关 + 手动屏蔽词 + 使用教程 + 隐私协议 + 关于）
 - [x] 📁 页面分层（tabs/ 4 Tab + sub/ 8 子页 + NavPathStack 路由）
 - [x] 🏠 4 Tab 导航（Home/Inbox/Explore/Profile + 小白条沉浸）
-- [x] 🔐 GitHub OAuth WebView 登录（自定义 Scheme + onLoadIntercept + 防抖）
+- [x] 🧊 子页面沉浸毛玻璃标题栏（HdsNavDestination + 内容滚动模糊）
+- [x] 🔐 GitHub OAuth Device Flow 登录（客户端零密钥，验证码 + 轮询）
 - [x] 🔄 登录自动刷新 + 主题持久化（preferences）
 - [x] 📋 首页工作项子页面（议题/PR/讨论/项目/仓库/组织/已加星标）
 - [x] 📡 通知列表（筛选标签 + 类型图标 + 空状态）
@@ -54,7 +55,7 @@
 ## v0.8.0 — 搜索 ✅ 已完成
 
 - [x] `pages/sub/SearchPage.ets` — 全局搜索
-- [x] 敏感词过滤（120+ 中英文内置词库 + 手动添加）
+- [x] 手动屏蔽词过滤
 - [x] Linguist 语言颜色标签
 - [ ] 搜索类型切换（Repos / Users / Issues）
 

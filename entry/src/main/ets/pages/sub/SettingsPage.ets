@@ -12,6 +12,8 @@ export struct SettingsPage {
   build() {
     Scroll() {
       Column({ space: 0 }) {
+        // 沉浸标题栏占位：初始避开标题栏，滚动时滑入磨砂下
+        Blank(100)
         // 深色模式
         this.settingRow('🌙 深色模式', true)
         Divider().color(this.T().border).width('90%')

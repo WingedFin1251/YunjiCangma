@@ -1,6 +1,5 @@
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
 import { SearchRepository } from '../../services/SearchRepository';
-import { BUILTIN_FILTER_WORDS } from '../../common/constants/SensitiveWords';
 
 @Component
 export struct SearchPage {
@@ -16,17 +15,15 @@ export struct SearchPage {
   private getBlockedCount(): number { return this.results.length - this.getFilteredResults().length; }
 
   private getFilteredResults(): Object[] {
-    // 内置词库始终生效，手动屏蔽词受开关控制
-    const builtin: string[] = BUILTIN_FILTER_WORDS.map((w: string) => w.toLowerCase());
+    // 仅手动屏蔽词（受开关控制）
     const manual: string[] = this.userFilterEnabled
       ? this.filterWords.toLowerCase().split(/[,，\s]+/).filter((w: string) => w.length > 0)
       : [];
-    const allWords: string[] = builtin.concat(manual);
-    if (allWords.length === 0) return this.results;
+    if (manual.length === 0) return this.results;
     return this.results.filter((item: Object) => {
       const name: string = ((item as Record<string, Object>).full_name as string || '').toLowerCase();
       const desc: string = ((item as Record<string, Object>).description as string || '').toLowerCase();
-      return !allWords.some((w: string) => name.includes(w) || desc.includes(w));
+      return !manual.some((w: string) => name.includes(w) || desc.includes(w));
     });
   }
   private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
@@ -43,6 +40,8 @@ export struct SearchPage {
 
   build() {
     Column() {
+      // 沉浸标题栏占位：初始避开标题栏
+      Blank(100)
       // 搜索框
       Text('').fontSize(0).fontColor(this.themeMode === 'dark' ? this.T().textPrimary : this.T().textPrimary)
       Row() {

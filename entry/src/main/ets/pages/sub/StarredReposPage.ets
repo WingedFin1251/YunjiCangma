@@ -50,6 +50,8 @@ export struct StarredReposPage {
 
   build() {
     Column() {
+      // 沉浸标题栏占位：初始避开标题栏
+      Blank(100)
       if (this.loading) {
         Column() {
           LoadingProgress().width(32).height(32).color(this.T().accent)

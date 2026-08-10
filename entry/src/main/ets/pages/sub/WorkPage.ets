@@ -33,6 +33,8 @@ export struct WorkPage {
 
   build() {
     Column() {
+      // 沉浸标题栏占位：初始避开标题栏
+      Blank(100)
       Text('').fontSize(0).fontColor(this.themeMode === 'dark' ? this.T().textPrimary : this.T().textPrimary)
       if (!this.isLoggedIn) {
         Column({ space: 12 }) {
