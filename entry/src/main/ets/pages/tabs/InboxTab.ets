@@ -2,6 +2,7 @@ import { webview } from '@kit.ArkWeb';
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
 import { EmptyState } from '../../common/components/EmptyState';
 import { SearchRepository } from '../../services/SearchRepository';
+import { NotificationDetailPage } from '../sub/NotificationDetailPage';
 import type { GitHubNotification } from '../../models/User';
 
 @Component
@@ -10,6 +11,15 @@ export struct InboxTab {
   private inboxStack: NavPathStack = new NavPathStack();
   @State webUrl: string = '';
   private webCtl: webview.WebviewController = new webview.WebviewController();
+  @State notifOwner: string = '';
+  @State notifRepo: string = '';
+  @State notifNumber: number = 0;
+  @State notifTitle: string = '';
+  @State notifRepoFull: string = '';
+  @State notifType: string = '';
+  @State notifReason: string = '';
+  @State notifUpdated: string = '';
+  @State notifUnread: boolean = false;
   @State selectedFilter: number = 0;
   @State notifications: GitHubNotification[] = [];
   @State isInboxLoading: boolean = true;
@@ -56,7 +66,15 @@ export struct InboxTab {
 
   @Builder
   inboxPageMap(name: string, param: ESObject) {
-    if (name === 'repoWebView') {
+    if (name === 'notifDetail') {
+      NavDestination() { NotificationDetailPage({
+        owner: this.notifOwner, repoName: this.notifRepo, number: this.notifNumber,
+        notifTitle: this.notifTitle, repoFullName: this.notifRepoFull, notifType: this.notifType,
+        reason: this.notifReason, updatedAt: this.notifUpdated, isUnread: this.notifUnread,
+        onOpenWebView: (u: string) => { this.webUrl = u; this.inboxStack.pushPath({ name: 'repoWebView' }); }
+      }) }
+        .title('消息详情').backgroundColor(this.T().background).padding({ top: 32 })
+    } else if (name === 'repoWebView') {
       NavDestination() {
         Web({ src: this.webUrl, controller: this.webCtl })
           .width('100%').height('100%')
@@ -66,9 +84,23 @@ export struct InboxTab {
     }
   }
 
-  /** 打开通知关联页面（API URL → HTML URL，WebView 加载） */
+  /** 打开通知：解析 subject.url → 原生消息详情；无法解析则 WebView 兜底 */
   private openNotification(notif: GitHubNotification): void {
     const apiUrl: string = notif.subject.url || '';
+    const m: RegExpMatchArray | null = apiUrl.match(/repos\/([^/]+)\/([^/]+)\/(?:issues|pulls|discussions)\/(\d+)/);
+    if (m && m[1] && m[2] && m[3]) {
+      this.notifOwner = m[1];
+      this.notifRepo = m[2];
+      this.notifNumber = parseInt(m[3]);
+      this.notifTitle = notif.subject.title || '';
+      this.notifRepoFull = notif.repository.full_name || '';
+      this.notifType = notif.subject.type || '';
+      this.notifReason = notif.reason || '';
+      this.notifUpdated = notif.updated_at || '';
+      this.notifUnread = notif.unread;
+      this.inboxStack.pushPath({ name: 'notifDetail' });
+      return;
+    }
     let url: string = apiUrl;
     if (apiUrl.indexOf('api.github.com') >= 0) {
       url = apiUrl.replace('api.github.com/repos/', 'github.com/');
