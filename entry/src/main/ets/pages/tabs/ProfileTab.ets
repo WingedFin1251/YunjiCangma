@@ -174,7 +174,7 @@ export struct ProfileTab {
         Column() {
           Row() {
             Blank()
-            Text('☰').fontSize($r('app.float.icon_size_normal'))
+            Text('☰').fontSize($r('app.float.icon_size_normal')).fontColor(this.T().textPrimary)
               .width($r('app.float.size_nav_icon_hit')).height($r('app.float.size_nav_icon_hit'))
               .textAlign(TextAlign.Center).lineHeight($r('app.float.size_nav_icon_hit'))
               .onClick(() => { this.profileStack.pushPath({ name: 'settings' }); })
