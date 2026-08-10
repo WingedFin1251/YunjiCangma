@@ -20,6 +20,9 @@ function parseColor(hex: string): number {
   return v;
 }
 
+/** 超长 Markdown 截断上限（防止一次性渲染过多节点导致卡顿/闪退） */
+const MAX_MD_CHARS: number = 30000;
+
 /**
  * Markdown 渲染 — 基于 CJMarkdown（@cangjie-tpc/markdown_hybrid）的薄封装。
  * 公开 API（content/maxLines/fontSize/onOpenRepo/onOpenWebView）与旧实现保持一致。
@@ -171,11 +174,20 @@ export struct MarkdownView {
     if (this.onOpenWebView) this.onOpenWebView(url);
   }
 
+  /** 超长内容截断后传入 CJMarkdown，防止渲染爆炸 */
+  private displayed(): string {
+    return this.content.length > MAX_MD_CHARS ? this.content.substring(0, MAX_MD_CHARS) : this.content;
+  }
+
+  private isTruncated(): boolean {
+    return this.content.length > MAX_MD_CHARS;
+  }
+
   build() {
     Column() {
       ForEach([this.signature()], (_key: string) => {
         CJMarkdown({
-          content: this.content,
+          content: this.displayed(),
           isInputEnded: true,
           incrementalAnalysis: false,
           useCangjieComponent: true,
@@ -183,6 +195,11 @@ export struct MarkdownView {
           plugin: this.getPlugin()
         })
       }, (key: string): string => key)
+      if (this.isTruncated()) {
+        Text('内容过长，已截断显示前 ' + MAX_MD_CHARS.toString() + ' 字，可在浏览器查看完整版')
+          .fontSize(12).fontColor(this.T().textTertiary)
+          .width('100%').padding({ top: 8, bottom: 4 })
+      }
     }.width('100%')
   }
 }
