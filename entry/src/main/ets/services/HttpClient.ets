@@ -22,7 +22,10 @@ export class HttpClient {
       });
       if (res.responseCode === 200) return JSON.parse(res.result as string) as T;
       throw new Error(`HTTP ${res.responseCode} for ${path}`);
-    } catch (e) { throw e; } finally { req.destroy(); }
+    } catch (e) {
+      if (e instanceof Error) { throw e; }
+      throw new Error(JSON.stringify(e));
+    } finally { req.destroy(); }
   }
 
   static async postRaw<T>(url: string, body: string, extraHeaders?: Record<string, string>): Promise<T> {
@@ -38,7 +41,10 @@ export class HttpClient {
       });
       if (res.responseCode === 200 || res.responseCode === 201) return JSON.parse(res.result as string) as T;
       throw new Error(`HTTP ${res.responseCode}`);
-    } catch (e) { throw e; } finally { req.destroy(); }
+    } catch (e) {
+      if (e instanceof Error) { throw e; }
+      throw new Error(JSON.stringify(e));
+    } finally { req.destroy(); }
   }
 
   static async post<T>(path: string, body: Object): Promise<T> {
@@ -53,6 +59,9 @@ export class HttpClient {
       });
       if (res.responseCode === 200 || res.responseCode === 201) return JSON.parse(res.result as string) as T;
       throw new Error(`HTTP ${res.responseCode} for ${path}`);
-    } catch (e) { throw e; } finally { req.destroy(); }
+    } catch (e) {
+      if (e instanceof Error) { throw e; }
+      throw new Error(JSON.stringify(e));
+    } finally { req.destroy(); }
   }
 }
