@@ -3,6 +3,7 @@ import type { Repository, SearchResult } from '../models/User';
 
 export class RepoRepository {
   static getStarredRepos(): Promise<Repository[]> { return HttpClient.get<Repository[]>('/user/starred?per_page=20'); }
+  static getStarredReposAll(): Promise<Repository[]> { return HttpClient.get<Repository[]>('/user/starred?per_page=100'); }
   static starRepo(owner: string, repo: string): Promise<void> { return HttpClient.put('/user/starred/' + owner + '/' + repo); }
   static unstarRepo(owner: string, repo: string): Promise<void> { return HttpClient.delete('/user/starred/' + owner + '/' + repo); }
   static getTopStarredRepos(): Promise<SearchResult> { return HttpClient.get<SearchResult>('/search/repositories?q=stars:%3E1&sort=stars&order=desc&per_page=20'); }
