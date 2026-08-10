@@ -8,6 +8,7 @@ import { SearchPage } from '../sub/SearchPage';
 import { DevProfilePage } from '../sub/DevProfilePage';
 import { IssuesPage } from '../sub/IssuesPage';
 import { IssueDetailPage } from '../sub/IssueDetailPage';
+import { StarredReposPage } from '../sub/StarredReposPage';
 import { RepoDetailPage } from '../sub/RepoDetailPage';
 import type { Repository } from '../../models/User';
 
@@ -101,6 +102,9 @@ export struct HomeTab {
     if (name === 'search') {
       NavDestination() { SearchPage({ onOpenRepo: (owner: string, repo: string) => { this.repoOwner = owner; this.repoName = repo; this.homeStack.pushPath({ name: 'repoWeb' }); } }) }
         .title('搜索').backgroundColor(this.T().background).padding({ top: 32 })
+    } else if (name === 'starredPage') {
+      NavDestination() { StarredReposPage({ onOpenRepo: (o: string, r: string) => { this.repoOwner = o; this.repoName = r; this.homeStack.pushPath({ name: 'repoWeb' }); } }) }
+        .title('已加星标').backgroundColor(this.T().background).padding({ top: 32 })
     } else if (name === 'issues') {
       NavDestination() { IssuesPage({ owner: this.repoOwner, repoName: this.repoName, onOpenWebView: (u: string) => { this.webUrl = u; this.homeStack.pushPath({ name: 'repoWebView' }); }, onOpenIssue: (o: string, r: string, n: number) => { this.repoOwner = o; this.repoName = r; this.detailIssueNumber = n; this.homeStack.pushPath({ name: 'issueDetail' }); } }) }
         .title('议题').backgroundColor(this.T().background).padding({ top: 32 })
@@ -143,7 +147,7 @@ export struct HomeTab {
             this.sectionHeader('我的项目')
             Column() { ForEach(this.workItems, (item: WorkItem, index: number) => { this.workListItem(item) }, (item: WorkItem) => item.label) }
             Divider().color(this.T().border).width('100%').margin({ top: 12, bottom: 8 })
-            this.sectionHeader('我的星标')
+            this.sectionHeader('我的星标', () => { this.homeStack.pushPath({ name: 'starredPage' }); })
             Column({ space: 12 }) {
               ForEach(this.starredRepos, (repo: FavoriteRepo, index: number) => {
                 Column() {
@@ -162,7 +166,7 @@ export struct HomeTab {
   }
 
   @Builder
-  sectionHeader(title: string) {
+  sectionHeader(title: string, onMore?: () => void) {
     Row() {
       Text(title)
         .fontSize(20)
@@ -175,6 +179,7 @@ export struct HomeTab {
         .width(44)
         .height(44)
         .textAlign(TextAlign.Center)
+        .onClick(() => { if (onMore) onMore(); })
     }
     .width('100%')
     .padding({ left: 16, right: 16 })
