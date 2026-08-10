@@ -166,7 +166,7 @@ export struct HomeTab {
                 }.width('100%').onClick(() => { this.repoOwner = repo.owner; this.repoName = repo.repo; this.webUrl = repo.htmlUrl; this.homeStack.pushPath({ name: 'repoWeb' }); })
               }, (repo: FavoriteRepo) => repo.repo)
             }.padding({ left: 16, right: 16 })
-            Blank().height(12)
+            Blank().height(76)
           }.width('100%').alignItems(HorizontalAlign.Start)
         }.scrollBar(BarState.Off).width('100%').backgroundColor(this.T().background)
       }
