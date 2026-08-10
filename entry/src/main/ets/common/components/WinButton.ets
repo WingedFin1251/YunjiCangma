@@ -2,7 +2,7 @@ import { DarkTheme, LightTheme, THEME_KEY } from '../constants/ThemeConstants';
 
 /**
  * WinUI 风格按钮 — 图标 + 文字 + 细描边 + 按压反馈。
- * 在 Row 中并列时，调用处加 .layoutWeight(1) 均分宽度。
+ * 在 Row 中并列时传 flex: 1 均分宽度（0 = 按内容自适应）。
  */
 @Component
 export struct WinButton {
@@ -10,6 +10,7 @@ export struct WinButton {
   @Prop label: string = '';
   @Prop icon: string = '';
   @Prop tint: string = '#218BFE';
+  @Prop flex: number = 0;
   onAction?: () => void;
 
   @Styles
@@ -25,7 +26,7 @@ export struct WinButton {
       }
       Text(this.label).fontSize(14).fontWeight(FontWeight.Medium).fontColor(this.tint)
     }
-    .height(40).justifyContent(FlexAlign.Center).alignItems(VerticalAlign.Center)
+    .layoutWeight(this.flex).height(40).justifyContent(FlexAlign.Center).alignItems(VerticalAlign.Center)
     .borderRadius(8)
     .backgroundColor(this.themeMode === 'dark' ? DarkTheme.ctrlFill : LightTheme.ctrlFill)
     .border({ width: 1, color: this.themeMode === 'dark' ? DarkTheme.cardStroke : LightTheme.cardStroke })
