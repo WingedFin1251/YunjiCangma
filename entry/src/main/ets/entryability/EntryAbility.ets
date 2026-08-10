@@ -48,9 +48,13 @@ export default class EntryAbility extends UIAbility {
     }
 
     // 同步系统颜色模式 → NavDestination 标题/返回按钮可见
-    this.context.getApplicationContext().setColorMode(
-      savedTheme !== 'light' ? ConfigurationConstant.ColorMode.COLOR_MODE_DARK : ConfigurationConstant.ColorMode.COLOR_MODE_LIGHT
-    );
+    try {
+      this.context.getApplicationContext().setColorMode(
+        savedTheme !== 'light' ? ConfigurationConstant.ColorMode.COLOR_MODE_DARK : ConfigurationConstant.ColorMode.COLOR_MODE_LIGHT
+      );
+    } catch (err) {
+      hilog.warn(DOMAIN, 'testTag', 'Failed to set color mode. Cause: %{public}s', JSON.stringify(err));
+    }
 
     windowStage.loadContent('pages/MainPage', (err) => {
       if (err.code) {
