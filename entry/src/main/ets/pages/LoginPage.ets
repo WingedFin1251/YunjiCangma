@@ -1,4 +1,3 @@
-import { router } from '@kit.ArkUI';
 import { webview } from '@kit.ArkWeb';
 import { AuthService } from '../services/AuthService';
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../common/constants/ThemeConstants';
@@ -35,7 +34,7 @@ struct LoginPage {
     try {
       const token: string = await AuthService.exchangeCodeForToken(code);
       if (token) {
-        router.back();
+        this.getUIContext().getRouter().back();
       } else {
         this.errorMessage = 'Token exchange failed';
       }
@@ -59,7 +58,7 @@ struct LoginPage {
         .height(36)
         .backgroundColor(Color.Transparent)
         .onClick(() => {
-          router.back();
+          this.getUIContext().getRouter().back();
         })
 
         Blank()

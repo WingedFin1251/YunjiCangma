@@ -18,12 +18,15 @@ struct MainPage {
     AuthService.saveTheme(this.currentTheme);
     try {
       const isDark: boolean = this.currentTheme !== 'light';
-      window.getLastWindow(getContext()).then((w) => {
-        w.setWindowSystemBarProperties({
-          statusBarContentColor: isDark ? '#FFFFFF' : '#1F2328'
+      const ctx = this.getUIContext().getHostContext();
+      if (ctx !== undefined && ctx !== null) {
+        window.getLastWindow(ctx).then((w) => {
+          w.setWindowSystemBarProperties({
+            statusBarContentColor: isDark ? '#FFFFFF' : '#1F2328'
+          });
+          w.setWindowBackgroundColor(isDark ? '#121212' : '#F6F8FA');
         });
-        w.setWindowBackgroundColor(isDark ? '#121212' : '#F6F8FA');
-      });
+      }
     } catch (_) {}
   }
 
