@@ -1,5 +1,6 @@
 import { ConfigurationConstant } from '@kit.AbilityKit';
 import { window } from '@kit.ArkUI';
+import { HdsTabs, HdsTabsController, HdsTabsFloatingStyle, hdsMaterial } from '@kit.UIDesignKit';
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../common/constants/ThemeConstants';
 import { AuthService } from '../services/AuthService';
 import { HomeTab } from './tabs/HomeTab';
@@ -31,7 +32,7 @@ struct MainPage {
     };
   }
   @State currentIndex: number = 0;
-  private tabsController: TabsController = new TabsController();
+  private tabsController: HdsTabsController = new HdsTabsController();
 
   onThemeChange(): void {
     AuthService.saveTheme(this.currentTheme);
@@ -69,9 +70,16 @@ struct MainPage {
     return this.currentTheme === 'dark' ? 'rgba(76,194,255,0.45)' : 'rgba(9,105,218,0.35)';
   }
 
-  /** tab 栏毛玻璃背景（半透明 surface，配合 barOverlap 模糊） */
-  private tabBarColor(): string {
-    return this.currentTheme === 'dark' ? 'rgba(30,30,30,0.72)' : 'rgba(246,248,250,0.78)';
+  /** HdsTabs 悬浮样式（液态玻璃沉浸材质） */
+  private buildFloatingStyle(): HdsTabsFloatingStyle {
+    return {
+      barSideMargin: 16,
+      barBottomMargin: 28,
+      systemMaterialEffect: {
+        materialType: hdsMaterial.MaterialType.IMMERSIVE,
+        materialLevel: hdsMaterial.MaterialLevel.ADAPTIVE
+      }
+    };
   }
 
   @Builder
@@ -112,10 +120,10 @@ struct MainPage {
 
   build() {
     Column() {
-      Tabs({
+      HdsTabs({
         barPosition: BarPosition.End,
-        controller: this.tabsController,
-        index: this.currentIndex
+        index: this.currentIndex,
+        controller: this.tabsController
       }) {
         TabContent() {
           HomeTab()
@@ -138,8 +146,10 @@ struct MainPage {
         .tabBar(this.tabBarContent(3, '◉', $r('app.string.tab_profile')))
       }
       .barHeight(52)
-      .barBackgroundColor(this.tabBarColor())
       .barOverlap(true)
+      .barBackgroundColor(Color.Transparent)
+      .barBackgroundBlurStyle(BlurStyle.COMPONENT_THIN)
+      .barFloatingStyle(this.buildFloatingStyle())
       .backgroundColor(this.T().background)
       .scrollable(false)
       .animationDuration(0)
