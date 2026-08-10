@@ -152,9 +152,9 @@ export struct InboxTab {
 
   @Builder
   buildNotificationList() {
-    Scroll() {
-      Column() {
-        ForEach(this.getFilteredNotifications(), (item: GitHubNotification, index: number) => {
+    List({ space: 0 }) {
+      ForEach(this.getFilteredNotifications(), (item: GitHubNotification, index: number) => {
+        ListItem() {
           Row() {
             Text(this.getNotifIcon(item))
               .fontSize(16)
@@ -189,11 +189,9 @@ export struct InboxTab {
           .height(48)
           .padding({ left: 16, right: 16 })
           .alignItems(VerticalAlign.Center)
-        }, (item: GitHubNotification) => item.id)
-      }
-      .width('100%')
+        }
+      }, (item: GitHubNotification) => item.id)
     }
-    .scrollable(ScrollDirection.Vertical)
     .scrollBar(BarState.Off)
     .width('100%')
     .layoutWeight(1)
