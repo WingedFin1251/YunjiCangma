@@ -9,6 +9,7 @@ import { DevProfilePage } from '../sub/DevProfilePage';
 import { IssuesPage } from '../sub/IssuesPage';
 import { IssueDetailPage } from '../sub/IssueDetailPage';
 import { StarredReposPage } from '../sub/StarredReposPage';
+import { NewIssuePage } from '../sub/NewIssuePage';
 import { RepoDetailPage } from '../sub/RepoDetailPage';
 import type { Repository } from '../../models/User';
 
@@ -90,6 +91,12 @@ export struct HomeTab {
     }
   }
 
+  /** 刷新首页（重载星标列表） */
+  private refreshHome(): void {
+    this.isStarredLoading = true;
+    this.loadStarredRepos();
+  }
+
   private getWorkTitle(name: string): string {
     if (name === 'issues') return '议题'; if (name === 'pulls') return '拉取请求';
     if (name === 'discussions') return '讨论'; if (name === 'projects') return '项目';
@@ -105,6 +112,9 @@ export struct HomeTab {
     } else if (name === 'starredPage') {
       NavDestination() { StarredReposPage({ onOpenRepo: (o: string, r: string) => { this.repoOwner = o; this.repoName = r; this.homeStack.pushPath({ name: 'repoWeb' }); } }) }
         .title('已加星标').backgroundColor(this.T().background).padding({ top: 32 })
+    } else if (name === 'newIssue') {
+      NavDestination() { NewIssuePage({ onCreated: () => { this.homeStack.pop(); } }) }
+        .title('新建议题').backgroundColor(this.T().background).padding({ top: 32 })
     } else if (name === 'issues') {
       NavDestination() { IssuesPage({ owner: this.repoOwner, repoName: this.repoName, onOpenWebView: (u: string) => { this.webUrl = u; this.homeStack.pushPath({ name: 'repoWebView' }); }, onOpenIssue: (o: string, r: string, n: number) => { this.repoOwner = o; this.repoName = r; this.detailIssueNumber = n; this.homeStack.pushPath({ name: 'issueDetail' }); } }) }
         .title('议题').backgroundColor(this.T().background).padding({ top: 32 })
@@ -138,7 +148,8 @@ export struct HomeTab {
           Row({ space: 20 }) {
             Text('⌕').fontSize(20).fontColor(this.T().textPrimary).width(44).height(44).textAlign(TextAlign.Center).lineHeight(44)
               .onClick(() => { this.homeStack.pushPath({ name: 'search' }); })
-            this.navIcon('＋'); this.navIcon('⋯')
+            this.navIcon('＋', () => { this.homeStack.pushPath({ name: 'newIssue' }); })
+            this.navIcon('⋯', () => { this.refreshHome(); })
           }
         }.width('100%').padding({ left: 16, right: 16 }).alignItems(VerticalAlign.Bottom)
 
@@ -212,7 +223,7 @@ export struct HomeTab {
   }
 
   @Builder
-  navIcon(icon: string) {
+  navIcon(icon: string, onClick?: () => void) {
     Text(icon)
       .fontSize(20)
       .fontColor(this.T().textPrimary)
@@ -220,5 +231,6 @@ export struct HomeTab {
       .height(44)
       .textAlign(TextAlign.Center)
       .lineHeight(44)
+      .onClick(() => { if (onClick) onClick(); })
   }
 }
