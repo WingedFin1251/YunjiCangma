@@ -147,7 +147,7 @@ export struct HomeTab {
           Text($r('app.string.page_title_home')).fontSize(26).fontWeight(FontWeight.Bold).fontColor(this.T().textPrimary).layoutWeight(1)
           Row({ space: 20 }) {
             this.headerIcon($r('app.media.ic_search_line_d'), $r('app.media.ic_search_line_l'), () => { this.homeStack.pushPath({ name: 'search' }); })
-            this.navIcon('＋', () => { this.homeStack.pushPath({ name: 'newIssue' }); })
+            this.headerIcon($r('app.media.ic_add_line_d'), $r('app.media.ic_add_line_l'), () => { this.homeStack.pushPath({ name: 'newIssue' }); })
             this.headerIcon($r('app.media.ic_refresh_line_d'), $r('app.media.ic_refresh_line_l'), () => { this.refreshHome(); })
           }
         }.width('100%').padding({ left: 16, right: 16 }).alignItems(VerticalAlign.Bottom)
@@ -219,18 +219,6 @@ export struct HomeTab {
     .alignItems(VerticalAlign.Center)
     .backgroundColor(this.T().background)
     .onClick(() => { this.homeStack.pushPath({ name: item.route }); })
-  }
-
-  @Builder
-  navIcon(icon: string, onClick?: () => void) {
-    Text(icon)
-      .fontSize(20)
-      .fontColor(this.T().textPrimary)
-      .width(44)
-      .height(44)
-      .textAlign(TextAlign.Center)
-      .lineHeight(44)
-      .onClick(() => { if (onClick) onClick(); })
   }
 
   @Builder
