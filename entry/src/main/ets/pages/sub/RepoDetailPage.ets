@@ -16,10 +16,11 @@ function b64decode(b64: string): string {
     const b: number = B64CHARS.indexOf(s.charAt(i++));
     const c: number = B64CHARS.indexOf(s.charAt(i++));
     const d: number = B64CHARS.indexOf(s.charAt(i++));
+    if (a < 0 || b < 0) break;
     const n: number = (a << 18) | (b << 12) | ((c & 63) << 6) | (d & 63);
     out += String.fromCharCode((n >> 16) & 255);
-    if (c !== 64) out += String.fromCharCode((n >> 8) & 255);
-    if (d !== 64) out += String.fromCharCode(n & 255);
+    if (c >= 0) out += String.fromCharCode((n >> 8) & 255);
+    if (d >= 0) out += String.fromCharCode(n & 255);
   }
   try { return decodeURIComponent(escape(out)); } catch (e) { return out; }
 }
