@@ -11,6 +11,7 @@ export struct ExpandableSection {
   @Prop accentText: string = '';
   @Prop initialExpanded: boolean = false;
   @State expanded: boolean = false;
+  @State hasExpanded: boolean = false;
   @BuilderParam content: () => void;
 
   aboutToAppear(): void {
@@ -37,13 +38,18 @@ export struct ExpandableSection {
           .animation({ duration: 200, curve: Curve.FastOutSlowIn })
       }
       .width('100%').height(48).padding({ left: 16, right: 16 }).alignItems(VerticalAlign.Center)
-      .onClick(() => { this.expanded = !this.expanded; })
+      .onClick(() => {
+        this.expanded = !this.expanded;
+        if (this.expanded) this.hasExpanded = true;
+      })
 
-      if (this.expanded) {
+      // 首次展开后保持内容挂载（visibility 切换），避免折叠重开时重渲染超长 Markdown 卡顿/闪退
+      if (this.hasExpanded) {
         Column() {
           this.content()
         }
         .width('100%').padding({ left: 16, right: 16, bottom: 18 })
+        .visibility(this.expanded ? Visibility.Visible : Visibility.None)
         .transition(TransitionEffect.OPACITY.animation({ duration: 200, curve: Curve.FastOutSlowIn }))
       }
     }
