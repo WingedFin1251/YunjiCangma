@@ -132,7 +132,7 @@ export struct RepoDetailPage {
             AcrylicCard() {
               Column({ space: 10 }) {
                 Row({ space: 6 }) {
-                  PersonPicture({ url: this.ownerAvatar(), name: this.ownerLogin(), size: 20 })
+                  PersonPicture({ url: this.ownerAvatar(), name: this.ownerLogin(), avatarSize: 20 })
                   Text(this.ownerLogin()).fontSize(13).fontColor(this.T().textSecondary)
                     .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
                 }.width('100%').alignItems(VerticalAlign.Center)
@@ -226,7 +226,7 @@ export struct RepoDetailPage {
             // ===== 5. 开发者 =====
             AcrylicCard() {
               Row({ space: 12 }) {
-                PersonPicture({ url: this.ownerAvatar(), name: this.ownerLogin(), size: 40 })
+                PersonPicture({ url: this.ownerAvatar(), name: this.ownerLogin(), avatarSize: 40 })
                 Column({ space: 2 }) {
                   Text(this.ownerLogin()).fontSize(16).fontWeight(FontWeight.Medium).fontColor(this.T().textPrimary)
                   Text('开发者').fontSize(12).fontColor(this.T().textTertiary)

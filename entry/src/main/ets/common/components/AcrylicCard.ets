@@ -7,7 +7,7 @@ import { DarkTheme, LightTheme, THEME_KEY } from '../constants/ThemeConstants';
 @Component
 export struct AcrylicCard {
   @StorageLink(THEME_KEY) themeMode: string = 'dark';
-  @Prop radius: number = 8;
+  @Prop cornerRadius: number = 8;
   @Prop paddingV: number = 18;
   @Prop paddingH: number = 16;
   @BuilderParam content: () => void;
@@ -17,7 +17,7 @@ export struct AcrylicCard {
       this.content()
     }
     .width('100%')
-    .borderRadius(this.radius)
+    .borderRadius(this.cornerRadius)
     .backgroundColor(this.themeMode === 'dark' ? DarkTheme.cardGlass : LightTheme.cardGlass)
     .backdropBlur(20)
     .border({ width: 1, color: this.themeMode === 'dark' ? DarkTheme.cardStroke : LightTheme.cardStroke })
