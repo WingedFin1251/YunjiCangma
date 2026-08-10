@@ -80,6 +80,11 @@ export struct ExploreTab {
     }
   }
 
+  private openExploreWeb(url: string): void {
+    this.webUrl = url;
+    this.exploreStack.pushPath({ name: 'repoWeb' });
+  }
+
   @Builder
   explorePageMap(name: string, param: ESObject) {
     if (name === 'repoDetail') {
@@ -118,8 +123,8 @@ export struct ExploreTab {
           Column() {
 
           Row({ space: 12 }) {
-            this.discoverItem('◈', '热门仓库')
-            this.discoverItem('◈', '精选列表')
+            this.discoverItem('◈', '热门仓库', 'https://github.com/trending')
+            this.discoverItem('◈', '精选列表', 'https://github.com/topics')
           }
           .width('100%')
           .padding({ left: 16, right: 16 })
@@ -240,7 +245,7 @@ export struct ExploreTab {
   }
 
   @Builder
-  discoverItem(icon: string, label: string) {
+  discoverItem(icon: string, label: string, url: string) {
     Row() {
       Text(icon)
         .fontSize(24)
@@ -258,6 +263,6 @@ export struct ExploreTab {
     .backgroundColor(this.T().surface)
     .borderRadius(8)
     .alignItems(VerticalAlign.Center)
-    .onClick(() => {})
+    .onClick(() => { this.openExploreWeb(url); })
   }
 }
