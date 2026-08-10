@@ -151,7 +151,7 @@ export struct ProfileTab {
                     PersonPicture({
                       url: ((item as Record<string, Object>).avatar_url as string) || '',
                       name: ((item as Record<string, Object>).login as string) || '?',
-                      size: 40
+                      avatarSize: 40
                     })
                     Text(((item as Record<string, Object>).login as string) || '')
                       .fontSize(16).fontWeight(FontWeight.Medium).fontColor(this.T().textPrimary).layoutWeight(1)
