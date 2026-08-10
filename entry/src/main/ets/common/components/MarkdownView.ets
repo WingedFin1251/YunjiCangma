@@ -20,8 +20,8 @@ function parseColor(hex: string): number {
   return v;
 }
 
-/** 超长 Markdown 截断上限（防止一次性渲染过多节点导致卡顿/闪退） */
-const MAX_MD_CHARS: number = 30000;
+/** 超长 Markdown 渲染上限（50万字符≈500KB，覆盖全部真实 README；防极端输入导致闪退） */
+const MAX_MD_CHARS: number = 500000;
 
 /**
  * Markdown 渲染 — 基于 CJMarkdown（@cangjie-tpc/markdown_hybrid）的薄封装。
