@@ -146,10 +146,9 @@ export struct HomeTab {
         Row() {
           Text($r('app.string.page_title_home')).fontSize(26).fontWeight(FontWeight.Bold).fontColor(this.T().textPrimary).layoutWeight(1)
           Row({ space: 20 }) {
-            Text('⌕').fontSize(20).fontColor(this.T().textPrimary).width(44).height(44).textAlign(TextAlign.Center).lineHeight(44)
-              .onClick(() => { this.homeStack.pushPath({ name: 'search' }); })
+            this.headerIcon($r('app.media.ic_search'), () => { this.homeStack.pushPath({ name: 'search' }); })
             this.navIcon('＋', () => { this.homeStack.pushPath({ name: 'newIssue' }); })
-            this.navIcon('⋯', () => { this.refreshHome(); })
+            this.headerIcon($r('app.media.ic_refresh'), () => { this.refreshHome(); })
           }
         }.width('100%').padding({ left: 16, right: 16 }).alignItems(VerticalAlign.Bottom)
 
@@ -232,5 +231,21 @@ export struct HomeTab {
       .textAlign(TextAlign.Center)
       .lineHeight(44)
       .onClick(() => { if (onClick) onClick(); })
+  }
+
+  @Builder
+  headerIcon(iconRes: Resource, onClick?: () => void) {
+    Column() {
+      Image(iconRes)
+        .width(22)
+        .height(22)
+        .objectFit(ImageFit.Contain)
+        .fillColor(this.T().textPrimary)
+    }
+    .width(44)
+    .height(44)
+    .justifyContent(FlexAlign.Center)
+    .alignItems(HorizontalAlign.Center)
+    .onClick(() => { if (onClick) onClick(); })
   }
 }
