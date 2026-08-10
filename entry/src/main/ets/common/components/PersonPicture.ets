@@ -8,7 +8,7 @@ export struct PersonPicture {
   @StorageLink(THEME_KEY) themeMode: string = 'dark';
   @Prop url: string = '';
   @Prop name: string = '';
-  @Prop size: number = 80;
+  @Prop avatarSize: number = 80;
   @State failed: boolean = false;
 
   private initials(): string {
@@ -30,17 +30,17 @@ export struct PersonPicture {
     Stack() {
       if (this.url !== '' && !this.failed) {
         Image(this.url)
-          .width(this.size).height(this.size).borderRadius(this.size / 2).objectFit(ImageFit.Cover)
+          .width(this.avatarSize).height(this.avatarSize).borderRadius(this.avatarSize / 2).objectFit(ImageFit.Cover)
           .onError(() => { this.failed = true; })
       } else {
         Text(this.initials())
-          .fontSize(this.size * 0.36).fontWeight(FontWeight.Medium).fontColor(Color.White)
-          .width(this.size).height(this.size).borderRadius(this.size / 2).textAlign(TextAlign.Center)
+          .fontSize(this.avatarSize * 0.36).fontWeight(FontWeight.Medium).fontColor(Color.White)
+          .width(this.avatarSize).height(this.avatarSize).borderRadius(this.avatarSize / 2).textAlign(TextAlign.Center)
           .backgroundColor(this.avatarColor())
       }
     }
-    .width(this.size).height(this.size)
-    .borderRadius(this.size / 2)
+    .width(this.avatarSize).height(this.avatarSize)
+    .borderRadius(this.avatarSize / 2)
     .border({ width: 1.5, color: this.themeMode === 'dark' ? DarkTheme.cardStroke : LightTheme.cardStroke })
   }
 }
