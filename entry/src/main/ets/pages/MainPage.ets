@@ -1,3 +1,4 @@
+import { ConfigurationConstant } from '@kit.AbilityKit';
 import { window } from '@kit.ArkUI';
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../common/constants/ThemeConstants';
 import { AuthService } from '../services/AuthService';
@@ -20,6 +21,11 @@ struct MainPage {
       const isDark: boolean = this.currentTheme !== 'light';
       const ctx = this.getUIContext().getHostContext();
       if (ctx !== undefined && ctx !== null) {
+        // 同步系统颜色模式 → NavDestination 标题栏/系统组件颜色跟随主题
+        const appCtx = ctx.getApplicationContext();
+        if (appCtx !== undefined && appCtx !== null) {
+          appCtx.setColorMode(isDark ? ConfigurationConstant.ColorMode.COLOR_MODE_DARK : ConfigurationConstant.ColorMode.COLOR_MODE_LIGHT);
+        }
         window.getLastWindow(ctx).then((w) => {
           w.setWindowSystemBarProperties({
             statusBarContentColor: isDark ? '#FFFFFF' : '#1F2328'
