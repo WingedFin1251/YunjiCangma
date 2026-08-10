@@ -64,4 +64,36 @@ export class HttpClient {
       throw new Error(JSON.stringify(e));
     } finally { req.destroy(); }
   }
+
+  static async put(path: string): Promise<void> {
+    const req = http.createHttp();
+    try {
+      const res = await req.request(`${GITHUB_API_BASE}${path}`, {
+        method: http.RequestMethod.PUT,
+        header: HttpClient.buildHeaders()
+      });
+      if (res.responseCode !== 204) {
+        throw new Error(`HTTP ${res.responseCode} for ${path}`);
+      }
+    } catch (e) {
+      if (e instanceof Error) { throw e; }
+      throw new Error(JSON.stringify(e));
+    } finally { req.destroy(); }
+  }
+
+  static async delete(path: string): Promise<void> {
+    const req = http.createHttp();
+    try {
+      const res = await req.request(`${GITHUB_API_BASE}${path}`, {
+        method: http.RequestMethod.DELETE,
+        header: HttpClient.buildHeaders()
+      });
+      if (res.responseCode !== 204) {
+        throw new Error(`HTTP ${res.responseCode} for ${path}`);
+      }
+    } catch (e) {
+      if (e instanceof Error) { throw e; }
+      throw new Error(JSON.stringify(e));
+    } finally { req.destroy(); }
+  }
 }
