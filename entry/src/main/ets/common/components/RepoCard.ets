@@ -28,6 +28,7 @@ export struct RepoCard {
   @Prop stars: number = 0;
   @Prop isStarred: boolean = false;
   @State starred: boolean = false;
+  onUnstar?: (owner: string, repo: string) => void;
 
   aboutToAppear(): void {
     this.starred = this.isStarred;
@@ -48,10 +49,12 @@ export struct RepoCard {
         this.getUIContext().getPromptAction().showToast({ message: '收藏失败，请重试' });
       });
     } else {
-      RepoRepository.unstarRepo(this.owner, this.repo).catch(() => {
-        this.starred = true;
-        this.getUIContext().getPromptAction().showToast({ message: '取消收藏失败，请重试' });
-      });
+      RepoRepository.unstarRepo(this.owner, this.repo)
+        .then(() => { if (this.onUnstar) this.onUnstar(this.owner, this.repo); })
+        .catch(() => {
+          this.starred = true;
+          this.getUIContext().getPromptAction().showToast({ message: '取消收藏失败，请重试' });
+        });
     }
   }
 
