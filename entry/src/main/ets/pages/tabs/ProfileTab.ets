@@ -248,7 +248,7 @@ export struct ProfileTab {
             }.margin({ top: 24 })
           }
 
-          Blank().height(24)
+          Blank().height(76)
         }.width('100%').alignItems(HorizontalAlign.Center).padding({ top: 32, bottom: 20 })
       }.scrollable(ScrollDirection.Vertical).scrollBar(BarState.Off)
         .width('100%').backgroundColor(this.themeMode === 'dark' ? this.T().background : this.T().background)
