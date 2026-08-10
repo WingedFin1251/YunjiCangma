@@ -18,6 +18,10 @@ import { PrivacyPage } from '../sub/PrivacyPage';
 export struct ProfileTab {
   @StorageLink(AUTH_LOGIN_KEY) @Watch('onLoginChanged') isLoggedIn: boolean = false;
   @StorageLink(THEME_KEY) themeMode: string = 'dark'; private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
+  private mica(): Array<[ResourceColor, number]> {
+    const d: boolean = this.themeMode === 'dark';
+    return [[d ? DarkTheme.micaStart : LightTheme.micaStart, 0], [d ? DarkTheme.micaEnd : LightTheme.micaEnd, 1]];
+  }
   @State user: User | null = null;
   @State isLoading: boolean = false;
   @State listItems: Object[] = [];
@@ -111,10 +115,10 @@ export struct ProfileTab {
         .title('议题').backgroundColor(this.T().background).padding({ top: 32 })
     } else if (name === 'repoDetail') {
       NavDestination() { RepoDetailPage({ owner: this.detailOwner, repoName: this.detailRepo, onOpenWebView: (u: string) => { this.webUrl = u; this.profileStack.pushPath({ name: 'repoWeb' }); }, onOpenDev: (uname: string) => { this.detailOwner = uname; this.profileStack.pushPath({ name: 'devProfile' }); }, onOpenRepo: (o: string, r: string) => { this.detailOwner = o; this.detailRepo = r; this.profileStack.pushPath({ name: 'repoDetail' }); }, onOpenIssues: (o: string, r: string) => { this.detailOwner = o; this.detailRepo = r; this.profileStack.pushPath({ name: 'issues' }); } }) }
-        .title('仓库详情').backgroundColor(this.T().background).padding({ top: 32 })
+        .title('仓库详情').linearGradient({ colors: this.mica(), direction: GradientDirection.RightBottom }).padding({ top: 32 })
     } else if (name === 'devProfile') {
       NavDestination() { DevProfilePage({ username: this.detailOwner, onOpenRepo: (o: string, r: string) => { this.detailOwner = o; this.detailRepo = r; this.profileStack.pushPath({ name: 'repoDetail' }); }, onOpenWebView: (u: string) => { this.webUrl = u; this.profileStack.pushPath({ name: 'repoWeb' }); } }) }
-        .title('开发者').backgroundColor(this.T().background).padding({ top: 32 })
+        .title('开发者').linearGradient({ colors: this.mica(), direction: GradientDirection.RightBottom }).padding({ top: 32 })
     } else if (name === 'repoWeb') {
       NavDestination() {
         Web({ src: this.webUrl, controller: this.webCtl })
