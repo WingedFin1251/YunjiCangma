@@ -25,12 +25,27 @@ class ActivityItem {
   }
 }
 
+/** 仓库跳转参数（避免共享状态被当前页绑定，造成双重导航） */
+class RepoParam {
+  owner: string = '';
+  repo: string = '';
+  constructor(o: string, r: string) { this.owner = o; this.repo = r; }
+}
+
 @Component
 export struct ExploreTab {
   @StorageLink(THEME_KEY) themeMode: string = 'dark'; private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
   private mica(): Array<[ResourceColor, number]> {
     const d: boolean = this.themeMode === 'dark';
     return [[d ? DarkTheme.micaStart : LightTheme.micaStart, 0], [d ? DarkTheme.micaEnd : LightTheme.micaEnd, 1]];
+  }
+  private paramOwner(param: ESObject): string {
+    const p = param as RepoParam;
+    return p && p.owner ? p.owner : this.detailOwner;
+  }
+  private paramRepo(param: ESObject): string {
+    const p = param as RepoParam;
+    return p && p.repo ? p.repo : this.detailRepo;
   }
   private exploreStack: NavPathStack = new NavPathStack();
   @State trendingRepos: Repository[] = [];
@@ -107,16 +122,16 @@ export struct ExploreTab {
   @Builder
   explorePageMap(name: string, param: ESObject) {
     if (name === 'repoDetail') {
-      NavDestination() { RepoDetailPage({ owner: this.detailOwner, repoName: this.detailRepo, onOpenWebView: (u: string) => { this.webUrl = u; this.exploreStack.pushPath({ name: 'repoWeb' }); }, onOpenDev: (uname: string) => { this.detailOwner = uname; this.exploreStack.pushPath({ name: 'devProfile' }); }, onOpenRepo: (o: string, r: string) => { this.detailOwner = o; this.detailRepo = r; this.exploreStack.pushPath({ name: 'repoDetail' }); }, onOpenIssues: (o: string, r: string) => { this.detailOwner = o; this.detailRepo = r; this.exploreStack.pushPath({ name: 'issues' }); } }) }
+      NavDestination() { RepoDetailPage({ owner: this.paramOwner(param), repoName: this.paramRepo(param), onOpenWebView: (u: string) => { this.webUrl = u; this.exploreStack.pushPath({ name: 'repoWeb' }); }, onOpenDev: (uname: string) => { this.detailOwner = uname; this.exploreStack.pushPath({ name: 'devProfile' }); }, onOpenRepo: (o: string, r: string) => { this.exploreStack.pushPath({ name: 'repoDetail', param: new RepoParam(o, r) }); }, onOpenIssues: (o: string, r: string) => { this.detailOwner = o; this.detailRepo = r; this.exploreStack.pushPath({ name: 'issues' }); } }) }
         .title('仓库详情').linearGradient({ colors: this.mica(), direction: GradientDirection.RightBottom }).padding({ top: 32 })
     } else if (name === 'issues') {
       NavDestination() { IssuesPage({ owner: this.detailOwner, repoName: this.detailRepo, onOpenWebView: (u: string) => { this.webUrl = u; this.exploreStack.pushPath({ name: 'repoWeb' }); }, onOpenIssue: (o: string, r: string, n: number) => { this.detailOwner = o; this.detailRepo = r; this.detailIssueNumber = n; this.exploreStack.pushPath({ name: 'issueDetail' }); } }) }
         .title('议题').backgroundColor(this.T().background).padding({ top: 32 })
     } else if (name === 'issueDetail') {
-      NavDestination() { IssueDetailPage({ owner: this.detailOwner, repoName: this.detailRepo, issueNumber: this.detailIssueNumber, onOpenWebView: (u: string) => { this.webUrl = u; this.exploreStack.pushPath({ name: 'repoWeb' }); }, onOpenRepo: (o: string, r: string) => { this.detailOwner = o; this.detailRepo = r; this.exploreStack.pushPath({ name: 'repoDetail' }); } }) }
+      NavDestination() { IssueDetailPage({ owner: this.detailOwner, repoName: this.detailRepo, issueNumber: this.detailIssueNumber, onOpenWebView: (u: string) => { this.webUrl = u; this.exploreStack.pushPath({ name: 'repoWeb' }); }, onOpenRepo: (o: string, r: string) => { this.exploreStack.pushPath({ name: 'repoDetail', param: new RepoParam(o, r) }); } }) }
         .title('议题详情').backgroundColor(this.T().background).padding({ top: 32 })
     } else if (name === 'devProfile') {
-      NavDestination() { DevProfilePage({ username: this.detailOwner, onOpenRepo: (o: string, r: string) => { this.detailOwner = o; this.detailRepo = r; this.exploreStack.pushPath({ name: 'repoDetail' }); }, onOpenWebView: (u: string) => { this.webUrl = u; this.exploreStack.pushPath({ name: 'repoWeb' }); } }) }
+      NavDestination() { DevProfilePage({ username: this.detailOwner, onOpenRepo: (o: string, r: string) => { this.exploreStack.pushPath({ name: 'repoDetail', param: new RepoParam(o, r) }); }, onOpenWebView: (u: string) => { this.webUrl = u; this.exploreStack.pushPath({ name: 'repoWeb' }); } }) }
         .title('开发者').linearGradient({ colors: this.mica(), direction: GradientDirection.RightBottom }).padding({ top: 32 })
     } else if (name === 'repoWeb') {
       NavDestination() {
@@ -126,7 +141,7 @@ export struct ExploreTab {
           .backgroundColor(this.themeMode === 'dark' ? Color.Black : Color.White)
       }.title('GitHub').backgroundColor(this.T().background).padding({ top: 32 })
     } else if (name === 'topRepos') {
-      NavDestination() { TopReposPage({ onOpenRepo: (o: string, r: string) => { this.detailOwner = o; this.detailRepo = r; this.exploreStack.pushPath({ name: 'repoDetail' }); } }) }
+      NavDestination() { TopReposPage({ onOpenRepo: (o: string, r: string) => { this.exploreStack.pushPath({ name: 'repoDetail', param: new RepoParam(o, r) }); } }) }
         .title('星标榜').backgroundColor(this.T().background).padding({ top: 32 })
     }
   }
@@ -196,10 +211,8 @@ export struct ExploreTab {
               }
               .width('100%')
               .onClick(() => {
-                this.detailOwner = repo.owner.login;
-                this.detailRepo = repo.name;
                 this.webUrl = repo.html_url || '';
-                this.exploreStack.pushPath({ name: 'repoDetail' });
+                this.exploreStack.pushPath({ name: 'repoDetail', param: new RepoParam(repo.owner.login, repo.name) });
               })
             }, (repo: Repository) => repo.id.toString())
           }
