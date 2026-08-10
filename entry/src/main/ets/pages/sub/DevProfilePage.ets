@@ -7,6 +7,10 @@ import { WinButton } from '../../common/components/WinButton';
 import { PersonPicture } from '../../common/components/PersonPicture';
 import type { User } from '../../models/User';
 
+// 贡献热力图缓存（避免重复打开同一开发者反复请求触发 GraphQL 限流）
+const contribCache: Map<string, Object[]> = new Map();
+const contribTotalCache: Map<string, number> = new Map();
+
 function fmt(n: number): string {
   if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
   if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
@@ -53,13 +57,21 @@ export struct DevProfilePage {
 
   async loadContributions(): Promise<void> {
     try {
-      const data: Object = await UserRepository.getContributions(this.username);
-      const d: Record<string, Object> = data as Record<string, Object>;
-      const userObj: Record<string, Object> = d.data ? (d.data as Record<string, Object>).user as Record<string, Object> : ({} as Record<string, Object>);
-      const coll: Record<string, Object> = userObj ? (userObj.contributionsCollection as Record<string, Object>) : ({} as Record<string, Object>);
-      const cal: Record<string, Object> = coll ? (coll.contributionCalendar as Record<string, Object>) : ({} as Record<string, Object>);
-      this.totalContributions = (cal.totalContributions as number) || 0;
-      this.contribWeeks = (cal.weeks as Object[]) || [];
+      const cached: Object[] | undefined = contribCache.get(this.username);
+      if (cached) {
+        this.contribWeeks = cached;
+        this.totalContributions = contribTotalCache.get(this.username) || 0;
+      } else {
+        const data: Object = await UserRepository.getContributions(this.username);
+        const d: Record<string, Object> = data as Record<string, Object>;
+        const userObj: Record<string, Object> = d.data ? (d.data as Record<string, Object>).user as Record<string, Object> : ({} as Record<string, Object>);
+        const coll: Record<string, Object> = userObj ? (userObj.contributionsCollection as Record<string, Object>) : ({} as Record<string, Object>);
+        const cal: Record<string, Object> = coll ? (coll.contributionCalendar as Record<string, Object>) : ({} as Record<string, Object>);
+        this.totalContributions = (cal.totalContributions as number) || 0;
+        this.contribWeeks = (cal.weeks as Object[]) || [];
+        contribCache.set(this.username, this.contribWeeks);
+        contribTotalCache.set(this.username, this.totalContributions);
+      }
     } catch (e) { this.totalContributions = 0; this.contribWeeks = []; }
     finally { this.contribLoading = false; }
   }
@@ -168,6 +180,13 @@ export struct DevProfilePage {
                     Text('较多').fontSize(10).fontColor(this.T().textTertiary)
                   }.width('100%').padding({ top: 4 }).justifyContent(FlexAlign.End)
                 }.width('100%')
+              }
+            } else {
+              AcrylicCard({ paddingV: 14 }) {
+                Column({ space: 8 }) {
+                  this.sectionTitle('📊 贡献')
+                  Text('贡献数据加载失败或暂无数据').fontSize(12).fontColor(this.T().textTertiary)
+                }.width('100%').alignItems(HorizontalAlign.Start)
               }
             }
 
