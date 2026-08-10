@@ -68,7 +68,7 @@ export struct InboxTab {
   inboxPageMap(name: string, param: ESObject) {
     if (name === 'notifDetail') {
       NavDestination() { NotificationDetailPage({
-        owner: this.notifOwner, repoName: this.notifRepo, number: this.notifNumber,
+        owner: this.notifOwner, repoName: this.notifRepo, issueNumber: this.notifNumber,
         notifTitle: this.notifTitle, repoFullName: this.notifRepoFull, notifType: this.notifType,
         reason: this.notifReason, updatedAt: this.notifUpdated, isUnread: this.notifUnread,
         onOpenWebView: (u: string) => { this.webUrl = u; this.inboxStack.pushPath({ name: 'repoWebView' }); }
@@ -84,31 +84,26 @@ export struct InboxTab {
     }
   }
 
-  /** 打开通知：解析 subject.url → 原生消息详情；无法解析则 WebView 兜底 */
+  /** 打开通知：解析 subject.url → 原生消息详情（元信息 + 关联内容）；解析失败只显示元信息 + 浏览器按钮 */
   private openNotification(notif: GitHubNotification): void {
-    const apiUrl: string = notif.subject.url || '';
+    const subj = notif.subject;
+    const apiUrl: string = subj ? (subj.url || '') : '';
+    this.notifOwner = '';
+    this.notifRepo = '';
+    this.notifNumber = 0;
     const m: RegExpMatchArray | null = apiUrl.match(/repos\/([^/]+)\/([^/]+)\/(?:issues|pulls|discussions)\/(\d+)/);
     if (m && m[1] && m[2] && m[3]) {
       this.notifOwner = m[1];
       this.notifRepo = m[2];
       this.notifNumber = parseInt(m[3]);
-      this.notifTitle = notif.subject.title || '';
-      this.notifRepoFull = notif.repository.full_name || '';
-      this.notifType = notif.subject.type || '';
-      this.notifReason = notif.reason || '';
-      this.notifUpdated = notif.updated_at || '';
-      this.notifUnread = notif.unread;
-      this.inboxStack.pushPath({ name: 'notifDetail' });
-      return;
     }
-    let url: string = apiUrl;
-    if (apiUrl.indexOf('api.github.com') >= 0) {
-      url = apiUrl.replace('api.github.com/repos/', 'github.com/');
-    } else {
-      url = 'https://github.com/' + notif.repository.full_name;
-    }
-    this.webUrl = url;
-    this.inboxStack.pushPath({ name: 'repoWebView' });
+    this.notifTitle = subj ? (subj.title || '') : '';
+    this.notifRepoFull = notif.repository ? (notif.repository.full_name || '') : '';
+    this.notifType = subj ? (subj.type || '') : '';
+    this.notifReason = notif.reason || '';
+    this.notifUpdated = notif.updated_at || '';
+    this.notifUnread = notif.unread;
+    this.inboxStack.pushPath({ name: 'notifDetail' });
   }
 
   build() {
