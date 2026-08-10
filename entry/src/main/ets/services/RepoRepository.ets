@@ -3,6 +3,7 @@ import type { Repository, SearchResult } from '../models/User';
 
 export class RepoRepository {
   static getStarredRepos(): Promise<Repository[]> { return HttpClient.get<Repository[]>('/user/starred?per_page=20'); }
+  static getTopStarredRepos(): Promise<SearchResult> { return HttpClient.get<SearchResult>('/search/repositories?q=stars:%3E1&sort=stars&order=desc&per_page=20'); }
   static getTrendingRepos(): Promise<SearchResult> {
     const d: Date = new Date();
     d.setDate(d.getDate() - 30);
