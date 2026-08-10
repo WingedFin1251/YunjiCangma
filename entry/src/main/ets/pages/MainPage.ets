@@ -74,7 +74,7 @@ struct MainPage {
   private buildFloatingStyle(): HdsTabsFloatingStyle {
     return {
       barSideMargin: 16,
-      barBottomMargin: 28,
+      barBottomMargin: 36,
       systemMaterialEffect: {
         materialType: hdsMaterial.MaterialType.IMMERSIVE,
         materialLevel: hdsMaterial.MaterialLevel.ADAPTIVE
@@ -157,12 +157,6 @@ struct MainPage {
         this.currentIndex = index;
       })
       .layoutWeight(1)
-
-      // 小白条沉浸区：底栏颜色向下延伸
-      Row()
-        .width('100%')
-        .height(20)
-        .backgroundColor(this.T().surface)
     }
     .width('100%')
     .height('100%')
