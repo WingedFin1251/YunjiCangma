@@ -77,10 +77,14 @@ struct MainPage {
 
   @Builder
   tabBarContent(index: number, icon: string, label: ResourceStr) {
-    Column({ space: 2 }) {
+    Column() {
+      // 图标：固定行高居中符号（避免基线偏移）
       Text(icon)
         .fontSize(20)
         .fontColor(this.currentIndex === index ? this.T().accent : this.T().textSecondary)
+        .height(24)
+        .lineHeight(24)
+        .textAlign(TextAlign.Center)
 
       Text(label)
         .fontSize(10)
@@ -89,6 +93,8 @@ struct MainPage {
         .maxLines(1)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
         .constraintSize({ maxWidth: 52 })
+        .lineHeight(12)
+        .margin({ top: 2 })
     }
     .justifyContent(FlexAlign.Center)
     .alignItems(HorizontalAlign.Center)
