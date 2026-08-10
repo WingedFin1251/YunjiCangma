@@ -1,6 +1,16 @@
 import { HttpClient } from './HttpClient';
 import type { Repository, SearchResult } from '../models/User';
 
+/** 创建议题请求体 */
+class NewIssueBody {
+  title: string = '';
+  body: string = '';
+  constructor(t: string, b: string) {
+    this.title = t;
+    this.body = b;
+  }
+}
+
 export class RepoRepository {
   static getStarredRepos(): Promise<Repository[]> { return HttpClient.get<Repository[]>('/user/starred?per_page=20'); }
   static getStarredReposAll(): Promise<Repository[]> { return HttpClient.get<Repository[]>('/user/starred?per_page=100'); }
@@ -16,6 +26,9 @@ export class RepoRepository {
   static getMyRepos(): Promise<Repository[]> { return HttpClient.get<Repository[]>('/user/repos?type=all&per_page=50&sort=updated'); }
   static getUserRepos(u: string): Promise<Repository[]> { return HttpClient.get<Repository[]>('/users/' + u + '/repos?per_page=30&sort=updated'); }
   static getRepoDetail(owner: string, repo: string): Promise<Object> { return HttpClient.get<Object>('/repos/' + owner + '/' + repo); }
+  static createIssue(owner: string, repo: string, title: string, body: string): Promise<Object> {
+    return HttpClient.post<Object>('/repos/' + owner + '/' + repo + '/issues', new NewIssueBody(title, body));
+  }
   static getRepoContents(owner: string, repo: string, path: string): Promise<Object[]> {
     const p: string = path ? '/' + encodeURIComponent(path) : '';
     return HttpClient.get<Object[]>('/repos/' + owner + '/' + repo + '/contents' + p);
