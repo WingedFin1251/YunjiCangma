@@ -36,20 +36,36 @@ struct MainPage {
     } catch (_) {}
   }
 
+  /** 选中 tab 的光感胶囊底色（半透明 accent） */
+  private tabGlowColor(): string {
+    return this.currentTheme === 'dark' ? 'rgba(33,139,254,0.22)' : 'rgba(9,105,218,0.16)';
+  }
+
   @Builder
   tabBarContent(index: number, icon: string, label: ResourceStr) {
     Column() {
-      Text(icon)
-        .fontSize(20)
-        .fontColor(this.currentIndex === index
-          ? this.T().accent
-          : this.T().textSecondary)
+      // 光感胶囊：选中时图标置于半透明 accent 胶囊上，带光晕
+      Column() {
+        Text(icon)
+          .fontSize(20)
+          .fontColor(this.currentIndex === index ? this.T().accent : this.T().textSecondary)
+      }
+      .width(46)
+      .height(30)
+      .borderRadius(15)
+      .justifyContent(FlexAlign.Center)
+      .backgroundColor(this.currentIndex === index ? this.tabGlowColor() : Color.Transparent)
+      .shadow({
+        radius: this.currentIndex === index ? 14 : 0,
+        color: this.currentIndex === index ? this.tabGlowColor() : 'rgba(0,0,0,0)',
+        offsetY: 0
+      })
+      .animation({ duration: 200, curve: Curve.FastOutSlowIn })
+
       Text(label)
         .fontSize(10)
         .fontWeight(FontWeight.Lighter)
-        .fontColor(this.currentIndex === index
-          ? this.T().accent
-          : this.T().textSecondary)
+        .fontColor(this.currentIndex === index ? this.T().accent : this.T().textSecondary)
         .maxLines(1)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
         .constraintSize({ maxWidth: 52 })
