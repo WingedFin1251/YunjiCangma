@@ -84,14 +84,22 @@ struct MainPage {
     return dark ? 'rgba(76,194,255,0.45)' : 'rgba(9,105,218,0.35)';
   }
 
-  /** HdsTabs 悬浮样式（液态玻璃沉浸材质） */
+  /** HdsTabs 悬浮样式（液态玻璃沉浸材质 + 背板蒙层，材质等级随光感档位） */
   private buildFloatingStyle(): HdsTabsFloatingStyle {
+    const dark: boolean = this.currentTheme === 'dark';
+    let level: hdsMaterial.MaterialLevel = hdsMaterial.MaterialLevel.ADAPTIVE;
+    if (this.glowLevel === 0) level = hdsMaterial.MaterialLevel.GENTLE;
+    else if (this.glowLevel === 2) level = hdsMaterial.MaterialLevel.EXQUISITE;
     return {
       barSideMargin: 16,
       barBottomMargin: 36,
+      gradientMask: {
+        maskColor: dark ? '#33000000' : '#66F1F3F5',
+        maskHeight: 68
+      },
       systemMaterialEffect: {
         materialType: hdsMaterial.MaterialType.IMMERSIVE,
-        materialLevel: hdsMaterial.MaterialLevel.ADAPTIVE
+        materialLevel: level
       }
     };
   }
