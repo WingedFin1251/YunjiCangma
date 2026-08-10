@@ -36,6 +36,7 @@ Thumbs.db
 
 # 无关第三方参考项目（非本应用源码）
 /WinUIonWeb-master/
+/komi-store-main/
 
 # Claude Code
 /.claude/
