@@ -126,11 +126,14 @@ export struct InboxTab {
           Column() {
             LoadingProgress().width(32).height(32).color(this.T().accent).margin({ top: 80 })
           }
-          .width('100%').height('100%').backgroundColor(this.themeMode === 'dark' ? this.T().background : this.T().background)
+          .width('100%').layoutWeight(1).alignItems(HorizontalAlign.Center)
         } else if (this.getFilteredNotifications().length > 0) {
           this.buildNotificationList()
         } else {
-          EmptyState({ icon: '✉', title: '暂无新消息', subtitle: '所有通知已查看，随心探索开源仓库' })
+          Column() {
+            EmptyState({ icon: '✉', title: '暂无新消息', subtitle: '所有通知已查看，随心探索开源仓库' })
+          }
+          .width('100%').layoutWeight(1)
         }
       }
       .width('100%')
@@ -193,7 +196,7 @@ export struct InboxTab {
     .scrollable(ScrollDirection.Vertical)
     .scrollBar(BarState.Off)
     .width('100%')
-    .height('100%')
+    .layoutWeight(1)
     .backgroundColor(this.T().background)
   }
 }
