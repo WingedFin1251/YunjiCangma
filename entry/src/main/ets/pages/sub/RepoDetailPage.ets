@@ -1,3 +1,4 @@
+import { util } from '@kit.ArkTS';
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors, langColor } from '../../common/constants/ThemeConstants';
 import { MarkdownView } from '../../common/components/MarkdownView';
 import { RepoRepository } from '../../services/RepoRepository';
@@ -7,22 +8,16 @@ import { WinButton } from '../../common/components/WinButton';
 import { ExpandableSection } from '../../common/components/ExpandableSection';
 import { PersonPicture } from '../../common/components/PersonPicture';
 
-const B64CHARS: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+/** Base64 → UTF-8 字符串（系统原生解码，避免手写循环阻塞主线程） */
 function b64decode(b64: string): string {
-  let s: string = b64.replace(/[^A-Za-z0-9+/=]/g, '');
-  let out: string = ''; let i: number = 0;
-  while (i < s.length) {
-    const a: number = B64CHARS.indexOf(s.charAt(i++));
-    const b: number = B64CHARS.indexOf(s.charAt(i++));
-    const c: number = B64CHARS.indexOf(s.charAt(i++));
-    const d: number = B64CHARS.indexOf(s.charAt(i++));
-    if (a < 0 || b < 0) break;
-    const n: number = (a << 18) | (b << 12) | ((c & 63) << 6) | (d & 63);
-    out += String.fromCharCode((n >> 16) & 255);
-    if (c >= 0) out += String.fromCharCode((n >> 8) & 255);
-    if (d >= 0) out += String.fromCharCode(n & 255);
+  try {
+    const base64 = new util.Base64Helper();
+    const bytes: Uint8Array = base64.decodeSync(b64);
+    const decoder = new util.TextDecoder('utf-8');
+    return decoder.decodeToString(bytes);
+  } catch (e) {
+    return '';
   }
-  try { return decodeURIComponent(escape(out)); } catch (e) { return out; }
 }
 function fmt(n: number): string {
   if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
