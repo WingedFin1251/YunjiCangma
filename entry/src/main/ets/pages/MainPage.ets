@@ -11,9 +11,26 @@ import { ProfileTab } from './tabs/ProfileTab';
 @Component
 struct MainPage {
   @StorageLink(THEME_KEY) @Watch('onThemeChange') currentTheme: string = 'dark';
-  private T(): ThemeColors { const d = this.currentTheme === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
+  private T(): ThemeColors {
+    const d: boolean = this.currentTheme === 'dark';
+    return {
+      background: d ? DarkTheme.background : LightTheme.background,
+      surface: d ? DarkTheme.surface : LightTheme.surface,
+      surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated,
+      border: d ? DarkTheme.border : LightTheme.border,
+      textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary,
+      textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary,
+      textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary,
+      accent: d ? DarkTheme.accent : LightTheme.accent,
+      issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen,
+      prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue,
+      discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple,
+      orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange,
+      starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow,
+      clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback
+    };
+  }
   @State currentIndex: number = 0;
-  private tabsController: TabsController = new TabsController();
 
   onThemeChange(): void {
     AuthService.saveTheme(this.currentTheme);
@@ -21,7 +38,6 @@ struct MainPage {
       const isDark: boolean = this.currentTheme !== 'light';
       const ctx = this.getUIContext().getHostContext();
       if (ctx !== undefined && ctx !== null) {
-        // 同步系统颜色模式 → NavDestination 标题栏/系统组件颜色跟随主题
         const appCtx = ctx.getApplicationContext();
         if (appCtx !== undefined && appCtx !== null) {
           appCtx.setColorMode(isDark ? ConfigurationConstant.ColorMode.COLOR_MODE_DARK : ConfigurationConstant.ColorMode.COLOR_MODE_LIGHT);
@@ -36,33 +52,44 @@ struct MainPage {
     } catch (_) {}
   }
 
-  /** 选中 tab 的光感胶囊底色（半透明 accent） */
-  private tabGlowColor(): string {
-    return this.currentTheme === 'dark' ? 'rgba(33,139,254,0.22)' : 'rgba(9,105,218,0.16)';
+  /** 液态玻璃栏背景（半透明，配合 backdropBlur） */
+  private glassColor(): string {
+    return this.currentTheme === 'dark' ? 'rgba(30,30,30,0.55)' : 'rgba(255,255,255,0.6)';
   }
 
-  /** tab 栏毛玻璃背景（半透明 surface，配合 barOverlap 模糊） */
-  private tabBarColor(): string {
-    return this.currentTheme === 'dark' ? 'rgba(30,30,30,0.72)' : 'rgba(246,248,250,0.78)';
+  /** 选中项亮色渐变（accent → 亮） */
+  private tabGradient(selected: boolean): Array<[ResourceColor, number]> {
+    if (!selected) {
+      return [['rgba(0,0,0,0)', 0], ['rgba(0,0,0,0)', 1]];
+    }
+    if (this.currentTheme === 'dark') {
+      return [['#218BFE', 0], ['#4CC2FF', 1]];
+    }
+    return [['#0969DA', 0], ['#1F8FFF', 1]];
+  }
+
+  /** 选中项光晕色 */
+  private glowShadow(): string {
+    return this.currentTheme === 'dark' ? 'rgba(76,194,255,0.45)' : 'rgba(9,105,218,0.35)';
   }
 
   @Builder
-  tabBarContent(index: number, icon: string, label: ResourceStr) {
-    Column() {
-      // 光感胶囊：选中时图标置于半透明 accent 胶囊上，带光晕
+  floatingItem(index: number, icon: string, label: ResourceStr) {
+    Column({ space: 2 }) {
+      // 图标置于亮色渐变胶囊中（选中时），带光晕
       Column() {
         Text(icon)
           .fontSize(20)
-          .fontColor(this.currentIndex === index ? this.T().accent : this.T().textSecondary)
+          .fontColor(this.currentIndex === index ? Color.White : this.T().textSecondary)
       }
-      .width(46)
-      .height(30)
-      .borderRadius(15)
+      .width(44)
+      .height(38)
+      .borderRadius(19)
       .justifyContent(FlexAlign.Center)
-      .backgroundColor(this.currentIndex === index ? this.tabGlowColor() : Color.Transparent)
+      .linearGradient({ colors: this.tabGradient(this.currentIndex === index) })
       .shadow({
         radius: this.currentIndex === index ? 14 : 0,
-        color: this.currentIndex === index ? this.tabGlowColor() : 'rgba(0,0,0,0)',
+        color: this.currentIndex === index ? this.glowShadow() : 'rgba(0,0,0,0)',
         offsetY: 0
       })
       .animation({ duration: 200, curve: Curve.FastOutSlowIn })
@@ -74,60 +101,56 @@ struct MainPage {
         .maxLines(1)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
         .constraintSize({ maxWidth: 52 })
-        .margin({ top: 2 })
     }
+    .layoutWeight(1)
     .justifyContent(FlexAlign.Center)
     .alignItems(HorizontalAlign.Center)
-    .width('100%')
     .height('100%')
-    .onClick(() => {
-      this.tabsController.changeIndex(index);
-    })
+    .onClick(() => { this.currentIndex = index; })
   }
 
   build() {
-    Column() {
-      Tabs({
-        barPosition: BarPosition.End,
-        controller: this.tabsController,
-        index: this.currentIndex
-      }) {
-        TabContent() {
-          HomeTab()
-        }
-        .tabBar(this.tabBarContent(0, '☷', $r('app.string.tab_home')))
+    Stack() {
+      // 四个 Tab 页：visibility 切换保留各自状态
+      HomeTab()
+        .visibility(this.currentIndex === 0 ? Visibility.Visible : Visibility.None)
+        .width('100%').height('100%')
+      InboxTab()
+        .visibility(this.currentIndex === 1 ? Visibility.Visible : Visibility.None)
+        .width('100%').height('100%')
+      ExploreTab()
+        .visibility(this.currentIndex === 2 ? Visibility.Visible : Visibility.None)
+        .width('100%').height('100%')
+      ProfileTab()
+        .visibility(this.currentIndex === 3 ? Visibility.Visible : Visibility.None)
+        .width('100%').height('100%')
 
-        TabContent() {
-          InboxTab()
-        }
-        .tabBar(this.tabBarContent(1, '✉', $r('app.string.tab_inbox')))
-
-        TabContent() {
-          ExploreTab()
-        }
-        .tabBar(this.tabBarContent(2, '◎', $r('app.string.tab_explore')))
-
-        TabContent() {
-          ProfileTab()
-        }
-        .tabBar(this.tabBarContent(3, '◉', $r('app.string.tab_profile')))
-      }
-      .barHeight(52)
-      .barBackgroundColor(this.tabBarColor())
-      .barOverlap(true)
-      .backgroundColor(this.T().background)
-      .scrollable(false)
-      .animationDuration(0)
-      .onChange((index: number) => {
-        this.currentIndex = index;
-      })
-      .layoutWeight(1)
-
-      // 小白条沉浸区：底栏颜色向下延伸
+      // 底部手势条（表面色延伸）
       Row()
-        .width('100%')
-        .height(20)
+        .width('100%').height(20)
         .backgroundColor(this.T().surface)
+        .align(Alignment.Bottom)
+
+      // 悬浮液态玻璃 tab 栏
+      Column() {
+        Row({ space: 4 }) {
+          this.floatingItem(0, '☷', $r('app.string.tab_home'))
+          this.floatingItem(1, '✉', $r('app.string.tab_inbox'))
+          this.floatingItem(2, '◎', $r('app.string.tab_explore'))
+          this.floatingItem(3, '◉', $r('app.string.tab_profile'))
+        }
+        .width('100%')
+        .height(58)
+        .borderRadius(29)
+        .backgroundColor(this.glassColor())
+        .backdropBlur(20)
+        .border({ width: 1, color: this.T().border })
+        .shadow({ radius: 16, color: 'rgba(0,0,0,0.28)', offsetY: 6 })
+        .padding({ left: 8, right: 8 })
+      }
+      .width('100%')
+      .align(Alignment.Bottom)
+      .padding({ left: 16, right: 16, bottom: 32 })
     }
     .width('100%')
     .height('100%')
