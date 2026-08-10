@@ -15,6 +15,7 @@ export class HttpClient {
 
   static async get<T>(path: string): Promise<T> {
     const req = http.createHttp();
+    req.setTimeout(15000);
     try {
       const res = await req.request(`${GITHUB_API_BASE}${path}`, {
         method: http.RequestMethod.GET,
@@ -30,6 +31,7 @@ export class HttpClient {
 
   static async postRaw<T>(url: string, body: string, extraHeaders?: Record<string, string>): Promise<T> {
     const req = http.createHttp();
+    req.setTimeout(15000);
     try {
       const h: Record<string, string> = HttpClient.buildHeaders();
       h['Content-Type'] = 'application/json';
@@ -49,6 +51,7 @@ export class HttpClient {
 
   static async post<T>(path: string, body: Object): Promise<T> {
     const req = http.createHttp();
+    req.setTimeout(15000);
     try {
       const h: Record<string, string> = HttpClient.buildHeaders();
       h['Content-Type'] = 'application/json';
@@ -67,6 +70,7 @@ export class HttpClient {
 
   static async put(path: string): Promise<void> {
     const req = http.createHttp();
+    req.setTimeout(15000);
     try {
       const res = await req.request(`${GITHUB_API_BASE}${path}`, {
         method: http.RequestMethod.PUT,
@@ -83,6 +87,7 @@ export class HttpClient {
 
   static async delete(path: string): Promise<void> {
     const req = http.createHttp();
+    req.setTimeout(15000);
     try {
       const res = await req.request(`${GITHUB_API_BASE}${path}`, {
         method: http.RequestMethod.DELETE,
