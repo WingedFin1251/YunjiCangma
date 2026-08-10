@@ -1,6 +1,5 @@
 import { ConfigurationConstant } from '@kit.AbilityKit';
 import { window } from '@kit.ArkUI';
-import { uiMaterial } from '@ohos.arkui.uiMaterial';
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../common/constants/ThemeConstants';
 import { AuthService } from '../services/AuthService';
 import { HomeTab } from './tabs/HomeTab';
@@ -70,6 +69,11 @@ struct MainPage {
     return this.currentTheme === 'dark' ? 'rgba(76,194,255,0.45)' : 'rgba(9,105,218,0.35)';
   }
 
+  /** tab 栏毛玻璃背景（半透明 surface，配合 barOverlap 模糊） */
+  private tabBarColor(): string {
+    return this.currentTheme === 'dark' ? 'rgba(30,30,30,0.72)' : 'rgba(246,248,250,0.78)';
+  }
+
   @Builder
   tabBarContent(index: number, icon: string, label: ResourceStr) {
     Column({ space: 2 }) {
@@ -134,12 +138,8 @@ struct MainPage {
         .tabBar(this.tabBarContent(3, '◉', $r('app.string.tab_profile')))
       }
       .barHeight(52)
+      .barBackgroundColor(this.tabBarColor())
       .barOverlap(true)
-      .barFloatingStyle({
-        barSideMargin: 16,
-        barBottomMargin: 28,
-        systemMaterial: uiMaterial.ImmersiveMaterial
-      })
       .backgroundColor(this.T().background)
       .scrollable(false)
       .animationDuration(0)
