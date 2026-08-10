@@ -43,16 +43,18 @@ export struct IssuesPage {
       }.scrollable(ScrollDirection.Horizontal).scrollBar(BarState.Off).width('100%').height(40).padding({ left: 16 })
 
       if (this.loading) {
-        LoadingProgress().width(32).height(32).color(this.T().accent).margin({ top: 80 })
+        Column() {
+          LoadingProgress().width(32).height(32).color(this.T().accent)
+        }.width('100%').layoutWeight(1).alignItems(HorizontalAlign.Center)
       } else if (this.getFiltered().length === 0) {
         Column({ space: 8 }) {
           Text('✉').fontSize(40)
           Text('暂无议题').fontSize(14).fontColor(this.T().textSecondary)
-        }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center).width('100%').height('100%')
+        }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center).width('100%').layoutWeight(1)
       } else {
-        Scroll() {
-          Column() {
-            ForEach(this.getFiltered(), (item: Object, idx: number) => {
+        List({ space: 0 }) {
+          ForEach(this.getFiltered(), (item: Object, idx: number) => {
+            ListItem() {
               Column() {
                 Row() {
                   Text(((item as Record<string, Object>).title as string) || '')
@@ -79,18 +81,19 @@ export struct IssuesPage {
                   Text(' · ' + (((item as Record<string, Object>).updated_at as string) || '').substring(0, 10))
                     .fontSize(12).fontColor(this.T().textTertiary)
                 }.width('100%').margin({ top: 6 })
+                if (idx < this.getFiltered().length - 1) {
+                  Divider().color(this.T().border).width('100%').margin({ top: 12 })
+                }
               }
               .width('100%').padding({ left: 16, right: 16, top: 14, bottom: 14 })
               .onClick(() => {
                 const url: string = ((item as Record<string, Object>).html_url as string) || '';
                 if (url && this.onOpenWebView) this.onOpenWebView(url);
               })
-              if (idx < this.getFiltered().length - 1) {
-                Divider().color(this.T().border).width('100%')
-              }
-            }, (item: Object, idx: number) => idx.toString())
-          }.width('100%')
-        }.scrollBar(BarState.Off).width('100%').height('100%').backgroundColor(this.T().background)
+            }
+          }, (item: Object, idx: number) => idx.toString())
+        }
+        .scrollBar(BarState.Off).width('100%').layoutWeight(1).backgroundColor(this.T().background)
       }
     }.width('100%').height('100%').backgroundColor(this.T().background).padding({ top: 8 })
   }
