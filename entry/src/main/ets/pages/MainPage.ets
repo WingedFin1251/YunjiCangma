@@ -76,15 +76,15 @@ struct MainPage {
   }
 
   @Builder
-  tabBarContent(index: number, icon: string, label: ResourceStr) {
+  tabBarContent(index: number, iconRes: Resource, label: ResourceStr) {
     Column() {
-      // 图标：固定行高居中符号（避免基线偏移）
-      Text(icon)
-        .fontSize(20)
-        .fontColor(this.currentIndex === index ? this.T().accent : this.T().textSecondary)
+      // 自定义图标：fillColor 着色（选中 accent / 未选中灰，主题自适应）
+      Image(iconRes)
+        .width(24)
         .height(24)
-        .lineHeight(24)
-        .textAlign(TextAlign.Center)
+        .objectFit(ImageFit.Contain)
+        .fillColor(this.currentIndex === index ? this.T().accent : this.T().textSecondary)
+        .animation({ duration: 200, curve: Curve.FastOutSlowIn })
 
       Text(label)
         .fontSize(10)
@@ -113,22 +113,22 @@ struct MainPage {
         TabContent() {
           HomeTab()
         }
-        .tabBar(this.tabBarContent(0, '☷', $r('app.string.tab_home')))
+        .tabBar(this.tabBarContent(0, $r('app.media.tab_home'), $r('app.string.tab_home')))
 
         TabContent() {
           InboxTab()
         }
-        .tabBar(this.tabBarContent(1, '✉', $r('app.string.tab_inbox')))
+        .tabBar(this.tabBarContent(1, $r('app.media.tab_inbox'), $r('app.string.tab_inbox')))
 
         TabContent() {
           ExploreTab()
         }
-        .tabBar(this.tabBarContent(2, '◎', $r('app.string.tab_explore')))
+        .tabBar(this.tabBarContent(2, $r('app.media.tab_explore'), $r('app.string.tab_explore')))
 
         TabContent() {
           ProfileTab()
         }
-        .tabBar(this.tabBarContent(3, '◉', $r('app.string.tab_profile')))
+        .tabBar(this.tabBarContent(3, $r('app.media.tab_profile'), $r('app.string.tab_profile')))
       }
       .barHeight(62)
       .barOverlap(true)
