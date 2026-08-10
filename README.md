@@ -40,7 +40,7 @@
 ### 运行
 
 ```bash
-git clone git@github.com:WingedFin1251/YunjiCangma-.git
+git clone git@github.com:WingedFin1251/YunjiCangma.git
 # DevEco Studio → Open → Shift + F10
 ```
 
