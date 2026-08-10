@@ -28,24 +28,6 @@ function fmt(n: number): string {
   if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
   return n.toString();
 }
-function stripMd(md: string): string {
-  return md
-    .replace(/^#{1,6}\s+/gm, '')
-    .replace(/\*\*(.+?)\*\*/g, '$1')
-    .replace(/__(.+?)__/g, '$1')
-    .replace(/\*(.+?)\*/g, '$1')
-    .replace(/_(.+?)_/g, '$1')
-    .replace(/`{1,3}[^`]*`{1,3}/g, '')
-    .replace(/\[(.+?)\]\(.+?\)/g, '$1')
-    .replace(/!\[.*?\]\(.+?\)/g, '')
-    .replace(/^[-*+]\s+/gm, '• ')
-    .replace(/^\d+\.\s+/gm, '')
-    .replace(/^>\s+/gm, '')
-    .replace(/---+/g, '')
-    .replace(/^\|.*\|$/gm, '')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
-}
 
 @Component
 export struct RepoDetailPage {
@@ -283,8 +265,8 @@ export struct RepoDetailPage {
                 }.width('100%').alignItems(HorizontalAlign.Start)
               }
             }
-          }
-          Blank().height(80)
+            Blank().height(80)
+          }.width('100%')
         }.scrollBar(BarState.Off).width('100%').height('100%')
       }
     }.width('100%').height('100%')
