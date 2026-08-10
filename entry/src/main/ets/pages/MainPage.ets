@@ -92,10 +92,10 @@ struct MainPage {
     else if (this.glowLevel === 2) level = hdsMaterial.MaterialLevel.EXQUISITE;
     return {
       barSideMargin: 16,
-      barBottomMargin: 36,
+      barBottomMargin: 22,
       gradientMask: {
         maskColor: dark ? '#33000000' : '#66F1F3F5',
-        maskHeight: 68
+        maskHeight: 78
       },
       systemMaterialEffect: {
         materialType: hdsMaterial.MaterialType.IMMERSIVE,
@@ -167,7 +167,7 @@ struct MainPage {
         }
         .tabBar(this.tabBarContent(3, '◉', $r('app.string.tab_profile')))
       }
-      .barHeight(52)
+      .barHeight(62)
       .barOverlap(true)
       .barBackgroundColor(Color.Transparent)
       .barBackgroundBlurStyle(BlurStyle.COMPONENT_THIN)
