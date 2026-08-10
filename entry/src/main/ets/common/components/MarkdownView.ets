@@ -20,12 +20,15 @@ function parseColor(hex: string): number {
   return v;
 }
 
-/** 超长 Markdown 渲染上限（50万字符≈500KB，覆盖全部真实 README；防极端输入导致闪退） */
+/** 超长 Markdown 渲染上限（50万字符≈500KB，防极端输入；分块渐进渲染处理正常大文件） */
 const MAX_MD_CHARS: number = 500000;
+/** 每块渲染字符数（控制单帧 Text 节点量，避免 skia 排版冻帧） */
+const CHUNK_CHARS: number = 12000;
 
 /**
- * Markdown 渲染 — 基于 CJMarkdown（@cangjie-tpc/markdown_hybrid）的薄封装。
- * 公开 API（content/maxLines/fontSize/onOpenRepo/onOpenWebView）与旧实现保持一致。
+ * Markdown 渲染 — 基于 CJMarkdown 的分块渐进渲染。
+ * 长内容按段落边界切成块，逐块渲染（"继续加载"追加），
+ * 避免一次性创建成百上千 Text 组件导致主线程冻结。
  */
 @Component
 export struct MarkdownView {
@@ -39,6 +42,8 @@ export struct MarkdownView {
   private cachedConfig: MarkdownConfiguration | null = null;
   private cachedSignature: string = '';
   private cachedPlugin: MarkdownPlugin | null = null;
+  @State chunks: string[] = [];
+  @State renderedChunks: number = 1;
 
   private T(): ThemeColors {
     const d: boolean = this.themeMode === 'dark';
@@ -58,6 +63,15 @@ export struct MarkdownView {
       starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow,
       clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback
     };
+  }
+
+  aboutToAppear(): void {
+    this.rebuildChunks();
+  }
+
+  @Watch('content')
+  onContentChange(): void {
+    this.rebuildChunks();
   }
 
   private signature(): string {
@@ -174,7 +188,7 @@ export struct MarkdownView {
     if (this.onOpenWebView) this.onOpenWebView(url);
   }
 
-  /** 超长内容截断后传入 CJMarkdown，防止渲染爆炸 */
+  /** 超长内容截断（防极端输入） */
   private displayed(): string {
     return this.content.length > MAX_MD_CHARS ? this.content.substring(0, MAX_MD_CHARS) : this.content;
   }
@@ -183,19 +197,56 @@ export struct MarkdownView {
     return this.content.length > MAX_MD_CHARS;
   }
 
+  /** 按段落边界切成块，控制单帧渲染的节点量 */
+  private splitChunks(md: string): string[] {
+    const result: string[] = [];
+    let start: number = 0;
+    const len: number = md.length;
+    while (start < len) {
+      let end: number = start + CHUNK_CHARS;
+      if (end >= len) { result.push(md.substring(start)); break; }
+      let cut: number = md.lastIndexOf('\n\n', end);
+      if (cut <= start) { cut = md.lastIndexOf('\n', end); }
+      if (cut > start) { end = cut; }
+      result.push(md.substring(start, end));
+      start = end;
+    }
+    return result;
+  }
+
+  private rebuildChunks(): void {
+    this.chunks = this.splitChunks(this.displayed());
+    this.renderedChunks = 1;
+  }
+
   build() {
     Column() {
-      ForEach([this.signature()], (_key: string) => {
+      ForEach(this.chunks.slice(0, this.renderedChunks), (chunk: string, i: number) => {
         CJMarkdown({
-          content: this.displayed(),
+          content: chunk,
           isInputEnded: true,
           incrementalAnalysis: false,
           useCangjieComponent: true,
           config: this.getConfig(),
           plugin: this.getPlugin()
         })
-      }, (key: string): string => key)
-      if (this.isTruncated()) {
+      }, (chunk: string, i: number) => 'c' + i)
+
+      // 分块渐进：继续加载更多
+      if (this.renderedChunks < this.chunks.length) {
+        Column() {
+          Text('继续加载更多 (已显示 ' + this.renderedChunks.toString() + '/' + this.chunks.length.toString() + ' 段)')
+            .fontSize(13)
+            .fontColor(this.T().accent)
+            .padding({ left: 14, right: 14, top: 8, bottom: 8 })
+            .backgroundColor(this.themeMode === 'dark' ? '#1A2F44' : '#DDF4FF')
+            .borderRadius(8)
+        }
+        .width('100%')
+        .alignItems(HorizontalAlign.Center)
+        .padding({ top: 12, bottom: 12 })
+        .onClick(() => { this.renderedChunks += 1; })
+      } else if (this.isTruncated()) {
         Text('内容过长，已截断显示前 ' + MAX_MD_CHARS.toString() + ' 字，可在浏览器查看完整版')
           .fontSize(12).fontColor(this.T().textTertiary)
           .width('100%').padding({ top: 8, bottom: 4 })
