@@ -206,7 +206,7 @@ export struct ExploreTab {
           .padding({ left: 16, right: 16 })
           .margin({ top: 12 })
 
-          Blank().height(24)
+          Blank().height(76)
         }.width('100%').alignItems(HorizontalAlign.Start)
       }.scrollBar(BarState.Off).width('100%')
         .backgroundColor(this.themeMode === 'dark' ? this.T().background : this.T().background)
