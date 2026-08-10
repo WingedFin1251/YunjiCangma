@@ -7,6 +7,7 @@ import { RepoDetailPage } from '../sub/RepoDetailPage';
 import { DevProfilePage } from '../sub/DevProfilePage';
 import { IssuesPage } from '../sub/IssuesPage';
 import { IssueDetailPage } from '../sub/IssueDetailPage';
+import { TopReposPage } from '../sub/TopReposPage';
 import type { Repository } from '../../models/User';
 
 class ActivityItem {
@@ -106,6 +107,9 @@ export struct ExploreTab {
           .darkMode(this.themeMode === 'dark' ? WebDarkMode.On : WebDarkMode.Off)
           .backgroundColor(this.themeMode === 'dark' ? Color.Black : Color.White)
       }.title('GitHub').backgroundColor(this.T().background).padding({ top: 32 })
+    } else if (name === 'topRepos') {
+      NavDestination() { TopReposPage({ onOpenRepo: (o: string, r: string) => { this.detailOwner = o; this.detailRepo = r; this.exploreStack.pushPath({ name: 'repoDetail' }); } }) }
+        .title('星标榜').backgroundColor(this.T().background).padding({ top: 32 })
     }
   }
 
@@ -123,7 +127,7 @@ export struct ExploreTab {
           Column() {
 
           Row({ space: 12 }) {
-            this.discoverItem('◈', '热门仓库', 'https://github.com/trending')
+            this.discoverItem('◈', '热门仓库', 'topRepos')
             this.discoverItem('◈', '精选列表', 'https://github.com/topics')
           }
           .width('100%')
@@ -264,6 +268,9 @@ export struct ExploreTab {
     .backgroundColor(this.T().surface)
     .borderRadius(8)
     .alignItems(VerticalAlign.Center)
-    .onClick(() => { this.openExploreWeb(url); })
+    .onClick(() => {
+      if (url.startsWith('http')) { this.openExploreWeb(url); }
+      else { this.exploreStack.pushPath({ name: url }); }
+    })
   }
 }
