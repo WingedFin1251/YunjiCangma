@@ -41,6 +41,11 @@ struct MainPage {
     return this.currentTheme === 'dark' ? 'rgba(33,139,254,0.22)' : 'rgba(9,105,218,0.16)';
   }
 
+  /** tab 栏毛玻璃背景（半透明 surface，配合 barOverlap 模糊） */
+  private tabBarColor(): string {
+    return this.currentTheme === 'dark' ? 'rgba(30,30,30,0.72)' : 'rgba(246,248,250,0.78)';
+  }
+
   @Builder
   tabBarContent(index: number, icon: string, label: ResourceStr) {
     Column() {
@@ -108,7 +113,8 @@ struct MainPage {
         .tabBar(this.tabBarContent(3, '◉', $r('app.string.tab_profile')))
       }
       .barHeight(52)
-      .barBackgroundColor(this.T().surface)
+      .barBackgroundColor(this.tabBarColor())
+      .barOverlap(true)
       .backgroundColor(this.T().background)
       .scrollable(false)
       .animationDuration(0)

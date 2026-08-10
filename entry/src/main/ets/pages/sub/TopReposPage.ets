@@ -93,7 +93,7 @@ export struct TopReposPage {
           }, (repo: Repository) => repo.id.toString())
         }
         .scrollBar(BarState.Off).width('100%').layoutWeight(1)
-        .padding({ left: 16, right: 16, top: 8 })
+        .padding({ left: 16, right: 16, top: 8, bottom: 76 })
       }
     }.width('100%').height('100%').backgroundColor(this.T().background)
   }

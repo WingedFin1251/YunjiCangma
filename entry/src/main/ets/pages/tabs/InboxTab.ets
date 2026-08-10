@@ -252,5 +252,6 @@ export struct InboxTab {
     .width('100%')
     .layoutWeight(1)
     .backgroundColor(this.T().background)
+    .padding({ bottom: 76 })
   }
 }
