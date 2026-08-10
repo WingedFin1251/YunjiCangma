@@ -143,6 +143,7 @@ export struct ExploreTab {
               .layoutWeight(1)
             Text('▼')
               .fontSize(18)
+              .fontColor(this.T().textSecondary)
               .width(44)
               .height(44)
               .textAlign(TextAlign.Center)

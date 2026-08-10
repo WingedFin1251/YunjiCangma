@@ -132,7 +132,7 @@ export struct HomeTab {
         Row() {
           Text($r('app.string.page_title_home')).fontSize(26).fontWeight(FontWeight.Bold).fontColor(this.T().textPrimary).layoutWeight(1)
           Row({ space: 20 }) {
-            Text('⌕').fontSize(20).width(44).height(44).textAlign(TextAlign.Center).lineHeight(44)
+            Text('⌕').fontSize(20).fontColor(this.T().textPrimary).width(44).height(44).textAlign(TextAlign.Center).lineHeight(44)
               .onClick(() => { this.homeStack.pushPath({ name: 'search' }); })
             this.navIcon('＋'); this.navIcon('⋯')
           }
@@ -210,6 +210,7 @@ export struct HomeTab {
   navIcon(icon: string) {
     Text(icon)
       .fontSize(20)
+      .fontColor(this.T().textPrimary)
       .width(44)
       .height(44)
       .textAlign(TextAlign.Center)
