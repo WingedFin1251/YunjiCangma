@@ -33,7 +33,7 @@ const CHUNK_CHARS: number = 12000;
 @Component
 export struct MarkdownView {
   @StorageLink(THEME_KEY) themeMode: string = 'dark';
-  @Prop content: string = '';
+  @Prop @Watch('onContentChange') content: string = '';
   @Prop maxLines: number = 999;
   @Prop fontSize: number = 14;
   onOpenRepo?: (owner: string, repo: string) => void;
@@ -69,7 +69,6 @@ export struct MarkdownView {
     this.rebuildChunks();
   }
 
-  @Watch('content')
   onContentChange(): void {
     this.rebuildChunks();
   }
