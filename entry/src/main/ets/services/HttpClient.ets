@@ -15,11 +15,12 @@ export class HttpClient {
 
   static async get<T>(path: string): Promise<T> {
     const req = http.createHttp();
-    req.setTimeout(15000);
     try {
       const res = await req.request(`${GITHUB_API_BASE}${path}`, {
         method: http.RequestMethod.GET,
-        header: HttpClient.buildHeaders()
+        header: HttpClient.buildHeaders(),
+        connectTimeout: 15000,
+        readTimeout: 15000
       });
       if (res.responseCode === 200) return JSON.parse(res.result as string) as T;
       throw new Error(`HTTP ${res.responseCode} for ${path}`);
@@ -31,7 +32,6 @@ export class HttpClient {
 
   static async postRaw<T>(url: string, body: string, extraHeaders?: Record<string, string>): Promise<T> {
     const req = http.createHttp();
-    req.setTimeout(15000);
     try {
       const h: Record<string, string> = HttpClient.buildHeaders();
       h['Content-Type'] = 'application/json';
@@ -39,7 +39,9 @@ export class HttpClient {
       const res = await req.request(url, {
         method: http.RequestMethod.POST,
         header: h,
-        extraData: body
+        extraData: body,
+        connectTimeout: 15000,
+        readTimeout: 15000
       });
       if (res.responseCode === 200 || res.responseCode === 201) return JSON.parse(res.result as string) as T;
       throw new Error(`HTTP ${res.responseCode}`);
@@ -51,14 +53,15 @@ export class HttpClient {
 
   static async post<T>(path: string, body: Object): Promise<T> {
     const req = http.createHttp();
-    req.setTimeout(15000);
     try {
       const h: Record<string, string> = HttpClient.buildHeaders();
       h['Content-Type'] = 'application/json';
       const res = await req.request(`${GITHUB_API_BASE}${path}`, {
         method: http.RequestMethod.POST,
         header: h,
-        extraData: JSON.stringify(body)
+        extraData: JSON.stringify(body),
+        connectTimeout: 15000,
+        readTimeout: 15000
       });
       if (res.responseCode === 200 || res.responseCode === 201) return JSON.parse(res.result as string) as T;
       throw new Error(`HTTP ${res.responseCode} for ${path}`);
@@ -70,11 +73,12 @@ export class HttpClient {
 
   static async put(path: string): Promise<void> {
     const req = http.createHttp();
-    req.setTimeout(15000);
     try {
       const res = await req.request(`${GITHUB_API_BASE}${path}`, {
         method: http.RequestMethod.PUT,
-        header: HttpClient.buildHeaders()
+        header: HttpClient.buildHeaders(),
+        connectTimeout: 15000,
+        readTimeout: 15000
       });
       if (res.responseCode !== 204) {
         throw new Error(`HTTP ${res.responseCode} for ${path}`);
@@ -87,11 +91,12 @@ export class HttpClient {
 
   static async delete(path: string): Promise<void> {
     const req = http.createHttp();
-    req.setTimeout(15000);
     try {
       const res = await req.request(`${GITHUB_API_BASE}${path}`, {
         method: http.RequestMethod.DELETE,
-        header: HttpClient.buildHeaders()
+        header: HttpClient.buildHeaders(),
+        connectTimeout: 15000,
+        readTimeout: 15000
       });
       if (res.responseCode !== 204) {
         throw new Error(`HTTP ${res.responseCode} for ${path}`);

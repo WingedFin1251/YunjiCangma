@@ -34,11 +34,17 @@ export struct RepoCard {
     this.starred = this.isStarred;
   }
 
+  private toast(msg: string): void {
+    try {
+      this.getUIContext().getPromptAction().showToast({ message: msg });
+    } catch (e) { }
+  }
+
   /** 星标/取消星标（乐观更新，失败回滚 + 提示） */
   private toggleStar(): void {
     if (!this.owner || !this.repo) return;
     if (AuthService.getToken() === '') {
-      this.getUIContext().getPromptAction().showToast({ message: '请先登录后再收藏' });
+      this.toast('请先登录后再收藏');
       return;
     }
     const target: boolean = !this.starred;
@@ -46,14 +52,14 @@ export struct RepoCard {
     if (target) {
       RepoRepository.starRepo(this.owner, this.repo).catch(() => {
         this.starred = false;
-        this.getUIContext().getPromptAction().showToast({ message: '收藏失败，请重试' });
+        this.toast('收藏失败，请重试');
       });
     } else {
       RepoRepository.unstarRepo(this.owner, this.repo)
         .then(() => { if (this.onUnstar) this.onUnstar(this.owner, this.repo); })
         .catch(() => {
           this.starred = true;
-          this.getUIContext().getPromptAction().showToast({ message: '取消收藏失败，请重试' });
+          this.toast('取消收藏失败，请重试');
         });
     }
   }
