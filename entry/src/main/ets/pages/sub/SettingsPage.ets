@@ -5,6 +5,7 @@ import { AuthService } from '../../services/AuthService';
 export struct SettingsPage {
   @StorageLink(THEME_KEY) themeMode: string = 'dark';
   @StorageLink('userFilterEnabled') userFilterEnabled: boolean = true;
+  @StorageLink('glowLevel') glowLevel: number = 1;
   onNavigate?: (name: string) => void;
   private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
 
@@ -21,6 +22,26 @@ export struct SettingsPage {
           Toggle({ type: ToggleType.Switch, isOn: this.userFilterEnabled })
             .onChange((isOn: boolean) => { AppStorage.setOrCreate('userFilterEnabled', isOn); })
         }.width('100%').height(52).padding({ left: 20, right: 20 }).alignItems(VerticalAlign.Center)
+        Divider().color(this.T().border).width('90%')
+
+        // 沉浸光感（三档）
+        Row() {
+          Text('✨ 沉浸光感').fontSize(16).fontColor(this.T().textPrimary).layoutWeight(1)
+        }.width('100%').height(44).padding({ left: 20, right: 20 }).alignItems(VerticalAlign.Center)
+        Row({ space: 8 }) {
+          ForEach(['弱', '均衡', '强'], (label: string, i: number) => {
+            Text(label).fontSize(13).fontWeight(FontWeight.Medium)
+              .fontColor(this.glowLevel === i ? Color.White : this.T().textSecondary)
+              .padding({ left: 18, right: 18, top: 6, bottom: 6 })
+              .backgroundColor(this.glowLevel === i ? this.T().accent : this.T().surfaceElevated)
+              .borderRadius(8)
+              .onClick(() => {
+                const level: number = i;
+                AuthService.saveGlowLevel(level);
+                AppStorage.setOrCreate('glowLevel', level);
+              })
+          }, (label: string, i: number) => i.toString())
+        }.width('100%').padding({ left: 20, right: 20, bottom: 14 })
         Divider().color(this.T().border).width('90%')
 
         // 使用教程
