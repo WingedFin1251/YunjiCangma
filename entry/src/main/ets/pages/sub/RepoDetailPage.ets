@@ -207,7 +207,7 @@ export struct RepoDetailPage {
 
             // ===== 4. 最新 Release =====
             if (this.latestRelease) {
-              ExpandableSection({ title: '最新版本', icon: '🚀', accentText: this.releaseTag(), initialExpanded: true }) {
+              ExpandableSection({ title: '最新版本', icon: '🚀', accentText: this.releaseTag(), initialExpanded: false }) {
                 Column({ space: 8 }) {
                   if (this.releaseName() !== '') {
                     Text(this.releaseName()).fontSize(14).fontColor(this.T().textSecondary).width('100%')
