@@ -56,7 +56,7 @@ hvigorw assembleHap --mode module -p product=default -p buildMode=release
 | Model | `models/Xxx.ets` | `User.ets` |
 | 公共组件 | `common/components/Xxx.ets` | `RepoCard.ets` |
 | 常量 | `common/constants/XxxConstants.ets` | `APIConstants.ets` |
-| 工具常量 | `common/constants/Xxx.ets` | `SensitiveWords.ets` |
+| 工具函数 | `common/utils/Xxx.ets` | `NavTitleBar.ets` |
 | 测试 | `test/Xxx.test.ets` | `RepoRepository.test.ets` |
 
 ### ArkTS 编码规范

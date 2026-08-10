@@ -4,7 +4,7 @@
 ![API](https://img.shields.io/badge/API-6.1.0-green)
 ![Language](https://img.shields.io/badge/Language-ArkTS-orange)
 ![Theme](https://img.shields.io/badge/Theme-Light%20%7C%20Dark-218BFE)
-![License](https://img.shields.io/badge/License-MIT-lightgrey)
+![License](https://img.shields.io/badge/License-GPL--3.0-blue)
 
 > 云笈纳万卷，一码藏乾坤
 
@@ -16,13 +16,14 @@
 
 - [x] 🎨 深色/浅色双主题（14 色值，状态栏 + WebView + 系统 ColorMode 联动）
 - [x] 🏠 4 Tab 导航（标题栏固定不滚动 + 底部小白条沉浸）
-- [x] 🔐 GitHub OAuth WebView 登录（自定义 Scheme + onLoadIntercept + 防抖）
+- [x] 🧊 子页面沉浸毛玻璃标题栏（HdsNavDestination，内容滚动触发模糊）
+- [x] 🔐 GitHub OAuth Device Flow 登录（客户端零密钥，验证码 + 轮询）
 - [x] 🖼️ 用户头像 + Octocat 应用图标
 - [x] 🖥️ 全屏沉浸（透明状态栏 + 底部小白条 + 浅色适配）
 - [x] 📡 Repository 分层 API（HttpClient → Repo/User/Search/Auth Repository）
 - [x] 🔄 登录自动刷新 + 主题持久化（preferences 存取）
 - [x] 🌐 仓库详情页 RepoDetailPage（HEADER + Stats + Release + README + 开发者入口）
-- [x] 🔍 全局搜索（屏蔽词 + Linguist 颜色 → RepoDetailPage）
+- [x] 🔍 全局搜索（手动屏蔽词 + Linguist 颜色 → RepoDetailPage）
 - [x] 👤 开发者资料页 DevProfilePage（头像/统计/仓库列表/搜索/筛选/贡献热力图）
 - [x] 📊 贡献热力图（GraphQL API + 5 级色阶 + 横向滚动）
 - [x] ⚙️ 设置页（深色开关 + 手动屏蔽词 + 使用教程 + 隐私协议 + 关于）
@@ -39,15 +40,17 @@
 ### 运行
 
 ```bash
-git clone https://github.com/WingedFin1251/Github.git
+git clone git@github.com:WingedFin1251/YunjiCangma-.git
 # DevEco Studio → Open → Shift + F10
 ```
 
-### 配置 OAuth 登录
+### 配置 Device Flow 登录
 
 1. GitHub → Settings → Developer settings → OAuth Apps → New OAuth App
-2. **Callback URL**: `githubclient://auth/callback`
+2. 勾选 **Enable Device Flow**
 3. 将 Client ID 填入 `APIConstants.ets`
+
+无需 Client Secret、无需 Callback URL —— 设备流仅需 `client_id`，客户端零密钥。
 
 ## 项目结构
 
@@ -56,14 +59,14 @@ entry/src/main/ets/
 ├── entryability/EntryAbility.ets    # 入口：全屏沉浸 + Auth.init + await loadToken + 主题恢复
 ├── pages/
 │   ├── MainPage.ets                 # @Entry — Tabs(52dp, 小白条沉浸, 主题监听)
-│   ├── LoginPage.ets                # @Entry — WebView OAuth(onLoadIntercept + 防抖)
+│   ├── LoginPage.ets                # @Entry — Device Flow 登录（验证码 + 轮询）
 │   ├── tabs/
 │   │   ├── HomeTab.ets              # 首页（我的项目 + 我的星标）
 │   │   ├── InboxTab.ets             # 消息（筛选标签 + 通知列表/空状态）
 │   │   ├── ExploreTab.ets           # 发现（热门仓库 + 活动流 → RepoDetailPage）
 │   │   └── ProfileTab.ets           # 我的（头像 + 列表 + 登录 + 设置入口）
 │   └── sub/
-│       ├── SearchPage.ets           # 全局搜索（敏感词过滤 + Linguist 颜色）
+│       ├── SearchPage.ets           # 全局搜索（手动屏蔽词 + Linguist 颜色）
 │       ├── WorkPage.ets             # 工作项子页（议题/PR/仓库/组织/已加星标）
 │       ├── RepoDetailPage.ets       # 仓库详情（HEADER/Stats/Release/README/Info）
 │       ├── DevProfilePage.ets       # 开发者资料（统计/仓库/贡献热力图）
@@ -73,14 +76,14 @@ entry/src/main/ets/
 │       └── PrivacyPage.ets          # 隐私协议
 ├── services/
 │   ├── HttpClient.ets               # HTTP 引擎（泛型 get/post，Bearer 自动注入）
-│   ├── AuthService.ets              # OAuth + Token CRUD + 主题存取
+│   ├── AuthService.ets              # Device Flow + Token CRUD + 主题存取
 │   ├── RepoRepository.ets          # 仓库端点（Starred/Trending/Detail/Contents/Readme/Release）
 │   ├── UserRepository.ets          # 用户端点（Profile/Followers/Following/Events/Orgs/GraphQL）
 │   └── SearchRepository.ets        # 搜索/通知端点（Search/Notifications/Issues/PR）
 ├── models/{User,AuthModels}.ets     # User/Repository/GitHubNotification/SearchResult
 └── common/
     ├── constants/{Theme,API}Constants.ets  # DarkTheme/LightTheme/ThemeColors + API 端点
-    ├── constants/SensitiveWords.ets        # 内置敏感词库（120+ 词）
+    ├── utils/NavTitleBar.ets               # 子页面沉浸毛玻璃标题栏 helper
     └── components/  # RepoCard / ListItem / EmptyState / FilterTabBar / MarkdownView / TabBarBuilder
 ```
 
@@ -117,4 +120,4 @@ entry/src/main/ets/
 
 ## 许可证
 
-[MIT License](LICENSE)
+[GNU General Public License v3.0](LICENSE)
