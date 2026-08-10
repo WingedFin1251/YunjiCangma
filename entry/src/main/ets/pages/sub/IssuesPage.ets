@@ -29,6 +29,8 @@ export struct IssuesPage {
 
   build() {
     Column() {
+      // 沉浸标题栏占位：初始避开标题栏
+      Blank(100)
       // Filter tabs
       Scroll() {
         Row({ space: 8 }) {

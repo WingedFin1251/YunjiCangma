@@ -29,11 +29,11 @@
 │          Model Layer (models/)                       │
 │  User / Repository / RepoOwner                       │
 │  GitHubNotification / SearchResult                   │
-│  OAuthTokenResponse / AuthState                      │
+│  AuthState / DeviceFlowInfo / DevicePollStatus       │
 ├──────────────────────────────────────────────────────┤
 │         Common Layer (common/)                       │
 │  DarkTheme / LightTheme / ThemeColors                │
-│  APIConstants / SensitiveWords                       │
+│  APIConstants / NavTitleBar                          │
 │  RepoCard / ListItem / EmptyState                    │
 │  FilterTabBar / TabBarBuilder / MarkdownView         │
 └──────────────────────────────────────────────────────┘
@@ -79,8 +79,8 @@ EntryAbility (UIAbility)
                            └─ 登出按钮
 
 LoginPage.ets (@Entry, router.pushUrl 独立页面)
-  └─ Web (GitHub OAuth authorize page)
-       └─ URL 拦截 → AuthService.exchangeCodeForToken() → router.back()
+  └─ Device Flow：展示 user_code + Web (github.com/login/device)
+       └─ AuthService.pollDeviceToken() 轮询 → 成功 → router.back()
 ```
 
 ## 数据流
@@ -102,13 +102,13 @@ EntryAbility.onCreate()
 
 ```
 ProfileTab "Sign In" → router.pushUrl('pages/LoginPage')
-  → Web 加载 github.com/login/oauth/authorize
-  → 用户授权 → 回调 URL 含 ?code=xxx
-  → AuthService.isOAuthCallback(url) 检测
-  → AuthService.extractCodeFromUrl(url)
-  → AuthService.exchangeCodeForToken(code)
-    → POST github.com/login/oauth/access_token
-    → saveToken(token) → preferences + AppStorage
+  → AuthService.startDeviceFlow()
+    → POST github.com/login/device/code { client_id }
+  → 展示 user_code + Web 加载 github.com/login/device
+  → 用户输入验证码并授权
+  → AuthService.pollDeviceToken(device_code) 轮询
+    → POST github.com/login/oauth/access_token (grant_type=device_code)
+    → 成功 → saveToken(token) → preferences + AppStorage
   → router.back()
   → ProfileTab.onLoginChanged() → loadUserData()
     → UserRepository.getCurrentUser() → @State user
@@ -189,14 +189,14 @@ entry/src/main/ets/
 │   └── EntryBackupAbility.ets         # 备份扩展
 ├── pages/
 │   ├── MainPage.ets                   # @Entry — Tabs 容器 + 主题切换监听
-│   ├── LoginPage.ets                  # @Entry — OAuth WebView 登录
+│   ├── LoginPage.ets                  # @Entry — OAuth Device Flow 登录
 │   ├── tabs/
 │   │   ├── HomeTab.ets                # 首页（7 项工作入口 + 星标列表）
 │   │   ├── InboxTab.ets               # 收件箱（筛选 + 通知列表）
 │   │   ├── ExploreTab.ets             # 探索（热门仓库 + 动态流）
 │   │   └── ProfileTab.ets             # 个人资料（用户信息 + 资源列表）
 │   └── sub/
-│       ├── SearchPage.ets             # 全局搜索（敏感词过滤 → RepoDetailPage）
+│       ├── SearchPage.ets             # 全局搜索（手动屏蔽词 → RepoDetailPage）
 │       ├── WorkPage.ets               # 工作项子页面（议题/PR/仓库/组织/星标）
 │       ├── RepoDetailPage.ets         # 仓库详情（HEADER/Stats/Release/Info/README）
 │       ├── DevProfilePage.ets         # 开发者资料（头像/统计/仓库/贡献热力图）
@@ -206,18 +206,19 @@ entry/src/main/ets/
 │       └── PrivacyPage.ets            # 隐私协议
 ├── services/
 │   ├── HttpClient.ets                 # HTTP 引擎（泛型 get/post，自动 Bearer）
-│   ├── AuthService.ets                # OAuth + Token/Theme 持久化
+│   ├── AuthService.ets                # Device Flow + Token/Theme 持久化
 │   ├── RepoRepository.ets            # 仓库相关端点
 │   ├── UserRepository.ets            # 用户/动态/GraphQL 端点
 │   └── SearchRepository.ets          # 搜索/通知/PR 端点
 ├── models/
 │   ├── User.ets                       # User, Repository, RepoOwner, GitHubNotification, SearchResult
-│   └── AuthModels.ets                 # OAuthTokenResponse, AuthState, LoginPageParams
+│   └── AuthModels.ets                 # AuthState, LoginPageParams, DeviceFlowInfo, DevicePollStatus, DevicePollResult
 └── common/
     ├── constants/
     │   ├── ThemeConstants.ets          # DarkTheme / LightTheme / ThemeColors / langColor()
-    │   ├── APIConstants.ets           # API 端点 + OAuth 配置 + AppStorage Key
-    │   └── SensitiveWords.ets         # 内置敏感词库（120+ 词）
+    │   └── APIConstants.ets           # API 端点 + OAuth 配置 + AppStorage Key
+    ├── utils/
+    │   └── NavTitleBar.ets            # 子页面沉浸毛玻璃标题栏（HdsNavDestination）
     └── components/
         ├── RepoCard.ets               # 仓库卡片
         ├── ListItem.ets               # 列表功能项

@@ -45,9 +45,13 @@ export struct PrivacyPage {
 
   build() {
     Scroll() {
-      Text(this.policyText)
-        .fontSize(14).fontColor(this.T().textSecondary).lineHeight(22)
-        .width('100%').padding(20)
+      Column() {
+        // 沉浸标题栏占位：初始避开标题栏，滚动时滑入磨砂下
+        Blank(100)
+        Text(this.policyText)
+          .fontSize(14).fontColor(this.T().textSecondary).lineHeight(22)
+          .width('100%').padding(20)
+      }.width('100%')
     }
     .scrollBar(BarState.Off).width('100%').height('100%')
     .backgroundColor(this.T().background).padding({ top: 8 })

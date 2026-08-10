@@ -8,6 +8,8 @@ export struct TutorialPage {
   build() {
     Scroll() {
       Column({ space: 0 }) {
+        // 沉浸标题栏占位：初始避开标题栏，滚动时滑入磨砂下
+        Blank(100)
         this.step('1', '登录 GitHub 账号', '点击底部「我的」→「登录账号」，在 WebView 中授权 GitHub OAuth，完成后即可访问您的仓库与数据。')
         this.step('2', '浏览仓库', '在「我的」页面点击「仓库」查看您的所有仓库，点击任一仓库卡片即可在 WebView 中查看详情。')
         this.step('3', '查看通知', '在「消息」页面查看 GitHub 通知，通过筛选标签快速定位未读或重点消息。')

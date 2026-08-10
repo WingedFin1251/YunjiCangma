@@ -1,3 +1,5 @@
+import { HdsNavDestination } from '@kit.UIDesignKit'
+import { buildTitleBar } from '../../common/utils/NavTitleBar';
 import { webview } from '@kit.ArkWeb';
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
 import { RepoCard } from '../../common/components/RepoCard';
@@ -46,13 +48,6 @@ export struct ExploreTab {
   private paramRepo(param: ESObject): string {
     const p = param as RepoParam;
     return p && p.repo ? p.repo : this.detailRepo;
-  }
-  /** 子页面标题栏：沉浸毛玻璃 */
-  private titleOpts(): NavigationTitleOptions {
-    return {
-      backgroundColor: this.themeMode === 'dark' ? 'rgba(30,30,30,0.55)' : 'rgba(255,255,255,0.6)',
-      backgroundBlurStyle: BlurStyle.COMPONENT_THICK
-    };
   }
   private exploreStack: NavPathStack = new NavPathStack();
   @State trendingRepos: Repository[] = [];
@@ -129,27 +124,27 @@ export struct ExploreTab {
   @Builder
   explorePageMap(name: string, param: ESObject) {
     if (name === 'repoDetail') {
-      NavDestination() { RepoDetailPage({ owner: this.paramOwner(param), repoName: this.paramRepo(param), onOpenWebView: (u: string) => { this.webUrl = u; this.exploreStack.pushPath({ name: 'repoWeb' }); }, onOpenDev: (uname: string) => { this.detailOwner = uname; this.exploreStack.pushPath({ name: 'devProfile' }); }, onOpenRepo: (o: string, r: string) => { this.exploreStack.pushPath({ name: 'repoDetail', param: new RepoParam(o, r) }); }, onOpenIssues: (o: string, r: string) => { this.detailOwner = o; this.detailRepo = r; this.exploreStack.pushPath({ name: 'issues' }); } }) }
-        .title('仓库详情', this.titleOpts()).linearGradient({ colors: this.mica(), direction: GradientDirection.RightBottom }).padding({ top: 32 })
+      HdsNavDestination() { RepoDetailPage({ owner: this.paramOwner(param), repoName: this.paramRepo(param), onOpenWebView: (u: string) => { this.webUrl = u; this.exploreStack.pushPath({ name: 'repoWeb' }); }, onOpenDev: (uname: string) => { this.detailOwner = uname; this.exploreStack.pushPath({ name: 'devProfile' }); }, onOpenRepo: (o: string, r: string) => { this.exploreStack.pushPath({ name: 'repoDetail', param: new RepoParam(o, r) }); }, onOpenIssues: (o: string, r: string) => { this.detailOwner = o; this.detailRepo = r; this.exploreStack.pushPath({ name: 'issues' }); } }) }
+        .titleBar(buildTitleBar('仓库详情')).linearGradient({ colors: this.mica(), direction: GradientDirection.RightBottom })
     } else if (name === 'issues') {
-      NavDestination() { IssuesPage({ owner: this.detailOwner, repoName: this.detailRepo, onOpenWebView: (u: string) => { this.webUrl = u; this.exploreStack.pushPath({ name: 'repoWeb' }); }, onOpenIssue: (o: string, r: string, n: number) => { this.detailOwner = o; this.detailRepo = r; this.detailIssueNumber = n; this.exploreStack.pushPath({ name: 'issueDetail' }); } }) }
-        .title('议题', this.titleOpts()).backgroundColor(this.T().background).padding({ top: 32 })
+      HdsNavDestination() { IssuesPage({ owner: this.detailOwner, repoName: this.detailRepo, onOpenWebView: (u: string) => { this.webUrl = u; this.exploreStack.pushPath({ name: 'repoWeb' }); }, onOpenIssue: (o: string, r: string, n: number) => { this.detailOwner = o; this.detailRepo = r; this.detailIssueNumber = n; this.exploreStack.pushPath({ name: 'issueDetail' }); } }) }
+        .titleBar(buildTitleBar('议题')).backgroundColor(this.T().background)
     } else if (name === 'issueDetail') {
-      NavDestination() { IssueDetailPage({ owner: this.detailOwner, repoName: this.detailRepo, issueNumber: this.detailIssueNumber, onOpenWebView: (u: string) => { this.webUrl = u; this.exploreStack.pushPath({ name: 'repoWeb' }); }, onOpenRepo: (o: string, r: string) => { this.exploreStack.pushPath({ name: 'repoDetail', param: new RepoParam(o, r) }); } }) }
-        .title('议题详情', this.titleOpts()).backgroundColor(this.T().background).padding({ top: 32 })
+      HdsNavDestination() { IssueDetailPage({ owner: this.detailOwner, repoName: this.detailRepo, issueNumber: this.detailIssueNumber, onOpenWebView: (u: string) => { this.webUrl = u; this.exploreStack.pushPath({ name: 'repoWeb' }); }, onOpenRepo: (o: string, r: string) => { this.exploreStack.pushPath({ name: 'repoDetail', param: new RepoParam(o, r) }); } }) }
+        .titleBar(buildTitleBar('议题详情')).backgroundColor(this.T().background)
     } else if (name === 'devProfile') {
-      NavDestination() { DevProfilePage({ username: this.detailOwner, onOpenRepo: (o: string, r: string) => { this.exploreStack.pushPath({ name: 'repoDetail', param: new RepoParam(o, r) }); }, onOpenWebView: (u: string) => { this.webUrl = u; this.exploreStack.pushPath({ name: 'repoWeb' }); } }) }
-        .title('开发者', this.titleOpts()).linearGradient({ colors: this.mica(), direction: GradientDirection.RightBottom }).padding({ top: 32 })
+      HdsNavDestination() { DevProfilePage({ username: this.detailOwner, onOpenRepo: (o: string, r: string) => { this.exploreStack.pushPath({ name: 'repoDetail', param: new RepoParam(o, r) }); }, onOpenWebView: (u: string) => { this.webUrl = u; this.exploreStack.pushPath({ name: 'repoWeb' }); } }) }
+        .titleBar(buildTitleBar('开发者')).linearGradient({ colors: this.mica(), direction: GradientDirection.RightBottom })
     } else if (name === 'repoWeb') {
-      NavDestination() {
+      HdsNavDestination() {
         Web({ src: this.webUrl, controller: this.webCtl })
           .width('100%').height('100%')
           .darkMode(this.themeMode === 'dark' ? WebDarkMode.On : WebDarkMode.Off)
           .backgroundColor(this.themeMode === 'dark' ? Color.Black : Color.White)
-      }.title('GitHub', this.titleOpts()).backgroundColor(this.T().background).padding({ top: 32 })
+      }.titleBar(buildTitleBar('GitHub')).backgroundColor(this.T().background)
     } else if (name === 'topRepos') {
-      NavDestination() { TopReposPage({ onOpenRepo: (o: string, r: string) => { this.exploreStack.pushPath({ name: 'repoDetail', param: new RepoParam(o, r) }); } }) }
-        .title('星标榜', this.titleOpts()).backgroundColor(this.T().background).padding({ top: 32 })
+      HdsNavDestination() { TopReposPage({ onOpenRepo: (o: string, r: string) => { this.exploreStack.pushPath({ name: 'repoDetail', param: new RepoParam(o, r) }); } }) }
+        .titleBar(buildTitleBar('星标榜')).backgroundColor(this.T().background)
     }
   }
 
