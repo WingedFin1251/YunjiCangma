@@ -36,6 +36,8 @@ export struct ExploreTab {
   @State trendingRepos: Repository[] = [];
   @State activities: ActivityItem[] = [];
   @State isExploreLoading: boolean = true;
+  @State starredLoaded: boolean = false;
+  private starredSet: Set<string> = new Set<string>();
   @State webUrl: string = '';
   @State detailOwner: string = '';
   @State detailRepo: string = '';
@@ -79,6 +81,22 @@ export struct ExploreTab {
     } finally {
       this.isExploreLoading = false;
     }
+    this.loadStarred();
+  }
+
+  /** 拉取用户星标列表，标记热门卡片初始星标状态 */
+  async loadStarred(): Promise<void> {
+    try {
+      const starred: Repository[] = await RepoRepository.getStarredRepos();
+      const s: Set<string> = new Set<string>();
+      for (let i = 0; i < starred.length; i++) { s.add(starred[i].full_name); }
+      this.starredSet = s;
+    } catch (e) { }
+    finally { this.starredLoaded = true; }
+  }
+
+  private isStarred(repo: Repository): boolean {
+    return this.starredSet.has(repo.full_name);
   }
 
   private openExploreWeb(url: string): void {
@@ -173,7 +191,7 @@ export struct ExploreTab {
                   description: repo.description || '',
                   language: repo.language || '',
                   stars: repo.stargazers_count,
-                  isStarred: false
+                  isStarred: this.isStarred(repo)
                 })
               }
               .width('100%')
