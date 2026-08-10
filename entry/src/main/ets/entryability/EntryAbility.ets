@@ -32,6 +32,8 @@ export default class EntryAbility extends UIAbility {
     await AuthService.loadToken();
     const savedTheme: string = await AuthService.loadTheme();
     AppStorage.setOrCreate('currentTheme', savedTheme);
+    const savedGlow: number = await AuthService.loadGlowLevel();
+    AppStorage.setOrCreate('glowLevel', savedGlow);
 
     // 全屏沉浸 — 状态栏透明叠加，窗口延伸至屏幕顶部
     try {
