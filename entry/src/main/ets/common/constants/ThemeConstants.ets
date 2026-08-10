@@ -30,6 +30,14 @@ export class DarkTheme {
   static readonly orgOrange: string = '#FF9529';
   static readonly starYellow: string = '#FFD33D';
   static readonly clickFeedback: string = '#383838';
+  static readonly micaStart: string = '#232323';
+  static readonly micaEnd: string = '#16161A';
+  static readonly micaBlob: string = 'rgba(76,194,255,0.10)';
+  static readonly cardGlass: string = 'rgba(255,255,255,0.05)';
+  static readonly cardGlassStrong: string = 'rgba(255,255,255,0.09)';
+  static readonly cardStroke: string = 'rgba(255,255,255,0.08)';
+  static readonly ctrlFill: string = 'rgba(255,255,255,0.06)';
+  static readonly ctrlFillPressed: string = 'rgba(255,255,255,0.03)';
 }
 
 /** 浅色主题色值 */
@@ -48,6 +56,14 @@ export class LightTheme {
   static readonly orgOrange: string = '#CF6A00';
   static readonly starYellow: string = '#9A6700';
   static readonly clickFeedback: string = '#E0E4E8';
+  static readonly micaStart: string = '#F3F3F3';
+  static readonly micaEnd: string = '#ECEEF1';
+  static readonly micaBlob: string = 'rgba(0,103,192,0.07)';
+  static readonly cardGlass: string = 'rgba(255,255,255,0.70)';
+  static readonly cardGlassStrong: string = 'rgba(255,255,255,0.85)';
+  static readonly cardStroke: string = 'rgba(0,0,0,0.06)';
+  static readonly ctrlFill: string = 'rgba(255,255,255,0.70)';
+  static readonly ctrlFillPressed: string = 'rgba(0,0,0,0.06)';
 }
 
 /** 主题色值获取：themeMode + 属性名 → 色值 */
