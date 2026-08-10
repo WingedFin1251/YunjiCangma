@@ -32,6 +32,7 @@ struct MainPage {
     };
   }
   @State currentIndex: number = 0;
+  @StorageLink('glowLevel') glowLevel: number = 1;
   private tabsController: HdsTabsController = new HdsTabsController();
 
   onThemeChange(): void {
@@ -54,20 +55,33 @@ struct MainPage {
     } catch (_) {}
   }
 
-  /** 选中项亮色渐变（accent → 亮） */
+  /** 选中项光晕半径（按档位：弱/均衡/强） */
+  private glowRadius(): number {
+    if (this.glowLevel === 2) return 22;
+    if (this.glowLevel === 0) return 6;
+    return 12;
+  }
+
+  /** 选中项亮色渐变（按档位调整亮度） */
   private tabGradient(selected: boolean): Array<[ResourceColor, number]> {
     if (!selected) {
       return [['rgba(0,0,0,0)', 0], ['rgba(0,0,0,0)', 1]];
     }
-    if (this.currentTheme === 'dark') {
-      return [['#218BFE', 0], ['#4CC2FF', 1]];
+    if (this.glowLevel === 0) {
+      return this.currentTheme === 'dark' ? [['#218BFE', 0], ['#2E9BFE', 1]] : [['#0969DA', 0], ['#0B78E8', 1]];
     }
-    return [['#0969DA', 0], ['#1F8FFF', 1]];
+    if (this.glowLevel === 2) {
+      return this.currentTheme === 'dark' ? [['#1E8CFF', 0], ['#6ED4FF', 1]] : [['#0077E6', 0], ['#3AA6FF', 1]];
+    }
+    return this.currentTheme === 'dark' ? [['#218BFE', 0], ['#4CC2FF', 1]] : [['#0969DA', 0], ['#1F8FFF', 1]];
   }
 
-  /** 选中项光晕色 */
+  /** 选中项光晕色（按档位调整透明度） */
   private glowShadow(): string {
-    return this.currentTheme === 'dark' ? 'rgba(76,194,255,0.45)' : 'rgba(9,105,218,0.35)';
+    const dark: boolean = this.currentTheme === 'dark';
+    if (this.glowLevel === 2) return dark ? 'rgba(76,194,255,0.7)' : 'rgba(9,105,218,0.55)';
+    if (this.glowLevel === 0) return dark ? 'rgba(76,194,255,0.2)' : 'rgba(9,105,218,0.15)';
+    return dark ? 'rgba(76,194,255,0.45)' : 'rgba(9,105,218,0.35)';
   }
 
   /** HdsTabs 悬浮样式（液态玻璃沉浸材质） */
@@ -97,7 +111,7 @@ struct MainPage {
       .justifyContent(FlexAlign.Center)
       .linearGradient({ colors: this.tabGradient(this.currentIndex === index) })
       .shadow({
-        radius: this.currentIndex === index ? 12 : 0,
+        radius: this.currentIndex === index ? this.glowRadius() : 0,
         color: this.currentIndex === index ? this.glowShadow() : 'rgba(0,0,0,0)',
         offsetY: 0
       })

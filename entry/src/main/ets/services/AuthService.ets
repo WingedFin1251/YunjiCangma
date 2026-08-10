@@ -143,6 +143,25 @@ export class AuthService {
     }
   }
 
+  static async loadGlowLevel(): Promise<number> {
+    try {
+      const prefs = await preferences.getPreferences(AuthService.getContext(), PREFERENCES_NAME);
+      return await prefs.get('glow_level', 1) as number;
+    } catch (err) {
+      return 1;
+    }
+  }
+
+  static async saveGlowLevel(level: number): Promise<void> {
+    try {
+      const prefs = await preferences.getPreferences(AuthService.getContext(), PREFERENCES_NAME);
+      await prefs.put('glow_level', level);
+      await prefs.flush();
+    } catch (err) {
+      console.error('Failed to save glow level:', JSON.stringify(err));
+    }
+  }
+
   static isOAuthCallback(url: string): boolean {
     return url.includes('code=') &&
       (url.startsWith('githubclient://') ||
