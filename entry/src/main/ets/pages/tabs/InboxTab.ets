@@ -120,6 +120,7 @@ export struct InboxTab {
           // 右侧功能图标：更多
           Text('⋯')
             .fontSize(20)
+            .fontColor(this.T().textPrimary)
             .width(44)
             .height(44)
             .textAlign(TextAlign.Center)
