@@ -106,7 +106,7 @@ export struct DevProfilePage {
             // ===== 1. PROFILE HEADER =====
             AcrylicCard({ paddingV: 24 }) {
               Column() {
-                PersonPicture({ url: this.profile.avatar_url, name: this.profile.login, size: 84 })
+                PersonPicture({ url: this.profile.avatar_url, name: this.profile.login, avatarSize: 84 })
                 Text(this.profile.name || this.profile.login)
                   .fontSize(24).fontWeight(FontWeight.Bold).fontColor(this.T().textPrimary).margin({ top: 12 })
                 Text('@' + this.profile.login).fontSize(14).fontColor(this.T().textSecondary).margin({ top: 2 })
