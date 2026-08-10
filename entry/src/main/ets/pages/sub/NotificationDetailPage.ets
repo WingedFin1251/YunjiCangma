@@ -14,7 +14,7 @@ export struct NotificationDetailPage {
   @State commentsLoading: boolean = true;
   @Prop @Watch('load') owner: string = '';
   @Prop @Watch('load') repoName: string = '';
-  @Prop number: number = 0;
+  @Prop issueNumber: number = 0;
   @Prop notifTitle: string = '';
   @Prop repoFullName: string = '';
   @Prop notifType: string = '';
@@ -43,12 +43,18 @@ export struct NotificationDetailPage {
     };
   }
 
-  aboutToAppear(): void { if (this.owner && this.repoName && this.number > 0) this.load(); }
+  aboutToAppear(): void {
+    if (this.owner && this.repoName && this.issueNumber > 0) {
+      this.load();
+    } else {
+      this.loading = false;
+    }
+  }
 
   async load(): Promise<void> {
     this.loading = true;
     try {
-      this.issue = await HttpClient.get<Object>('/repos/' + this.owner + '/' + this.repoName + '/issues/' + this.number.toString());
+      this.issue = await HttpClient.get<Object>('/repos/' + this.owner + '/' + this.repoName + '/issues/' + this.issueNumber.toString());
     } catch (e) { this.issue = null; }
     finally { this.loading = false; }
     this.loadComments();
@@ -57,7 +63,7 @@ export struct NotificationDetailPage {
   async loadComments(): Promise<void> {
     this.commentsLoading = true;
     try {
-      this.comments = await HttpClient.get<Object[]>('/repos/' + this.owner + '/' + this.repoName + '/issues/' + this.number.toString() + '/comments?per_page=50');
+      this.comments = await HttpClient.get<Object[]>('/repos/' + this.owner + '/' + this.repoName + '/issues/' + this.issueNumber.toString() + '/comments?per_page=50');
     } catch (e) { this.comments = []; }
     finally { this.commentsLoading = false; }
   }
@@ -91,14 +97,16 @@ export struct NotificationDetailPage {
   private commentBody(c: Object): string { return (((c as Record<string, Object>).body as string) || ''); }
 
   private openInWeb(): void {
-    const base: string = 'https://github.com/' + this.owner + '/' + this.repoName;
-    if (this.notifType === 'PullRequest') {
-      if (this.onOpenWebView) this.onOpenWebView(base + '/pull/' + this.number.toString());
-    } else if (this.notifType === 'Discussion') {
-      if (this.onOpenWebView) this.onOpenWebView(base + '/discussions/' + this.number.toString());
-    } else {
-      if (this.onOpenWebView) this.onOpenWebView(base + '/issues/' + this.number.toString());
+    let target: string = 'https://github.com';
+    if (this.owner && this.repoName) {
+      const base: string = 'https://github.com/' + this.owner + '/' + this.repoName;
+      if (this.notifType === 'PullRequest') target = base + '/pull/' + this.issueNumber.toString();
+      else if (this.notifType === 'Discussion') target = base + '/discussions/' + this.issueNumber.toString();
+      else target = base + '/issues/' + this.issueNumber.toString();
+    } else if (this.repoFullName) {
+      target = 'https://github.com/' + this.repoFullName;
     }
+    if (this.onOpenWebView) this.onOpenWebView(target);
   }
 
   build() {

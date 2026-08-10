@@ -14,7 +14,7 @@ export struct IssueDetailPage {
   @State commentsLoading: boolean = true;
   @Prop @Watch('load') owner: string = '';
   @Prop @Watch('load') repoName: string = '';
-  @Prop number: number = 0;
+  @Prop issueNumber: number = 0;
   onOpenWebView?: (url: string) => void;
   onOpenRepo?: (owner: string, repo: string) => void;
   private T(): ThemeColors {
@@ -37,12 +37,12 @@ export struct IssueDetailPage {
     };
   }
 
-  aboutToAppear(): void { if (this.owner && this.repoName && this.number > 0) this.load(); }
+  aboutToAppear(): void { if (this.owner && this.repoName && this.issueNumber > 0) this.load(); }
 
   async load(): Promise<void> {
     this.loading = true;
     try {
-      this.issue = await HttpClient.get<Object>('/repos/' + this.owner + '/' + this.repoName + '/issues/' + this.number.toString());
+      this.issue = await HttpClient.get<Object>('/repos/' + this.owner + '/' + this.repoName + '/issues/' + this.issueNumber.toString());
     } catch (e) { this.issue = null; }
     finally { this.loading = false; }
     this.loadComments();
@@ -51,7 +51,7 @@ export struct IssueDetailPage {
   async loadComments(): Promise<void> {
     this.commentsLoading = true;
     try {
-      this.comments = await HttpClient.get<Object[]>('/repos/' + this.owner + '/' + this.repoName + '/issues/' + this.number.toString() + '/comments?per_page=50');
+      this.comments = await HttpClient.get<Object[]>('/repos/' + this.owner + '/' + this.repoName + '/issues/' + this.issueNumber.toString() + '/comments?per_page=50');
     } catch (e) { this.comments = []; }
     finally { this.commentsLoading = false; }
   }
