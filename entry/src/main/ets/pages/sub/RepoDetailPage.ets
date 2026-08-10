@@ -161,17 +161,17 @@ export struct RepoDetailPage {
             // ===== 2. 操作区（议题/PR/安全） =====
             Row({ space: 8 }) {
               WinButton({
-                label: '议题', icon: '◉', tint: this.T().issueGreen,
+                label: '议题', icon: '◉', tint: this.T().issueGreen, flex: 1,
                 onAction: () => { if (this.onOpenIssues) this.onOpenIssues(this.owner, this.repoName); }
-              }).layoutWeight(1)
+              })
               WinButton({
-                label: 'PR', icon: '⇄', tint: this.T().prBlue,
+                label: 'PR', icon: '⇄', tint: this.T().prBlue, flex: 1,
                 onAction: () => { this.openWeb('https://github.com/' + this.owner + '/' + this.repoName + '/pulls'); }
-              }).layoutWeight(1)
+              })
               WinButton({
-                label: '安全', icon: '🛡', tint: this.T().discussionPurple,
+                label: '安全', icon: '🛡', tint: this.T().discussionPurple, flex: 1,
                 onAction: () => { this.openWeb('https://github.com/' + this.owner + '/' + this.repoName + '/security'); }
-              }).layoutWeight(1)
+              })
             }.width('100%')
 
             // ===== 3. 仓库信息 =====
