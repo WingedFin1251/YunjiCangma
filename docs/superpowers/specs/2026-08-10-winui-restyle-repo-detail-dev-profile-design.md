@@ -19,8 +19,9 @@ Fluent 动画 + WinUI 控件细节。
 ## 设计 Token（新增，只加不改）
 
 `ThemeConstants.ets` 中 `DarkTheme` / `LightTheme` **新增静态字段**，不动 `ThemeColors` 接口与
-已有 14 字段 → 全 app 其它页面的 `T()` 方法不受影响。accent 沿用现有 GitHub 蓝
-（#218BFE / #0969DA），保证全 app 一致。
+已有 14 字段 → 全 app 其它页面的 `T()` 方法不受影响。**UI accent（按钮、链接、选中态）沿用现有
+GitHub 蓝（#218BFE / #0969DA）**，保证全 app 一致。`micaBlob` 柔光斑使用 WinUI 蓝
+（#4CC2FF / #0067C0，与 UI accent 协调但不必相同）—— 它只是背景里极淡的晕色，不承担 UI 语义。
 
 | Token | 深色 | 浅色 | 用途 |
 |-------|------|------|------|
@@ -71,7 +72,8 @@ Fluent 动画 + WinUI 控件细节。
 
 ## 仓库详情页重绘规格
 
-现有 7 个区块全部保留，行为不变，逐一重绘：
+现有内容区块（HEADER / 操作 / 信息 / Release / 开发者 / 报告问题 / README）全部保留，
+行为不变，逐一重绘：
 
 1. **HEADER**（AcrylicCard）
    - owner 小字（textSecondary）→ 仓库名大标题（28 bold）→ 描述 → topics 胶囊（沿用 accent 底）
@@ -85,9 +87,11 @@ Fluent 动画 + WinUI 控件细节。
    - tag（accent bold）+ 名称 + 日期 + 展开 body（MarkdownView），保留"查看完整 Release"
 5. **开发者**（AcrylicCard 行）
    - PersonPicture（首字母兜底头像）+ owner 名 + "查看 ›"（accent）
-6. **README**（AcrylicCard + ExpandableSection）
+6. **报告问题**（AcrylicCard 行）
+   - "🐛 报告问题" + "›"，点击进 WebView `/issues/new`（行为不变）
+7. **README**（AcrylicCard + ExpandableSection）
    - 展开后 MarkdownView，保留"在浏览器中查看"
-7. **加载 / 空 / 错态**
+8. **加载 / 空 / 错态**
    - 加载：WinUI ProgressRing 风格（`ProgressRing` 或自绘弧）
    - 空/错：InfoBar 式提示（图标 + 文案）
 
