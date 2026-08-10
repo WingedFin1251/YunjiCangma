@@ -11,6 +11,8 @@ export struct TopReposPage {
   @StorageLink(THEME_KEY) themeMode: string = 'dark';
   @State repos: Repository[] = [];
   @State loading: boolean = true;
+  @State starredLoaded: boolean = false;
+  private starredSet: Set<string> = new Set<string>();
   onOpenRepo?: (owner: string, repo: string) => void;
   private T(): ThemeColors {
     const d: boolean = this.themeMode === 'dark';
@@ -41,6 +43,22 @@ export struct TopReposPage {
       this.repos = result.items || [];
     } catch (e) { this.repos = []; }
     finally { this.loading = false; }
+    this.loadStarred();
+  }
+
+  /** 拉取用户星标列表，标记卡片初始星标状态 */
+  async loadStarred(): Promise<void> {
+    try {
+      const starred: Repository[] = await RepoRepository.getStarredRepos();
+      const s: Set<string> = new Set<string>();
+      for (let i = 0; i < starred.length; i++) { s.add(starred[i].full_name); }
+      this.starredSet = s;
+    } catch (e) { }
+    finally { this.starredLoaded = true; }
+  }
+
+  private isStarred(repo: Repository): boolean {
+    return this.starredSet.has(repo.full_name);
   }
 
   build() {
@@ -66,7 +84,7 @@ export struct TopReposPage {
                   description: repo.description || '',
                   language: repo.language || '',
                   stars: repo.stargazers_count,
-                  isStarred: false
+                  isStarred: this.isStarred(repo)
                 })
               }
               .width('100%')
