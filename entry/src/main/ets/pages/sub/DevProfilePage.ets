@@ -1,6 +1,10 @@
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
 import { UserRepository } from '../../services/UserRepository';
 import { RepoRepository } from '../../services/RepoRepository';
+import { AcrylicCard } from '../../common/components/AcrylicCard';
+import { MicaLayer } from '../../common/components/MicaLayer';
+import { WinButton } from '../../common/components/WinButton';
+import { PersonPicture } from '../../common/components/PersonPicture';
 import type { User } from '../../models/User';
 
 function fmt(n: number): string {
@@ -25,7 +29,25 @@ export struct DevProfilePage {
   onOpenRepo?: (owner: string, repo: string) => void;
   onOpenWebView?: (url: string) => void;
   private filterLabels: string[] = ['全部', '原创', '复刻'];
-  private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
+  private T(): ThemeColors {
+    const d: boolean = this.themeMode === 'dark';
+    return {
+      background: d ? DarkTheme.background : LightTheme.background,
+      surface: d ? DarkTheme.surface : LightTheme.surface,
+      surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated,
+      border: d ? DarkTheme.border : LightTheme.border,
+      textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary,
+      textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary,
+      textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary,
+      accent: d ? DarkTheme.accent : LightTheme.accent,
+      issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen,
+      prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue,
+      discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple,
+      orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange,
+      starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow,
+      clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback
+    };
+  }
 
   aboutToAppear(): void { if (this.username) this.load(); }
 
@@ -66,133 +88,122 @@ export struct DevProfilePage {
   }
 
   build() {
-    Scroll() {
-      Column() {
-        if (this.loading) {
-          Column() { LoadingProgress().width(32).height(32).color(this.T().accent) }
-            .justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center).width('100%').height(400)
-        } else if (!this.profile) {
-          Column({ space: 12 }) {
-            Text('☁').fontSize(48).fontColor(this.T().textTertiary)
-            Text('无法加载用户信息').fontSize(14).fontColor(this.T().textSecondary)
-          }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center).width('100%').height(400)
-        } else {
-          Column({ space: 24 }) {
-            // ===== PROFILE HEADER =====
-            Column() {
-              Image(this.profile.avatar_url).width(80).height(80).borderRadius(40).objectFit(ImageFit.Cover)
-              Text(this.profile.name || this.profile.login)
-                .fontSize(24).fontWeight(FontWeight.Bold).fontColor(this.T().textPrimary).margin({ top: 12 })
-              Text('@' + this.profile.login).fontSize(14).fontColor(this.T().textSecondary).margin({ top: 2 })
-              if (this.profile.bio) {
-                Text(this.profile.bio).fontSize(14).fontColor(this.T().textSecondary).lineHeight(20)
-                  .textAlign(TextAlign.Center).width('90%').margin({ top: 10 })
-              }
-
-              // Stats with dividers
-              Row() {
-                this.statCol('仓库', this.profile.public_repos)
-                Text('│').fontSize(18).fontColor(this.T().border).margin({ left: 20, right: 20 })
-                this.statCol('粉丝', this.profile.followers)
-                Text('│').fontSize(18).fontColor(this.T().border).margin({ left: 20, right: 20 })
-                this.statCol('关注', this.profile.following)
-              }.margin({ top: 16 })
-
-              if (this.profile.company) Text('🏢 ' + (this.profile.company || '')).fontSize(13).fontColor(this.T().textTertiary).margin({ top: 12 })
-              if (this.profile.location) Text('📍 ' + (this.profile.location || '')).fontSize(13).fontColor(this.T().textTertiary).margin({ top: 4 })
-              if (this.profile.blog) Text('🔗 ' + (this.profile.blog || '')).fontSize(13).fontColor(this.T().accent).margin({ top: 4 })
-
-              // Share button
-              Row() {
-                Text('📤 分享').fontSize(13).fontColor(this.T().accent)
-              }.margin({ top: 12 }).padding({ left: 14, right: 14, top: 6, bottom: 6 })
-                .backgroundColor(this.themeMode === 'dark' ? '#1A2F44' : '#DDF4FF').borderRadius(8)
-                .onClick(() => {
-                  if (this.onOpenWebView) this.onOpenWebView('https://github.com/' + this.username);
-                })
+    Stack() {
+      MicaLayer()
+      if (this.loading) {
+        Column({ space: 12 }) {
+          LoadingProgress().width(32).height(32).color(this.T().accent)
+          Text('正在加载…').fontSize(13).fontColor(this.T().textTertiary)
+        }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center).width('100%').height('100%')
+      } else if (!this.profile) {
+        Column({ space: 12 }) {
+          Text('☁').fontSize(48).fontColor(this.T().textTertiary)
+          Text('无法加载用户信息').fontSize(14).fontColor(this.T().textSecondary)
+        }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center).width('100%').height('100%')
+      } else {
+        Scroll() {
+          Column({ space: 20 }) {
+            // ===== 1. PROFILE HEADER =====
+            AcrylicCard({ paddingV: 24 }) {
+              Column() {
+                PersonPicture({ url: this.profile.avatar_url, name: this.profile.login, size: 84 })
+                Text(this.profile.name || this.profile.login)
+                  .fontSize(24).fontWeight(FontWeight.Bold).fontColor(this.T().textPrimary).margin({ top: 12 })
+                Text('@' + this.profile.login).fontSize(14).fontColor(this.T().textSecondary).margin({ top: 2 })
+                if (this.profile.bio) {
+                  Text(this.profile.bio).fontSize(14).fontColor(this.T().textSecondary).lineHeight(20)
+                    .textAlign(TextAlign.Center).width('100%').margin({ top: 10 })
+                }
+                Row() {
+                  this.statCol('仓库', this.profile.public_repos)
+                  Text('│').fontSize(18).fontColor(this.T().border).margin({ left: 20, right: 20 })
+                  this.statCol('粉丝', this.profile.followers)
+                  Text('│').fontSize(18).fontColor(this.T().border).margin({ left: 20, right: 20 })
+                  this.statCol('关注', this.profile.following)
+                }.margin({ top: 16 })
+                if (this.profile.company) Text('🏢 ' + (this.profile.company || '')).fontSize(13).fontColor(this.T().textTertiary).margin({ top: 12 })
+                if (this.profile.location) Text('📍 ' + (this.profile.location || '')).fontSize(13).fontColor(this.T().textTertiary).margin({ top: 4 })
+                if (this.profile.blog) Text('🔗 ' + (this.profile.blog || '')).fontSize(13).fontColor(this.T().accent).margin({ top: 4 })
+                WinButton({ label: '分享', icon: '📤', tint: this.T().accent, onAction: () => { if (this.onOpenWebView) this.onOpenWebView('https://github.com/' + this.username); } })
+                  .margin({ top: 14 })
+              }.alignItems(HorizontalAlign.Center)
             }
-            .width('100%').padding(24)
-            .backgroundColor(this.T().surface).borderRadius(16)
-            .border({ width: 1, color: this.T().border }).alignItems(HorizontalAlign.Center)
-            .padding({ left: 16, right: 16 })
 
-            // ===== 贡献热力图 =====
+            // ===== 2. 贡献热力图 =====
             if (this.contribLoading) {
-              Column() { LoadingProgress().width(20).height(20).color(this.T().accent).margin({ top: 12, bottom: 12 }) }
-                .width('100%').backgroundColor(this.T().surface).borderRadius(16)
-                .border({ width: 1, color: this.T().border }).padding(16)
-                .padding({ left: 16, right: 16 }).alignItems(HorizontalAlign.Center)
+              AcrylicCard({ paddingV: 14 }) {
+                Column({ space: 8 }) {
+                  this.sectionTitle('📊 贡献')
+                  LoadingProgress().width(20).height(20).color(this.T().accent)
+                }.width('100%').alignItems(HorizontalAlign.Start)
+              }
             } else if (this.contribWeeks.length > 0) {
+              AcrylicCard({ paddingV: 14 }) {
+                Column() {
+                  Row() {
+                    Text('📊 贡献').fontSize(16).fontWeight(FontWeight.Medium).fontColor(this.T().textPrimary)
+                    Blank()
+                    Text(this.totalContributions + ' 次').fontSize(14).fontColor(this.T().textSecondary)
+                  }.width('100%').padding({ top: 2, bottom: 8 })
+                  Scroll() {
+                    Column({ space: 2 }) {
+                      ForEach([0, 1, 2, 3, 4, 5, 6], (row: number, ri: number) => {
+                        Row({ space: 2 }) {
+                          ForEach(this.contribWeeks.slice(Math.max(0, this.contribWeeks.length - 53)), (week: Object, wi: number) => {
+                            if (row < (((week as Record<string, Object>).contributionDays as Object[]) || []).length) {
+                              Text('').width(10).height(10)
+                                .backgroundColor(this.heatColor((((((week as Record<string, Object>).contributionDays as Object[]) || [])[row] as Record<string, Object>).contributionCount as number) || 0))
+                                .borderRadius(2)
+                            } else { Text('').width(10).height(10) }
+                          }, (week: Object, wi: number) => 'w' + wi)
+                        }
+                      }, (row: number, ri: number) => 'r' + ri)
+                    }
+                  }.scrollable(ScrollDirection.Horizontal).scrollBar(BarState.Off).width('100%').height(82)
+                  Row({ space: 4 }) {
+                    Text('较少').fontSize(10).fontColor(this.T().textTertiary)
+                    Text('■').fontSize(10).fontColor('#1B3419'); Text('■').fontSize(10).fontColor('#0E4429')
+                    Text('■').fontSize(10).fontColor('#006D32'); Text('■').fontSize(10).fontColor('#26A641')
+                    Text('■').fontSize(10).fontColor('#39D353')
+                    Text('较多').fontSize(10).fontColor(this.T().textTertiary)
+                  }.width('100%').padding({ top: 4 }).justifyContent(FlexAlign.End)
+                }.width('100%')
+              }
+            }
+
+            // ===== 3. 仓库区（搜索 + 筛选 + 列表） =====
+            AcrylicCard({ paddingV: 14 }) {
               Column() {
                 Row() {
-                  Text('📊 贡献').fontSize(16).fontWeight(FontWeight.Medium).fontColor(this.T().textPrimary)
-                  Blank()
-                  Text(this.totalContributions + ' 次').fontSize(14).fontColor(this.T().textSecondary)
-                }.width('100%').padding({ top: 12, bottom: 8 })
-                Scroll() {
-                  Column({ space: 2 }) {
-                    ForEach([0, 1, 2, 3, 4, 5, 6], (row: number, ri: number) => {
-                      Row({ space: 2 }) {
-                        ForEach(this.contribWeeks.slice(Math.max(0, this.contribWeeks.length - 53)), (week: Object, wi: number) => {
-                          if (row < (((week as Record<string, Object>).contributionDays as Object[]) || []).length) {
-                            Text('').width(10).height(10)
-                              .backgroundColor(this.heatColor((((((week as Record<string, Object>).contributionDays as Object[]) || [])[row] as Record<string, Object>).contributionCount as number) || 0))
-                              .borderRadius(2)
-                          } else { Text('').width(10).height(10) }
-                        }, (week: Object, wi: number) => 'w' + wi)
-                      }
-                    }, (row: number, ri: number) => 'r' + ri)
+                  TextInput({ placeholder: '搜索仓库...', text: this.searchQuery })
+                    .placeholderColor(this.T().textTertiary).fontSize(14).fontColor(this.T().textPrimary)
+                    .backgroundColor(this.themeMode === 'dark' ? DarkTheme.ctrlFill : LightTheme.ctrlFill)
+                    .borderRadius(8).height(38).layoutWeight(1).padding({ left: 12 })
+                    .onChange((v: string) => { this.searchQuery = v; this.applyFilter(); })
+                  if (this.searchQuery) {
+                    Text('✕').fontSize(16).fontColor(this.T().textTertiary).width(36).height(38).textAlign(TextAlign.Center).lineHeight(38)
+                      .onClick(() => { this.searchQuery = ''; this.applyFilter(); })
                   }
-                }.scrollable(ScrollDirection.Horizontal).scrollBar(BarState.Off).width('100%').height(82)
-                Row({ space: 4 }) {
-                  Text('较少').fontSize(10).fontColor(this.T().textTertiary)
-                  Text('■').fontSize(10).fontColor('#1B3419'); Text('■').fontSize(10).fontColor('#0E4429')
-                  Text('■').fontSize(10).fontColor('#006D32'); Text('■').fontSize(10).fontColor('#26A641')
-                  Text('■').fontSize(10).fontColor('#39D353')
-                  Text('较多').fontSize(10).fontColor(this.T().textTertiary)
-                }.width('100%').padding({ top: 4 }).justifyContent(FlexAlign.End)
-              }
-              .width('100%').backgroundColor(this.T().surface).borderRadius(16)
-              .border({ width: 1, color: this.T().border }).padding(16)
-              .padding({ left: 16, right: 16 })
-            }
+                }.width('100%').alignItems(VerticalAlign.Center)
 
-            // ===== REPOS SECTION =====
-            Column() {
-              // Search bar
-              Row() {
-                TextInput({ placeholder: '搜索仓库...', text: this.searchQuery })
-                  .placeholderColor(this.T().textTertiary).fontSize(14).fontColor(this.T().textPrimary)
-                  .backgroundColor(this.T().surfaceElevated).borderRadius(8).height(36).layoutWeight(1).padding({ left: 10 })
-                  .onChange((v: string) => { this.searchQuery = v; this.applyFilter(); })
-                if (this.searchQuery) {
-                  Text('✕').fontSize(16).fontColor(this.T().textTertiary).width(36).height(36).textAlign(TextAlign.Center).lineHeight(36)
-                    .onClick(() => { this.searchQuery = ''; this.applyFilter(); })
-                }
-              }.width('100%').padding({ top: 8, bottom: 8 })
+                Scroll() {
+                  Row({ space: 8 }) {
+                    ForEach(this.filterLabels, (t: string, idx: number) => {
+                      Text(t).fontSize(13).fontWeight(FontWeight.Medium)
+                        .fontColor(this.filterType === idx ? Color.White : this.T().textSecondary)
+                        .padding({ left: 14, right: 14, top: 6, bottom: 6 })
+                        .backgroundColor(this.filterType === idx ? this.T().accent : (this.themeMode === 'dark' ? DarkTheme.ctrlFill : LightTheme.ctrlFill))
+                        .borderRadius(8)
+                        .onClick(() => { this.filterType = idx; this.applyFilter(); })
+                    }, (t: string, idx: number) => idx.toString())
+                  }
+                }.scrollable(ScrollDirection.Horizontal).scrollBar(BarState.Off).width('100%').height(40).margin({ top: 8 })
 
-              // Filter tabs
-              Scroll() {
-                Row({ space: 8 }) {
-                  ForEach(this.filterLabels, (t: string, idx: number) => {
-                    Text(t).fontSize(13).fontWeight(FontWeight.Medium)
-                      .fontColor(this.filterType === idx ? Color.White : this.T().textSecondary)
-                      .padding({ left: 14, right: 14, top: 6, bottom: 6 })
-                      .backgroundColor(this.filterType === idx ? this.T().accent : this.T().surfaceElevated)
-                      .borderRadius(8)
-                      .onClick(() => { this.filterType = idx; this.applyFilter(); })
-                  }, (t: string, idx: number) => idx.toString())
-                }
-              }.scrollable(ScrollDirection.Horizontal).scrollBar(BarState.Off).width('100%').height(40)
+                Text('显示 ' + this.filteredRepos.length + ' 个仓库').fontSize(12).fontColor(this.T().textTertiary)
+                  .width('100%').padding({ top: 4, bottom: 8 })
 
-              // Count
-              Text('显示 ' + this.filteredRepos.length + ' 个仓库').fontSize(12).fontColor(this.T().textTertiary)
-                .width('100%').padding({ top: 4, bottom: 8 })
-
-              // Repo cards
-              Column({ space: 10 }) {
-                ForEach(this.filteredRepos, (item: Object, idx: number) => {
-                  Column() {
+                Column() {
+                  ForEach(this.filteredRepos, (item: Object, idx: number) => {
                     Row() {
                       Column() {
                         Text(((item as Record<string, Object>).name as string) || '')
@@ -218,28 +229,26 @@ export struct DevProfilePage {
                         }.margin({ top: 6 })
                       }.alignItems(HorizontalAlign.Start).layoutWeight(1)
                       Text('›').fontSize(20).fontColor(this.T().textSecondary)
-                    }.width('100%').alignItems(VerticalAlign.Center)
+                    }
+                    .width('100%').padding({ top: 12, bottom: 12 }).alignItems(VerticalAlign.Center)
                     .onClick(() => {
                       const it = item as Record<string, Object>;
                       const rOwner: string = (it.owner as Record<string, string>).login || this.username;
                       const rName: string = (it.name as string) || '';
                       if (this.onOpenRepo) this.onOpenRepo(rOwner, rName);
                     })
-                  }
-                  .width('100%').padding(14)
-                  .backgroundColor(this.T().background).borderRadius(10)
-                  .border({ width: 1, color: this.T().border })
-                }, (item: Object, idx: number) => idx.toString())
-              }
+                    if (idx < this.filteredRepos.length - 1) {
+                      Divider().color(this.T().border).width('100%')
+                    }
+                  }, (item: Object, idx: number) => idx.toString())
+                }.width('100%')
+              }.width('100%')
             }
-            .width('100%').backgroundColor(this.T().surface).borderRadius(16)
-            .border({ width: 1, color: this.T().border }).padding(16)
-            .padding({ left: 16, right: 16 })
           }
-        }
-        Blank().height(80)
-      }.width('100%').alignItems(HorizontalAlign.Start)
-    }.scrollBar(BarState.Off).width('100%').height('100%').backgroundColor(this.T().background)
+          Blank().height(80)
+        }.scrollBar(BarState.Off).width('100%').height('100%')
+      }
+    }.width('100%').height('100%')
   }
 
   private heatColor(count: number): string {
@@ -248,7 +257,16 @@ export struct DevProfilePage {
     if (count <= 8) return '#26A641'; return '#39D353';
   }
 
-  @Builder statCol(label: string, value: number) {
+  @Builder
+  sectionTitle(title: string) {
+    Row() {
+      Text(title).fontSize(17).fontWeight(FontWeight.Medium).fontColor(this.T().textPrimary)
+      Blank()
+    }.width('100%').padding({ top: 2, bottom: 4 })
+  }
+
+  @Builder
+  statCol(label: string, value: number) {
     Column() {
       Text(value.toString()).fontSize(20).fontWeight(FontWeight.Bold).fontColor(this.T().textPrimary)
       Text(label).fontSize(12).fontColor(this.T().textTertiary)
