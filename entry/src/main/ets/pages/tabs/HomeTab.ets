@@ -146,9 +146,9 @@ export struct HomeTab {
         Row() {
           Text($r('app.string.page_title_home')).fontSize(26).fontWeight(FontWeight.Bold).fontColor(this.T().textPrimary).layoutWeight(1)
           Row({ space: 20 }) {
-            this.headerIcon($r('app.media.ic_search'), () => { this.homeStack.pushPath({ name: 'search' }); })
+            this.headerIcon($r('app.media.ic_search_line_d'), $r('app.media.ic_search_line_l'), () => { this.homeStack.pushPath({ name: 'search' }); })
             this.navIcon('＋', () => { this.homeStack.pushPath({ name: 'newIssue' }); })
-            this.headerIcon($r('app.media.ic_refresh'), () => { this.refreshHome(); })
+            this.headerIcon($r('app.media.ic_refresh_line_d'), $r('app.media.ic_refresh_line_l'), () => { this.refreshHome(); })
           }
         }.width('100%').padding({ left: 16, right: 16 }).alignItems(VerticalAlign.Bottom)
 
@@ -234,13 +234,12 @@ export struct HomeTab {
   }
 
   @Builder
-  headerIcon(iconRes: Resource, onClick?: () => void) {
+  headerIcon(lineDark: Resource, lineLight: Resource, onClick?: () => void) {
     Column() {
-      Image(iconRes)
+      Image(this.themeMode === 'dark' ? lineDark : lineLight)
         .width(22)
         .height(22)
         .objectFit(ImageFit.Contain)
-        .fillColor(this.T().textPrimary)
     }
     .width(44)
     .height(44)
