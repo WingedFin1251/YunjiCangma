@@ -1,4 +1,6 @@
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors, langColor } from '../constants/ThemeConstants';
+import { AuthService } from '../../services/AuthService';
+import { RepoRepository } from '../../services/RepoRepository';
 
 /**
  * 仓库卡片组件（全局复用）
@@ -29,6 +31,19 @@ export struct RepoCard {
 
   aboutToAppear(): void {
     this.starred = this.isStarred;
+  }
+
+  /** 星标/取消星标（乐观更新，失败回滚；未登录不操作） */
+  private toggleStar(): void {
+    if (!this.owner || !this.repo) return;
+    if (AuthService.getToken() === '') return;
+    const target: boolean = !this.starred;
+    this.starred = target;
+    if (target) {
+      RepoRepository.starRepo(this.owner, this.repo).catch(() => { this.starred = false; });
+    } else {
+      RepoRepository.unstarRepo(this.owner, this.repo).catch(() => { this.starred = true; });
+    }
   }
 
   build() {
@@ -115,9 +130,7 @@ export struct RepoCard {
         .height(36)
         .backgroundColor(this.T().surfaceElevated)
         .borderRadius(6)
-        .onClick(() => {
-          this.starred = !this.starred;
-        })
+        .onClick(() => { this.toggleStar(); })
       }
       .width('100%')
       .margin({ top: 10 })
