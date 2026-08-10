@@ -1,3 +1,4 @@
+import { webview } from '@kit.ArkWeb';
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
 import { EmptyState } from '../../common/components/EmptyState';
 import { SearchRepository } from '../../services/SearchRepository';
@@ -7,6 +8,8 @@ import type { GitHubNotification } from '../../models/User';
 export struct InboxTab {
   @StorageLink(THEME_KEY) themeMode: string = 'dark'; private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
   private inboxStack: NavPathStack = new NavPathStack();
+  @State webUrl: string = '';
+  private webCtl: webview.WebviewController = new webview.WebviewController();
   @State selectedFilter: number = 0;
   @State notifications: GitHubNotification[] = [];
   @State isInboxLoading: boolean = true;
@@ -52,7 +55,29 @@ export struct InboxTab {
   }
 
   @Builder
-  inboxPageMap(name: string, param: ESObject) {}
+  inboxPageMap(name: string, param: ESObject) {
+    if (name === 'repoWebView') {
+      NavDestination() {
+        Web({ src: this.webUrl, controller: this.webCtl })
+          .width('100%').height('100%')
+          .darkMode(this.themeMode === 'dark' ? WebDarkMode.On : WebDarkMode.Off)
+          .backgroundColor(this.themeMode === 'dark' ? Color.Black : Color.White)
+      }.title('GitHub').backgroundColor(this.T().background).padding({ top: 32 })
+    }
+  }
+
+  /** 打开通知关联页面（API URL → HTML URL，WebView 加载） */
+  private openNotification(notif: GitHubNotification): void {
+    const apiUrl: string = notif.subject.url || '';
+    let url: string = apiUrl;
+    if (apiUrl.indexOf('api.github.com') >= 0) {
+      url = apiUrl.replace('api.github.com/repos/', 'github.com/');
+    } else {
+      url = 'https://github.com/' + notif.repository.full_name;
+    }
+    this.webUrl = url;
+    this.inboxStack.pushPath({ name: 'repoWebView' });
+  }
 
   build() {
     Navigation(this.inboxStack) {
@@ -153,7 +178,7 @@ export struct InboxTab {
   @Builder
   buildNotificationList() {
     List({ space: 0 }) {
-      ForEach(this.getFilteredNotifications(), (item: GitHubNotification, index: number) => {
+      ForEach(this.getFilteredNotifications(), (item: GitHubNotification, _index: number) => {
         ListItem() {
           Row() {
             Text(this.getNotifIcon(item))
@@ -189,6 +214,9 @@ export struct InboxTab {
           .height(48)
           .padding({ left: 16, right: 16 })
           .alignItems(VerticalAlign.Center)
+          .onClick(() => {
+            this.openNotification(item);
+          })
         }
       }, (item: GitHubNotification) => item.id)
     }
