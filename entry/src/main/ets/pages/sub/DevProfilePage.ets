@@ -115,6 +115,8 @@ export struct DevProfilePage {
       } else {
         Scroll() {
           Column({ space: 20 }) {
+            // 沉浸标题栏占位：初始避开标题栏，滚动时滑入磨砂下
+            Blank(100)
             // ===== 1. PROFILE HEADER =====
             AcrylicCard({ paddingV: 24 }) {
               Column() {

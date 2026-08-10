@@ -1,33 +1,41 @@
-# Dependencies
-/node_modules
-/oh_modules
+# Dependencies（含模块级）
+**/node_modules/
+**/oh_modules/
 
 # Build outputs
-**/build
-/.hvigor
+**/build/
+**/.hvigor/
+*.hap
+*.app
+*.hsp
 
-# IDE settings
-/.idea
-/.preview
-.cxx
+# IDE / DevEco settings
+/.idea/
+/.deveco/
+/.preview/
+/.appanalyzer/
+.cxx/
 /.clangd
 /.clang-format
 /.clang-tidy
+*.iml
 
 # Local machine-specific
 /local.properties
+/.ohos/
 *.log
 
 # OS generated files
 .DS_Store
 Thumbs.db
+*.swp
+*~
 
 # Test outputs
-**/.test
+**/.test/
 
-# App analysis
-/.appanalyzer
-/.appanalyzer/
+# 无关第三方参考项目（非本应用源码）
+/WinUIonWeb-master/
 
 # Claude Code
 /.claude/

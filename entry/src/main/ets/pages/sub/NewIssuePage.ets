@@ -62,6 +62,8 @@ export struct NewIssuePage {
     Column() {
       Scroll() {
         Column({ space: 12 }) {
+          // 沉浸标题栏占位：初始避开标题栏，滚动时滑入磨砂下
+          Blank(100)
           TextInput({ placeholder: '仓库所有者（如 octocat）', text: this.owner })
             .fontSize(15).fontColor(this.T().textPrimary).placeholderColor(this.T().textTertiary)
             .backgroundColor(this.T().surfaceElevated).borderRadius(8).height(42).padding({ left: 12 })

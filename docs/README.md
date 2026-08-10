@@ -25,7 +25,7 @@
 - **平台**: HarmonyOS NEXT (API 6.1.0)
 - **语言**: ArkTS（TypeScript 严格子集）
 - **架构**: Stage Model + ArkUI 声明式 UI
-- **数据源**: GitHub REST API v3 + GraphQL + OAuth Web Flow
+- **数据源**: GitHub REST API v3 + GraphQL + OAuth Device Flow
 - **设计**: 深色/浅色双主题（14 色值 ×2，preferences 持久化 + 系统 ColorMode 联动）
 - **服务层**: HttpClient（HTTP 引擎）→ RepoRepository / UserRepository / SearchRepository / AuthService
 - **底部导航**: 主页 / 收件箱 / 探索 / 个人资料（4 Tab，独立 NavPathStack）

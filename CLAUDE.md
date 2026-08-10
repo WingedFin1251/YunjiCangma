@@ -6,13 +6,13 @@
 
 **云笈藏码** — HarmonyOS NEXT 平台上的第三方开源代码仓库浏览客户端。
 
-- **Bundle**: `com.github.web` | **API**: 6.1.0 (23)
+- **Bundle**: `com.yunjicangma.app` | **API**: 6.1.0 (23)
 - **语言**: ArkTS (TypeScript 严格子集)
 - **架构**: Stage Model + ArkUI
 - **主题**: 深色/浅色双模式（14 色值 ×2，ThemeColors 接口 + DarkTheme/LightTheme 静态类 + T() 方法，preferences 持久化 + 系统 ColorMode 联动）
-- **OAuth**: GitHub OAuth App → 自定义 Scheme `githubclient://auth/callback` → WebView `onLoadIntercept` 拦截
+- **OAuth**: GitHub Device Flow（仅 `client_id`，客户端零密钥）— 验证码展示 + 轮询换 token
 - **状态栏**: 透明沉浸（#00FFFFFF）+ statusBarContentColor 深浅切换 + 运行时更新
-- **搜索**: 内置敏感词过滤（SensitiveWords.ets）+ Linguist 语言颜色支持
+- **搜索**: 手动屏蔽词过滤 + Linguist 语言颜色支持
 
 ## 关键架构决策
 
@@ -24,8 +24,8 @@
 | 平板适配 | `Navigation.mode(Stack)` | 默认 Split 分栏导致内容区黑屏 |
 | 全屏沉浸 | `setWindowLayoutFullScreen(true)` + `setColorMode` 同步 | 状态栏 + NavDestination 标题栏统一 |
 | 小白条 | MainPage Column + bottom Row(20, surface) | 底栏色延伸至手势指示条 |
-| 安全区 | 所有页面 `padding({ top: 32, bottom: 20 })` | 避开状态栏 + Tab 栏 |
-| OAuth 回调 | `onLoadIntercept` + 自定义 Scheme | WebView 内拦截，不跳系统浏览器 |
+| 安全区 | Tab 主页面 `padding({ top: 32, bottom: 20 })`；HdsNavDestination 子页面标题栏 `avoidLayoutSafeArea` + 内容顶部 `Blank(100)` | 沉浸浮层标题栏避让状态栏，内容滚动滑入栏下 |
+| OAuth 登录 | Device Flow（`POST /login/device/code` + 轮询 `access_token`） | 仅需 client_id，无需 client_secret 与回调 URL |
 | 登录刷新 | `@StorageLink(AUTH_LOGIN_KEY)` + `@Watch('onLoginChanged')` | 登录完切回 Profile 即显示用户信息 |
 | 数据数组 | 具名 `class` 实例 (`new WorkItem(...)`) | ArkTS 禁止内联对象和无法推断的类型 |
 | API 类型 | 具名 `interface`（User, Repository, GitHubNotification 等） | ArkTS 禁止内联对象作为类型声明 |
@@ -38,7 +38,7 @@ HttpClient.ets          # HTTP 引擎 — buildHeaders() + get<T>() + post<T>() 
   ├── RepoRepository    # 仓库相关 — getStarredRepos, getTrendingRepos, getMyRepos, getUserRepos, getRepoDetail, getRepoContents, getReadme, getLatestRelease
   ├── UserRepository    # 用户相关 — getCurrentUser, getUser, getFollowers, getFollowing, getReceivedEvents, getOrgs, getContributions (GraphQL)
   ├── SearchRepository  # 搜索/通知 — searchRepos, getNotifications, getIssues, getPullRequests
-  └── AuthService       # 认证 — OAuth URL 构建, exchangeCodeForToken, Token/Theme 持久化
+  └── AuthService       # 认证 — startDeviceFlow, pollDeviceToken, Token/Theme 持久化
 ```
 
 ## API 端点（按 Repository 分布）
@@ -82,14 +82,14 @@ entry/src/main/ets/
 ├── entrybackupability/EntryBackupAbility.ets  # 备份扩展
 ├── pages/
 │   ├── MainPage.ets                    # @Entry — Tabs(4 tab, 52dp, 小白条沉浸, 主题监听)
-│   ├── LoginPage.ets                   # @Entry — WebView OAuth(onLoadIntercept + 防抖)
+│   ├── LoginPage.ets                   # @Entry — Device Flow 登录（验证码展示 + 轮询）
 │   ├── tabs/
 │   │   ├── HomeTab.ets                 # 首页（我的项目 7 项 → WorkPage/IssuesPage + 我的星标 RepoCard）
 │   │   ├── InboxTab.ets                # 消息（FilterTabBar 4 筛选 + 通知列表/空状态）
 │   │   ├── ExploreTab.ets              # 发现（热门仓库 + 动态流 → RepoDetailPage/DevProfilePage）
 │   │   └── ProfileTab.ets              # 我的（头像 + 统计 + 列表 + 登录/登出）
 │   └── sub/
-│       ├── SearchPage.ets              # 全局搜索（敏感词过滤 + Linguist 颜色 → RepoDetailPage）
+│       ├── SearchPage.ets              # 全局搜索（手动屏蔽词 + Linguist 颜色 → RepoDetailPage）
 │       ├── WorkPage.ets                # 我的工作子页（议题/PR/仓库/组织/已加星标列表）
 │       ├── RepoDetailPage.ets          # 仓库详情（HEADER + Stats + Release + README + 开发者入口）
 │       ├── DevProfilePage.ets          # 开发者资料（头像/统计/仓库搜索/筛选/贡献热力图）
@@ -102,15 +102,16 @@ entry/src/main/ets/
 │   ├── RepoRepository.ets             # 仓库端点
 │   ├── UserRepository.ets             # 用户/动态/GraphQL 端点
 │   ├── SearchRepository.ets           # 搜索/通知/PR 端点
-│   └── AuthService.ets                # OAuth + Token CRUD + 主题存取
+│   └── AuthService.ets                # Device Flow + Token CRUD + 主题存取
 ├── models/
 │   ├── User.ets                        # User, Repository, RepoOwner, GitHubNotification, SearchResult
-│   └── AuthModels.ets                  # OAuthTokenResponse, AuthState, LoginPageParams
+│   └── AuthModels.ets                  # AuthState, LoginPageParams, DeviceFlowInfo, DevicePollStatus, DevicePollResult
 └── common/
     ├── constants/
     │   ├── ThemeConstants.ets          # DarkTheme / LightTheme / ThemeColors / THEME_KEY / langColor()
-    │   ├── APIConstants.ets            # API 端点 + OAuth 配置 + AppStorage Key
-    │   └── SensitiveWords.ets          # 内置敏感词库（中英文 120+ 词）
+    │   └── APIConstants.ets            # API 端点 + OAuth 配置 + AppStorage Key
+    ├── utils/
+    │   └── NavTitleBar.ets             # 子页面沉浸毛玻璃标题栏（HdsNavDestination titleBar）
     └── components/
         ├── RepoCard.ets                # 仓库卡片（头像+描述+语言+星标）
         ├── ListItem.ets                # 列表功能项

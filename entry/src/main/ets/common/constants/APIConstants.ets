@@ -5,20 +5,13 @@
 /** GitHub REST API Base URL */
 export const GITHUB_API_BASE: string = 'https://api.github.com';
 
-/** GitHub OAuth 授权端点 */
-export const GITHUB_OAUTH_AUTHORIZE_URL: string = 'https://github.com/login/oauth/authorize';
-
 /** GitHub OAuth Token 交换端点 */
 export const GITHUB_OAUTH_ACCESS_TOKEN_URL: string = 'https://github.com/login/oauth/access_token';
 
+/** GitHub Device Flow 起始端点（只需 client_id，无 secret） */
+export const GITHUB_OAUTH_DEVICE_CODE_URL: string = 'https://github.com/login/device/code';
+
 export const GITHUB_OAUTH_CLIENT_ID: string = 'Ov23ling48xkbpVRtB13';
-export const GITHUB_OAUTH_CLIENT_SECRET: string = '[REDACTED]';
-
-/** OAuth 授权范围 */
-export const GITHUB_OAUTH_SCOPES: string = 'repo,user';
-
-/** OAuth 回调 URL — 自定义 Scheme（需与 GitHub OAuth App 设置一致） */
-export const GITHUB_OAUTH_REDIRECT_URI: string = 'githubclient://auth/callback';
 
 /** API 请求头 */
 export class APIHeaders {

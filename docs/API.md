@@ -7,7 +7,7 @@
 - **Base URL**: `https://api.github.com`
 - **版本**: `X-GitHub-Api-Version: 2022-11-28`
 - **Accept**: `application/vnd.github+json`
-- **认证**: Bearer Token（OAuth Web Flow）
+- **认证**: Bearer Token（OAuth Device Flow）
 
 ## 服务层架构
 
@@ -38,22 +38,24 @@ export class HttpClient {
 
 ## 认证
 
-### OAuth Web Flow（已实现）
+### OAuth Device Flow（已实现）
 
-应用通过 WebView 加载 GitHub OAuth 授权页面，用户授权后拦截回调 URL 提取 authorization code，再用 code 交换 access token。
+纯客户端 Device Flow —— 客户端不持有 `client_secret`，登录只需 `client_id`。用户在验证页输入一次性验证码，应用轮询换取 access token。
 
 ```
-AuthService.buildOAuthUrl()
-  → WebView 加载 github.com/login/oauth/authorize
-  → 用户授权 → 回调 URL 含 ?code=xxx
-  → AuthService.isOAuthCallback(url) 检测
-  → AuthService.extractCodeFromUrl(url)
-  → AuthService.exchangeCodeForToken(code)
-    → POST github.com/login/oauth/access_token
-    → AuthService.saveToken(token) → preferences + AppStorage
+AuthService.startDeviceFlow()
+  → POST github.com/login/device/code { client_id }
+  → 返回 device_code + user_code
+  → LoginPage 展示 user_code + 加载 github.com/login/device
+  → 用户输入验证码并授权
+  → AuthService.pollDeviceToken(device_code) 轮询
+    → POST github.com/login/oauth/access_token { client_id, device_code, grant_type=device_code }
+    → 成功 → AuthService.saveToken(token) → preferences + AppStorage
 ```
 
-**配置**: 在 `common/constants/APIConstants.ets` 中设置 `GITHUB_OAUTH_CLIENT_ID` 和 `GITHUB_OAUTH_CLIENT_SECRET`。
+轮询处理 `authorization_pending`（继续）／`slow_down`（间隔 +5s）／`access_denied`／`expired_token`／`bad_verification_code`。
+
+**配置**: GitHub OAuth App 勾选 **Enable Device Flow**，在 `common/constants/APIConstants.ets` 设置 `GITHUB_OAUTH_CLIENT_ID`。无需 client_secret、无需 callback URL。
 
 ### Token 管理
 
@@ -198,14 +200,22 @@ export interface SearchResult {
 }
 ```
 
-### OAuthTokenResponse
+### DeviceFlowInfo / DevicePollResult
 
 ```typescript
 // models/AuthModels.ets
-export interface OAuthTokenResponse {
-  access_token: string;
-  token_type: string;
-  scope: string;
+export class DeviceFlowInfo {        // POST /login/device/code 响应
+  deviceCode: string;
+  userCode: string;
+  verificationUri: string;
+  interval: number;                  // 轮询间隔（秒）
+  expiresIn: number;
+}
+export enum DevicePollStatus { SUCCESS, PENDING, SLOW_DOWN, DENIED, EXPIRED, BAD_CODE, ERROR }
+export class DevicePollResult {
+  status: DevicePollStatus;
+  accessToken: string;
+  detail: string;
 }
 ```
 
