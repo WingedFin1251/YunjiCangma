@@ -38,6 +38,13 @@ export struct ProfileTab {
     const p = param as RepoParam;
     return p && p.repo ? p.repo : this.detailRepo;
   }
+  /** 子页面标题栏：沉浸毛玻璃 */
+  private titleOpts(): NavigationTitleOptions {
+    return {
+      backgroundColor: this.themeMode === 'dark' ? 'rgba(30,30,30,0.55)' : 'rgba(255,255,255,0.6)',
+      backgroundBlurStyle: BlurStyle.COMPONENT_THICK
+    };
+  }
   @State user: User | null = null;
   @State isLoading: boolean = false;
   @State listItems: Object[] = [];
@@ -126,26 +133,26 @@ export struct ProfileTab {
             }.scrollBar(BarState.Off).width('100%').height('100%')
           }
         }.width('100%').height('100%').backgroundColor(this.T().background).padding({ top: 8 })
-      }.title('我的仓库').backgroundColor(this.T().background).padding({ top: 32 })
+      }.title('我的仓库', this.titleOpts()).backgroundColor(this.T().background).padding({ top: 32 })
     } else if (name === 'issues') {
       NavDestination() { IssuesPage({ owner: this.detailOwner, repoName: this.detailRepo, onOpenWebView: (u: string) => { this.webUrl = u; this.profileStack.pushPath({ name: 'repoWeb' }); }, onOpenIssue: (o: string, r: string, n: number) => { this.detailOwner = o; this.detailRepo = r; this.detailIssueNumber = n; this.profileStack.pushPath({ name: 'issueDetail' }); } }) }
-        .title('议题').backgroundColor(this.T().background).padding({ top: 32 })
+        .title('议题', this.titleOpts()).backgroundColor(this.T().background).padding({ top: 32 })
     } else if (name === 'issueDetail') {
       NavDestination() { IssueDetailPage({ owner: this.detailOwner, repoName: this.detailRepo, issueNumber: this.detailIssueNumber, onOpenWebView: (u: string) => { this.webUrl = u; this.profileStack.pushPath({ name: 'repoWeb' }); }, onOpenRepo: (o: string, r: string) => { this.profileStack.pushPath({ name: 'repoDetail', param: new RepoParam(o, r) }); } }) }
-        .title('议题详情').backgroundColor(this.T().background).padding({ top: 32 })
+        .title('议题详情', this.titleOpts()).backgroundColor(this.T().background).padding({ top: 32 })
     } else if (name === 'repoDetail') {
       NavDestination() { RepoDetailPage({ owner: this.paramOwner(param), repoName: this.paramRepo(param), onOpenWebView: (u: string) => { this.webUrl = u; this.profileStack.pushPath({ name: 'repoWeb' }); }, onOpenDev: (uname: string) => { this.detailOwner = uname; this.profileStack.pushPath({ name: 'devProfile' }); }, onOpenRepo: (o: string, r: string) => { this.profileStack.pushPath({ name: 'repoDetail', param: new RepoParam(o, r) }); }, onOpenIssues: (o: string, r: string) => { this.detailOwner = o; this.detailRepo = r; this.profileStack.pushPath({ name: 'issues' }); } }) }
-        .title('仓库详情').linearGradient({ colors: this.mica(), direction: GradientDirection.RightBottom }).padding({ top: 32 })
+        .title('仓库详情', this.titleOpts()).linearGradient({ colors: this.mica(), direction: GradientDirection.RightBottom }).padding({ top: 32 })
     } else if (name === 'devProfile') {
       NavDestination() { DevProfilePage({ username: this.detailOwner, onOpenRepo: (o: string, r: string) => { this.profileStack.pushPath({ name: 'repoDetail', param: new RepoParam(o, r) }); }, onOpenWebView: (u: string) => { this.webUrl = u; this.profileStack.pushPath({ name: 'repoWeb' }); } }) }
-        .title('开发者').linearGradient({ colors: this.mica(), direction: GradientDirection.RightBottom }).padding({ top: 32 })
+        .title('开发者', this.titleOpts()).linearGradient({ colors: this.mica(), direction: GradientDirection.RightBottom }).padding({ top: 32 })
     } else if (name === 'repoWeb') {
       NavDestination() {
         Web({ src: this.webUrl, controller: this.webCtl })
           .width('100%').height('100%')
           .darkMode(this.themeMode === 'dark' ? WebDarkMode.On : WebDarkMode.Off)
           .backgroundColor(this.themeMode === 'dark' ? Color.Black : Color.White)
-      }.title('GitHub').backgroundColor(this.T().background).padding({ top: 32 })
+      }.title('GitHub', this.titleOpts()).backgroundColor(this.T().background).padding({ top: 32 })
     } else if (name === 'followers' || name === 'following') {
       NavDestination() {
         Column() {
@@ -189,16 +196,16 @@ export struct ProfileTab {
           }
         }.width('100%').height('100%').backgroundColor(this.T().background).padding({ top: 8 })
       }
-      .title(name === 'followers' ? '粉丝' : '关注中').backgroundColor(this.T().background).padding({ top: 32 })
+      .title(name === 'followers' ? '粉丝' : '关注中', this.titleOpts()).backgroundColor(this.T().background).padding({ top: 32 })
     } else if (name === 'settings') {
       NavDestination() { SettingsPage({ onNavigate: (n: string) => { this.profileStack.pushPath({ name: n }); } }) }
-        .title('设置').backgroundColor(this.T().background).padding({ top: 32 })
+        .title('设置', this.titleOpts()).backgroundColor(this.T().background).padding({ top: 32 })
     } else if (name === 'tutorial') {
       NavDestination() { TutorialPage() }
-        .title('使用教程').backgroundColor(this.T().background).padding({ top: 32 })
+        .title('使用教程', this.titleOpts()).backgroundColor(this.T().background).padding({ top: 32 })
     } else if (name === 'privacy') {
       NavDestination() { PrivacyPage() }
-        .title('隐私协议').backgroundColor(this.T().background).padding({ top: 32 })
+        .title('隐私协议', this.titleOpts()).backgroundColor(this.T().background).padding({ top: 32 })
     }
   }
 
