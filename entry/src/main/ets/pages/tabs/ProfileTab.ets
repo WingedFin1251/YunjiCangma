@@ -1,4 +1,3 @@
-import { router } from '@kit.ArkUI';
 import { webview } from '@kit.ArkWeb';
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
 import { RepoCard } from '../../common/components/RepoCard';
@@ -218,7 +217,7 @@ export struct ProfileTab {
                 Text('Sign In with GitHub').fontSize(16).fontWeight(FontWeight.Medium).fontColor(this.T().textPrimary)
               }.width('70%').height(44).justifyContent(FlexAlign.Center)
                 .backgroundColor(this.T().accent).borderRadius(8).margin({ top: 8 })
-                .onClick(() => { router.pushUrl({ url: 'pages/LoginPage' }); })
+                .onClick(() => { this.getUIContext().getRouter().pushUrl({ url: 'pages/LoginPage' }); })
             }.alignItems(HorizontalAlign.Center).padding({ top: 40, bottom: 24 }).width('100%')
           }
 
