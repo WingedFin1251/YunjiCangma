@@ -89,7 +89,7 @@ export struct ExploreTab {
       NavDestination() { IssuesPage({ owner: this.detailOwner, repoName: this.detailRepo, onOpenWebView: (u: string) => { this.webUrl = u; this.exploreStack.pushPath({ name: 'repoWeb' }); }, onOpenIssue: (o: string, r: string, n: number) => { this.detailOwner = o; this.detailRepo = r; this.detailIssueNumber = n; this.exploreStack.pushPath({ name: 'issueDetail' }); } }) }
         .title('议题').backgroundColor(this.T().background).padding({ top: 32 })
     } else if (name === 'issueDetail') {
-      NavDestination() { IssueDetailPage({ owner: this.detailOwner, repoName: this.detailRepo, number: this.detailIssueNumber, onOpenWebView: (u: string) => { this.webUrl = u; this.exploreStack.pushPath({ name: 'repoWeb' }); }, onOpenRepo: (o: string, r: string) => { this.detailOwner = o; this.detailRepo = r; this.exploreStack.pushPath({ name: 'repoDetail' }); } }) }
+      NavDestination() { IssueDetailPage({ owner: this.detailOwner, repoName: this.detailRepo, issueNumber: this.detailIssueNumber, onOpenWebView: (u: string) => { this.webUrl = u; this.exploreStack.pushPath({ name: 'repoWeb' }); }, onOpenRepo: (o: string, r: string) => { this.detailOwner = o; this.detailRepo = r; this.exploreStack.pushPath({ name: 'repoDetail' }); } }) }
         .title('议题详情').backgroundColor(this.T().background).padding({ top: 32 })
     } else if (name === 'devProfile') {
       NavDestination() { DevProfilePage({ username: this.detailOwner, onOpenRepo: (o: string, r: string) => { this.detailOwner = o; this.detailRepo = r; this.exploreStack.pushPath({ name: 'repoDetail' }); }, onOpenWebView: (u: string) => { this.webUrl = u; this.exploreStack.pushPath({ name: 'repoWeb' }); } }) }
