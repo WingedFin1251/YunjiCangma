@@ -1,6 +1,7 @@
 import { webview } from '@kit.ArkWeb';
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
 import { RepoCard } from '../../common/components/RepoCard';
+import { PersonPicture } from '../../common/components/PersonPicture';
 import { AuthService } from '../../services/AuthService';
 import { RepoRepository } from '../../services/RepoRepository';
 import { UserRepository } from '../../services/UserRepository';
@@ -134,24 +135,42 @@ export struct ProfileTab {
       NavDestination() {
         Column() {
           if (this.listLoading) {
-            LoadingProgress().width(32).height(32).color(this.T().accent).margin({ top: 80 })
+            Column() {
+              LoadingProgress().width(32).height(32).color(this.T().accent)
+            }.width('100%').layoutWeight(1).justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center)
           } else if (this.listItems.length === 0) {
             Column({ space: 8 }) {
               Text('✉').fontSize(40)
               Text('暂无内容').fontSize(14).fontColor(this.T().textSecondary)
-            }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center).width('100%').height('100%')
+            }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center).width('100%').layoutWeight(1)
           } else {
-            Scroll() {
-              Column() {
-                ForEach(this.listItems, (item: Object, idx: number) => {
-                  Row() {
+            List({ space: 0 }) {
+              ForEach(this.listItems, (item: Object, idx: number) => {
+                ListItem() {
+                  Row({ space: 12 }) {
+                    PersonPicture({
+                      url: ((item as Record<string, Object>).avatar_url as string) || '',
+                      name: ((item as Record<string, Object>).login as string) || '?',
+                      size: 40
+                    })
                     Text(((item as Record<string, Object>).login as string) || '')
-                      .fontSize(16).fontColor(this.T().textPrimary).layoutWeight(1)
+                      .fontSize(16).fontWeight(FontWeight.Medium).fontColor(this.T().textPrimary).layoutWeight(1)
+                      .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
                     Text('›').fontSize(18).fontColor(this.T().textSecondary)
-                  }.width('100%').height(48).padding({ left: 16, right: 16 }).alignItems(VerticalAlign.Center)
-                }, (item: Object, idx: number) => idx.toString())
-              }.width('100%')
-            }.scrollBar(BarState.Off).width('100%').height('100%')
+                  }
+                  .width('100%').height(56).padding({ left: 16, right: 16 }).alignItems(VerticalAlign.Center)
+                  .onClick(() => {
+                    const login: string = ((item as Record<string, Object>).login as string) || '';
+                    if (login) {
+                      this.detailOwner = login;
+                      this.profileStack.pushPath({ name: 'devProfile' });
+                    }
+                  })
+                }
+              }, (item: Object, idx: number) => idx.toString())
+            }
+            .divider({ strokeWidth: 1, color: this.T().border, startMargin: 68 })
+            .scrollBar(BarState.Off).width('100%').layoutWeight(1).backgroundColor(this.T().background)
           }
         }.width('100%').height('100%').backgroundColor(this.T().background).padding({ top: 8 })
       }
