@@ -76,19 +76,18 @@ struct MainPage {
   }
 
   @Builder
-  tabBarContent(index: number, lineDark: Resource, lineLight: Resource, fillRes: Resource, label: ResourceStr) {
+  tabBarContent(index: number, grayDark: Resource, grayLight: Resource, accentDark: Resource, accentLight: Resource, label: ResourceStr) {
     Column() {
       if (this.currentIndex === index) {
-        // 选中：实心图标 + accent 着色
-        Image(fillRes)
+        // 选中：accent 色描边线稿
+        Image(this.currentTheme === 'dark' ? accentDark : accentLight)
           .width(24)
           .height(24)
           .objectFit(ImageFit.Contain)
-          .fillColor(this.T().accent)
           .animation({ duration: 200, curve: Curve.FastOutSlowIn })
       } else {
-        // 未选中：描边线稿（灰，按主题取色）
-        Image(this.currentTheme === 'dark' ? lineDark : lineLight)
+        // 未选中：灰描边线稿（按主题取色）
+        Image(this.currentTheme === 'dark' ? grayDark : grayLight)
           .width(24)
           .height(24)
           .objectFit(ImageFit.Contain)
@@ -122,22 +121,22 @@ struct MainPage {
         TabContent() {
           HomeTab()
         }
-        .tabBar(this.tabBarContent(0, $r('app.media.tab_home_line_d'), $r('app.media.tab_home_line_l'), $r('app.media.tab_home_fill'), $r('app.string.tab_home')))
+        .tabBar(this.tabBarContent(0, $r('app.media.tab_home_line_d'), $r('app.media.tab_home_line_l'), $r('app.media.tab_home_line_a_d'), $r('app.media.tab_home_line_a_l'), $r('app.string.tab_home')))
 
         TabContent() {
           InboxTab()
         }
-        .tabBar(this.tabBarContent(1, $r('app.media.tab_inbox_line_d'), $r('app.media.tab_inbox_line_l'), $r('app.media.tab_inbox_fill'), $r('app.string.tab_inbox')))
+        .tabBar(this.tabBarContent(1, $r('app.media.tab_inbox_line_d'), $r('app.media.tab_inbox_line_l'), $r('app.media.tab_inbox_line_a_d'), $r('app.media.tab_inbox_line_a_l'), $r('app.string.tab_inbox')))
 
         TabContent() {
           ExploreTab()
         }
-        .tabBar(this.tabBarContent(2, $r('app.media.tab_explore_line_d'), $r('app.media.tab_explore_line_l'), $r('app.media.tab_explore_fill'), $r('app.string.tab_explore')))
+        .tabBar(this.tabBarContent(2, $r('app.media.tab_explore_line_d'), $r('app.media.tab_explore_line_l'), $r('app.media.tab_explore_line_a_d'), $r('app.media.tab_explore_line_a_l'), $r('app.string.tab_explore')))
 
         TabContent() {
           ProfileTab()
         }
-        .tabBar(this.tabBarContent(3, $r('app.media.tab_profile_line_d'), $r('app.media.tab_profile_line_l'), $r('app.media.tab_profile_fill'), $r('app.string.tab_profile')))
+        .tabBar(this.tabBarContent(3, $r('app.media.tab_profile_line_d'), $r('app.media.tab_profile_line_l'), $r('app.media.tab_profile_line_a_d'), $r('app.media.tab_profile_line_a_l'), $r('app.string.tab_profile')))
       }
       .barHeight(62)
       .barOverlap(true)
