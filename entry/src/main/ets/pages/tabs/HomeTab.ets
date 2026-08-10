@@ -7,6 +7,7 @@ import { WorkPage } from '../sub/WorkPage';
 import { SearchPage } from '../sub/SearchPage';
 import { DevProfilePage } from '../sub/DevProfilePage';
 import { IssuesPage } from '../sub/IssuesPage';
+import { IssueDetailPage } from '../sub/IssueDetailPage';
 import { RepoDetailPage } from '../sub/RepoDetailPage';
 import type { Repository } from '../../models/User';
 
@@ -52,6 +53,7 @@ export struct HomeTab {
   @State webUrl: string = '';
   @State repoOwner: string = '';
   @State repoName: string = '';
+  @State detailIssueNumber: number = 0;
   private webCtl: webview.WebviewController = new webview.WebviewController();
 
   private workItems: WorkItem[] = [
@@ -100,8 +102,11 @@ export struct HomeTab {
       NavDestination() { SearchPage({ onOpenRepo: (owner: string, repo: string) => { this.repoOwner = owner; this.repoName = repo; this.homeStack.pushPath({ name: 'repoWeb' }); } }) }
         .title('搜索').backgroundColor(this.T().background).padding({ top: 32 })
     } else if (name === 'issues') {
-      NavDestination() { IssuesPage({ owner: this.repoOwner, repoName: this.repoName, onOpenWebView: (u: string) => { this.webUrl = u; this.homeStack.pushPath({ name: 'repoWebView' }); } }) }
+      NavDestination() { IssuesPage({ owner: this.repoOwner, repoName: this.repoName, onOpenWebView: (u: string) => { this.webUrl = u; this.homeStack.pushPath({ name: 'repoWebView' }); }, onOpenIssue: (o: string, r: string, n: number) => { this.repoOwner = o; this.repoName = r; this.detailIssueNumber = n; this.homeStack.pushPath({ name: 'issueDetail' }); } }) }
         .title('议题').backgroundColor(this.T().background).padding({ top: 32 })
+    } else if (name === 'issueDetail') {
+      NavDestination() { IssueDetailPage({ owner: this.repoOwner, repoName: this.repoName, number: this.detailIssueNumber, onOpenWebView: (u: string) => { this.webUrl = u; this.homeStack.pushPath({ name: 'repoWebView' }); }, onOpenRepo: (o: string, r: string) => { this.repoOwner = o; this.repoName = r; this.homeStack.pushPath({ name: 'repoWeb' }); } }) }
+        .title('议题详情').backgroundColor(this.T().background).padding({ top: 32 })
     } else if (name === 'repoWeb') {
       NavDestination() {
         RepoDetailPage({ owner: this.repoOwner, repoName: this.repoName, onOpenWebView: (url: string) => { this.webUrl = url; this.homeStack.pushPath({ name: 'repoWebView' }); }, onOpenDev: (uname: string) => { this.repoOwner = uname; this.homeStack.pushPath({ name: 'devProfile' }); }, onOpenRepo: (o: string, r: string) => { this.repoOwner = o; this.repoName = r; this.homeStack.pushPath({ name: 'repoWeb' }); }, onOpenIssues: (o: string, r: string) => { this.repoOwner = o; this.repoName = r; this.homeStack.pushPath({ name: 'issues' }); } })

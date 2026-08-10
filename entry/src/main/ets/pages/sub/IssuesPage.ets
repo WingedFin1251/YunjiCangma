@@ -10,6 +10,7 @@ export struct IssuesPage {
   @Prop @Watch('load') owner: string = '';
   @Prop @Watch('load') repoName: string = '';
   onOpenWebView?: (url: string) => void;
+  onOpenIssue?: (owner: string, repo: string, number: number) => void;
   private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
 
   aboutToAppear(): void { if (this.owner && this.repoName) this.load(); }
@@ -87,6 +88,8 @@ export struct IssuesPage {
               }
               .width('100%').padding({ left: 16, right: 16, top: 14, bottom: 14 })
               .onClick(() => {
+                const num: number = (item as Record<string, Object>).number as number || 0;
+                if (this.onOpenIssue) { this.onOpenIssue(this.owner, this.repoName, num); return; }
                 const url: string = ((item as Record<string, Object>).html_url as string) || '';
                 if (url && this.onOpenWebView) this.onOpenWebView(url);
               })
