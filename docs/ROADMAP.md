@@ -1,6 +1,6 @@
 # 路线图
 
-## 当前版本: v1.0.0-beta（功能基本完备）
+## 当前版本: v1.0.0（正式版）
 
 - [x] 项目初始化 + 品牌「云笈藏码」
 - [x] Repository 分层 API（HttpClient → Repo/User/Search/Auth Repository）

@@ -13,6 +13,9 @@ export const GITHUB_OAUTH_DEVICE_CODE_URL: string = 'https://github.com/login/de
 
 export const GITHUB_OAUTH_CLIENT_ID: string = 'Ov23ling48xkbpVRtB13';
 
+/** OAuth 授权范围（标星需 public_repo/repo；私仓浏览需 repo） */
+export const GITHUB_OAUTH_SCOPES: string = 'repo,user';
+
 /** API 请求头 */
 export class APIHeaders {
   static readonly ACCEPT: string = 'application/vnd.github+json';
