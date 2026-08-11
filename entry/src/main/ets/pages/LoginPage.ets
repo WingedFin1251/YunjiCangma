@@ -49,9 +49,7 @@ struct LoginPage {
       this.startPolling();
     } catch (err) {
       this.isLoading = false;
-      let msg: string = '';
-      try { msg = (err as Error).message || ''; } catch (e) { msg = ''; }
-      this.errorMessage = '获取验证码失败: ' + (msg || '网络错误');
+      this.errorMessage = '获取验证码失败，请检查网络后重试';
     }
   }
 
