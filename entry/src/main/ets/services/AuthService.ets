@@ -4,6 +4,7 @@ import {
   GITHUB_OAUTH_ACCESS_TOKEN_URL,
   GITHUB_OAUTH_DEVICE_CODE_URL,
   GITHUB_OAUTH_CLIENT_ID,
+  GITHUB_OAUTH_SCOPES,
   AUTH_TOKEN_KEY,
   AUTH_LOGIN_KEY
 } from '../common/constants/APIConstants';
@@ -288,7 +289,8 @@ export class AuthService {
             'Content-Type': 'application/x-www-form-urlencoded',
             'Accept': 'application/json'
           },
-          extraData: `client_id=${encodeURIComponent(GITHUB_OAUTH_CLIENT_ID)}`
+          extraData: `client_id=${encodeURIComponent(GITHUB_OAUTH_CLIENT_ID)}` +
+            `&scope=${encodeURIComponent(GITHUB_OAUTH_SCOPES)}`
         }
       );
       if (response.responseCode === 200) {

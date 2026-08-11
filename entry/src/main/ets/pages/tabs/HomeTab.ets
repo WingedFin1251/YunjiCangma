@@ -147,9 +147,13 @@ export struct HomeTab {
         .titleBar(buildTitleBar('开发者')).linearGradient({ colors: this.mica(), direction: GradientDirection.RightBottom })
     } else if (name === 'repoWebView') {
       HdsNavDestination() {
-        Web({ src: this.webUrl, controller: this.webCtl }).width('100%').height('100%')
-          .darkMode(this.themeMode === 'dark' ? WebDarkMode.On : WebDarkMode.Off)
-          .backgroundColor(this.themeMode === 'dark' ? Color.Black : Color.White)
+        Column() {
+          Web({ src: this.webUrl, controller: this.webCtl })
+            .width('100%').layoutWeight(1)
+            .darkMode(this.themeMode === 'dark' ? WebDarkMode.On : WebDarkMode.Off)
+            .backgroundColor(this.themeMode === 'dark' ? Color.Black : Color.White)
+        }
+        .width('100%').height('100%').padding({ top: 100 })
       }.titleBar(buildTitleBar('GitHub')).backgroundColor(this.T().background)
     } else {
       HdsNavDestination() { WorkPage({ _title: this.getWorkTitle(name), dataType: name, onOpenRepo: (o: string, r: string) => { this.homeStack.pushPath({ name: 'repoWeb', param: new RepoParam(o, r) }); } }) }

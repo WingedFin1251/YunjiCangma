@@ -16,6 +16,7 @@ import { AUTH_LOGIN_KEY } from '../../common/constants/APIConstants';
 import { SettingsPage } from '../sub/SettingsPage';
 import { TutorialPage } from '../sub/TutorialPage';
 import { PrivacyPage } from '../sub/PrivacyPage';
+import { UserAgreementPage } from '../sub/UserAgreementPage';
 
 /** 仓库跳转参数（避免共享状态被当前页绑定，造成双重导航） */
 class RepoParam {
@@ -145,10 +146,13 @@ export struct ProfileTab {
         .titleBar(buildTitleBar('开发者')).linearGradient({ colors: this.mica(), direction: GradientDirection.RightBottom })
     } else if (name === 'repoWeb') {
       HdsNavDestination() {
-        Web({ src: this.webUrl, controller: this.webCtl })
-          .width('100%').height('100%')
-          .darkMode(this.themeMode === 'dark' ? WebDarkMode.On : WebDarkMode.Off)
-          .backgroundColor(this.themeMode === 'dark' ? Color.Black : Color.White)
+        Column() {
+          Web({ src: this.webUrl, controller: this.webCtl })
+            .width('100%').layoutWeight(1)
+            .darkMode(this.themeMode === 'dark' ? WebDarkMode.On : WebDarkMode.Off)
+            .backgroundColor(this.themeMode === 'dark' ? Color.Black : Color.White)
+        }
+        .width('100%').height('100%').padding({ top: 100 })
       }.titleBar(buildTitleBar('GitHub')).backgroundColor(this.T().background)
     } else if (name === 'followers' || name === 'following') {
       HdsNavDestination() {
@@ -202,6 +206,9 @@ export struct ProfileTab {
     } else if (name === 'tutorial') {
       HdsNavDestination() { TutorialPage() }
         .titleBar(buildTitleBar('使用教程')).backgroundColor(this.T().background)
+    } else if (name === 'userAgreement') {
+      HdsNavDestination() { UserAgreementPage() }
+        .titleBar(buildTitleBar('用户协议')).backgroundColor(this.T().background)
     } else if (name === 'privacy') {
       HdsNavDestination() { PrivacyPage() }
         .titleBar(buildTitleBar('隐私协议')).backgroundColor(this.T().background)

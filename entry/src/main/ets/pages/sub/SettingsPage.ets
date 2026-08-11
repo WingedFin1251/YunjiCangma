@@ -1,12 +1,27 @@
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
 import { AuthService } from '../../services/AuthService';
+import { bundleManager } from '@kit.AbilityKit';
 
 @Component
 export struct SettingsPage {
   @StorageLink(THEME_KEY) themeMode: string = 'dark';
   @StorageLink('userFilterEnabled') userFilterEnabled: boolean = true;
   @StorageLink('glowLevel') glowLevel: number = 1;
+  @State versionName: string = '';
   onNavigate?: (name: string) => void;
+
+  aboutToAppear(): void {
+    this.loadVersion();
+  }
+
+  private async loadVersion(): Promise<void> {
+    try {
+      const info = await bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_DEFAULT);
+      this.versionName = info.versionName;
+    } catch (e) {
+      this.versionName = '1.0.0';
+    }
+  }
   private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
 
   build() {
@@ -51,14 +66,19 @@ export struct SettingsPage {
 
         Divider().color(this.T().border).width('90%')
 
+        // 用户协议
+        this.settingRow('📜 用户协议', false, () => { if (this.onNavigate) this.onNavigate('userAgreement'); })
+
+        Divider().color(this.T().border).width('90%')
+
         // 隐私协议
         this.settingRow('🔒 隐私协议', false, () => { if (this.onNavigate) this.onNavigate('privacy'); })
 
         // 温馨提示
-        this.infoCard('💡 温馨提示', '本应用为第三方非官方客户端，不存储您的账号密码，仅通过 GitHub 官方 OAuth 授权获取访问令牌。使用中如遇到问题，请检查网络连接或重新登录。')
+        this.infoCard('💡 温馨提示', '本应用为第三方非官方客户端，不存储您的账号密码，仅通过 GitHub 官方授权获取访问令牌。使用中如遇到问题，请检查网络连接或重新登录。')
 
-        // 关于
-        this.infoCard('ℹ️ 关于云笈藏码', '版本：v0.5.0\n\n云笈藏码 — 开源代码仓库浏览工具\n一款简洁流畅的第三方开源仓库客户端，支持账号授权登录、仓库浏览、代码查看、动态消息、项目收藏等功能。\n\n云笈纳万卷，一码藏乾坤\n\n数据来源：GitHub 官方开放接口\n本应用与 GitHub 无官方关联。')
+        // 关于（版本号动态读取系统配置，不写死）
+        this.infoCard('ℹ️ 关于云笈藏码', '版本：v' + this.versionName + '\n\n云笈藏码 — 开源代码仓库浏览工具\n一款简洁流畅的第三方开源仓库客户端，支持账号授权登录、仓库浏览、代码查看、动态消息、项目收藏等功能。\n\n云笈纳万卷，一码藏乾坤\n\n数据来源：GitHub 官方开放接口\n本应用与 GitHub 无官方关联。')
 
         Blank().height(48)
       }
