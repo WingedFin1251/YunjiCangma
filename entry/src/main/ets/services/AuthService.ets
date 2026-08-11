@@ -9,6 +9,9 @@ import {
 } from '../common/constants/APIConstants';
 import { DeviceFlowInfo, DevicePollResult, DevicePollStatus } from '../models/AuthModels';
 import { http } from '@kit.NetworkKit';
+import { huks } from '@kit.UniversalKeystoreKit';
+import { cryptoFramework } from '@kit.CryptoArchitectureKit';
+import { util } from '@kit.ArkTS';
 
 const PREFERENCES_NAME: string = 'github_auth_prefs';
 
@@ -23,32 +26,160 @@ export class AuthService {
     return AuthService.appContext!;
   }
 
+  /** HUKS 密钥别名 + 加密后 token 的偏好键 */
+  private static readonly TOKEN_KEY_ALIAS: string = 'yunjicangma_token_key_v2';
+  private static readonly ENC_TOKEN_PREF: string = 'access_token_enc';
+
+  /** AES-256-GCM 密钥生成参数（密钥驻留系统密钥库，不可导出） */
+  private static keyGenOptions(): huks.HuksOptions {
+    const props: huks.HuksParam[] = [
+      { tag: huks.HuksTag.HUKS_TAG_ALGORITHM, value: huks.HuksKeyAlg.HUKS_ALG_AES },
+      { tag: huks.HuksTag.HUKS_TAG_KEY_SIZE, value: huks.HuksKeySize.HUKS_AES_KEY_SIZE_256 },
+      { tag: huks.HuksTag.HUKS_TAG_PURPOSE, value: huks.HuksKeyPurpose.HUKS_KEY_PURPOSE_ENCRYPT | huks.HuksKeyPurpose.HUKS_KEY_PURPOSE_DECRYPT },
+      { tag: huks.HuksTag.HUKS_TAG_BLOCK_MODE, value: huks.HuksCipherMode.HUKS_MODE_CBC },
+      { tag: huks.HuksTag.HUKS_TAG_PADDING, value: huks.HuksKeyPadding.HUKS_PADDING_PKCS7 }
+    ];
+    const opts: huks.HuksOptions = { properties: props };
+    return opts;
+  }
+
+  /** AES-CBC 会话属性（算法/密钥长度/目的/模式/填充/随机 IV） */
+  private static cbcParams(purpose: number, iv: Uint8Array): huks.HuksParam[] {
+    const props: huks.HuksParam[] = [
+      { tag: huks.HuksTag.HUKS_TAG_ALGORITHM, value: huks.HuksKeyAlg.HUKS_ALG_AES },
+      { tag: huks.HuksTag.HUKS_TAG_KEY_SIZE, value: huks.HuksKeySize.HUKS_AES_KEY_SIZE_256 },
+      { tag: huks.HuksTag.HUKS_TAG_PURPOSE, value: purpose },
+      { tag: huks.HuksTag.HUKS_TAG_BLOCK_MODE, value: huks.HuksCipherMode.HUKS_MODE_CBC },
+      { tag: huks.HuksTag.HUKS_TAG_PADDING, value: huks.HuksKeyPadding.HUKS_PADDING_PKCS7 },
+      { tag: huks.HuksTag.HUKS_TAG_IV, value: iv }
+    ];
+    return props;
+  }
+
+  private static async ensureTokenKey(): Promise<void> {
+    let exists: boolean = false;
+    try {
+      exists = await huks.isKeyItemExist(AuthService.TOKEN_KEY_ALIAS, AuthService.keyGenOptions());
+    } catch (e) {
+      // HUKS 怪癖：密钥不存在时 isKeyItemExist 抛 ITEM_NOT_EXIST(12000011) 而非返回 false
+      const msg: string = JSON.stringify(e);
+      if (msg.indexOf('12000011') === -1) { throw new Error('HUKS isKeyItemExist: ' + msg); }
+    }
+    if (!exists) {
+      try {
+        await huks.generateKeyItem(AuthService.TOKEN_KEY_ALIAS, AuthService.keyGenOptions());
+      } catch (e) {
+        // 并发/重试时密钥已存在 → KEY_ALREADY_EXIST(12000017)，忽略
+        const msg: string = JSON.stringify(e);
+        if (msg.indexOf('12000017') === -1) { throw new Error('HUKS generateKeyItem: ' + msg); }
+      }
+    }
+  }
+
+  /** 用 HUKS AES-CBC 加密 token，返回 {iv, ct} 的 JSON（base64） */
+  private static async encryptTokenValue(plaintext: string): Promise<string> {
+    await AuthService.ensureTokenKey();
+    const nonceBlob: cryptoFramework.DataBlob = cryptoFramework.createRandom().generateRandomSync(16);
+    const plainBytes: Uint8Array = new Uint8Array(plaintext.length);
+    for (let i = 0; i < plaintext.length; i++) { plainBytes[i] = plaintext.charCodeAt(i); }
+    // 数据经 options.inData 传入（不是函数第三参），小数据一次性 init → finish
+    const props: huks.HuksParam[] = AuthService.cbcParams(huks.HuksKeyPurpose.HUKS_KEY_PURPOSE_ENCRYPT, nonceBlob.data);
+    // 官方流程：同一 options（含 inData）传给 initSession 与 finishSession
+    const options: huks.HuksOptions = { properties: props, inData: plainBytes };
+    let handle: huks.HuksSessionHandle;
+    try {
+      handle = await huks.initSession(AuthService.TOKEN_KEY_ALIAS, options);
+    } catch (e) {
+      throw new Error('HUKS encrypt initSession: ' + JSON.stringify(e));
+    }
+    let finish: huks.HuksReturnResult;
+    try {
+      finish = await huks.finishSession(handle.handle, options);
+    } catch (e) {
+      throw new Error('HUKS encrypt finishSession: ' + JSON.stringify(e));
+    }
+    const ctOut: Uint8Array | undefined = finish.outData;
+    if (ctOut === undefined) { throw new Error('HUKS encrypt failed: missing output'); }
+    const base64 = new util.Base64Helper();
+    const blob: Record<string, string> = {
+      'iv': base64.encodeToStringSync(nonceBlob.data),
+      'ct': base64.encodeToStringSync(ctOut)
+    };
+    return JSON.stringify(blob);
+  }
+
+  /** 解密 HUKS 密文 blob 还原 token */
+  private static async decryptTokenValue(blob: string): Promise<string> {
+    const obj: Record<string, string> = JSON.parse(blob) as Record<string, string>;
+    const base64 = new util.Base64Helper();
+    const iv: Uint8Array = base64.decodeSync(obj['iv']);
+    const ct: Uint8Array = base64.decodeSync(obj['ct']);
+    const props: huks.HuksParam[] = AuthService.cbcParams(huks.HuksKeyPurpose.HUKS_KEY_PURPOSE_DECRYPT, iv);
+    const options: huks.HuksOptions = { properties: props, inData: ct };
+    let handle: huks.HuksSessionHandle;
+    try {
+      handle = await huks.initSession(AuthService.TOKEN_KEY_ALIAS, options);
+    } catch (e) {
+      throw new Error('HUKS decrypt initSession: ' + JSON.stringify(e));
+    }
+    let finish: huks.HuksReturnResult;
+    try {
+      finish = await huks.finishSession(handle.handle, options);
+    } catch (e) {
+      throw new Error('HUKS decrypt finishSession: ' + JSON.stringify(e));
+    }
+    const out: Uint8Array | undefined = finish.outData;
+    if (out === undefined) { throw new Error('HUKS decrypt failed: missing output'); }
+    const bytes: Uint8Array = out;
+    let s: string = '';
+    for (let i = 0; i < bytes.length; i++) { s += String.fromCharCode(bytes[i]); }
+    return s;
+  }
+
   static async saveToken(token: string): Promise<void> {
     try {
+      const enc: string = await AuthService.encryptTokenValue(token);
       const prefs = await preferences.getPreferences(AuthService.getContext(), PREFERENCES_NAME);
-      await prefs.put('access_token', token);
+      await prefs.put(AuthService.ENC_TOKEN_PREF, enc);
+      await prefs.delete('access_token'); // 清理旧明文
       await prefs.flush();
       AppStorage.setOrCreate<string>(AUTH_TOKEN_KEY, token);
       AppStorage.setOrCreate<boolean>(AUTH_LOGIN_KEY, true);
     } catch (err) {
-      console.error('Failed to save token:', JSON.stringify(err));
+      // 加密失败则不落盘明文（fail-closed），让调用方感知登录失败
+      throw err instanceof Error ? err : new Error(JSON.stringify(err));
     }
   }
 
   static async loadToken(): Promise<string> {
     try {
       const prefs = await preferences.getPreferences(AuthService.getContext(), PREFERENCES_NAME);
-      const token: string = await prefs.get('access_token', '') as string;
-      if (token) {
+      const enc: string = await prefs.get(AuthService.ENC_TOKEN_PREF, '') as string;
+      if (enc) {
+        const token: string = await AuthService.decryptTokenValue(enc);
         AppStorage.setOrCreate<string>(AUTH_TOKEN_KEY, token);
         AppStorage.setOrCreate<boolean>(AUTH_LOGIN_KEY, true);
-      } else {
-        AppStorage.setOrCreate<string>(AUTH_TOKEN_KEY, '');
-        AppStorage.setOrCreate<boolean>(AUTH_LOGIN_KEY, false);
+        return token;
       }
-      return token;
+      // 旧版明文 token 迁移到加密存储
+      const legacy: string = await prefs.get('access_token', '') as string;
+      if (legacy) {
+        await AuthService.saveToken(legacy);
+        AppStorage.setOrCreate<string>(AUTH_TOKEN_KEY, legacy);
+        AppStorage.setOrCreate<boolean>(AUTH_LOGIN_KEY, true);
+        return legacy;
+      }
+      AppStorage.setOrCreate<string>(AUTH_TOKEN_KEY, '');
+      AppStorage.setOrCreate<boolean>(AUTH_LOGIN_KEY, false);
+      return '';
     } catch (err) {
       console.error('Failed to load token:', JSON.stringify(err));
+      // 清理损坏/过期密文（如旧 GCM 时代残留），避免每次启动反复失败
+      try {
+        const prefs = await preferences.getPreferences(AuthService.getContext(), PREFERENCES_NAME);
+        await prefs.delete(AuthService.ENC_TOKEN_PREF);
+        await prefs.flush();
+      } catch (e) { }
       AppStorage.setOrCreate<string>(AUTH_TOKEN_KEY, '');
       AppStorage.setOrCreate<boolean>(AUTH_LOGIN_KEY, false);
       return '';
@@ -66,8 +197,11 @@ export class AuthService {
   static async logout(): Promise<void> {
     try {
       const prefs = await preferences.getPreferences(AuthService.getContext(), PREFERENCES_NAME);
+      await prefs.delete(AuthService.ENC_TOKEN_PREF);
       await prefs.delete('access_token');
       await prefs.flush();
+      // 一并删除 HUKS 密钥，旧密文永久不可解
+      try { await huks.deleteKeyItem(AuthService.TOKEN_KEY_ALIAS, AuthService.keyGenOptions()); } catch (e) { }
       AppStorage.setOrCreate<string>(AUTH_TOKEN_KEY, '');
       AppStorage.setOrCreate<boolean>(AUTH_LOGIN_KEY, false);
     } catch (err) {
