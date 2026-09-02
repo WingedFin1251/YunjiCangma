@@ -8,6 +8,7 @@ export struct SettingsPage {
   @StorageLink('userFilterEnabled') userFilterEnabled: boolean = true;
   @StorageLink('glowLevel') glowLevel: number = 1;
   @State versionName: string = '';
+  scroller?: Scroller;
   onNavigate?: (name: string) => void;
 
   aboutToAppear(): void {
@@ -25,10 +26,9 @@ export struct SettingsPage {
   private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
 
   build() {
-    Scroll() {
+    Scroll(this.scroller) {
       Column({ space: 0 }) {
-        // 沉浸标题栏占位：初始避开标题栏，滚动时滑入磨砂下
-        Blank(100)
+        Blank().height(88)
         // 深色模式
         this.settingRow('🌙 深色模式', true)
         Divider().color(this.T().border).width('90%')

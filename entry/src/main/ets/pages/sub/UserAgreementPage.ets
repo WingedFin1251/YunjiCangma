@@ -3,6 +3,7 @@ import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/cons
 @Component
 export struct UserAgreementPage {
   @StorageLink(THEME_KEY) themeMode: string = 'dark';
+  scroller?: Scroller;
   private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
 
   private readonly policyText: string =
@@ -31,10 +32,9 @@ export struct UserAgreementPage {
     '如对本协议有任何疑问，请通过应用内隐私政策中的联系方式与我们联系。';
 
   build() {
-    Scroll() {
+    Scroll(this.scroller) {
       Column() {
-        // 沉浸标题栏占位：初始避开标题栏，滚动时滑入磨砂下
-        Blank(100)
+        Blank().height(88)
         Text(this.policyText)
           .fontSize(14).fontColor(this.T().textSecondary).lineHeight(22)
           .width('100%').padding(20)

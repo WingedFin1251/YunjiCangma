@@ -13,6 +13,7 @@ export struct TopReposPage {
   @State loading: boolean = true;
   @State starredLoaded: boolean = false;
   private starredSet: Set<string> = new Set<string>();
+  scroller?: Scroller;
   onOpenRepo?: (owner: string, repo: string) => void;
   private T(): ThemeColors {
     const d: boolean = this.themeMode === 'dark';
@@ -63,8 +64,6 @@ export struct TopReposPage {
 
   build() {
     Column() {
-      // 沉浸标题栏占位：初始避开标题栏
-      Blank(100)
       if (this.loading) {
         Column() {
           LoadingProgress().width(32).height(32).color(this.T().accent)
@@ -75,7 +74,8 @@ export struct TopReposPage {
           Text('暂无数据').fontSize(14).fontColor(this.T().textSecondary)
         }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center).width('100%').layoutWeight(1)
       } else {
-        List({ space: 12 }) {
+        List({ space: 12, scroller: this.scroller }) {
+          ListItem() { Column() { Blank().height(88) } }
           ForEach(this.repos, (repo: Repository, idx: number) => {
             ListItem() {
               Column() {

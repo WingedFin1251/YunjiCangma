@@ -51,6 +51,16 @@ export struct ProfileTab {
   @State detailIssueNumber: number = 0;
   private profileStack: NavPathStack = new NavPathStack();
   private webCtl: webview.WebviewController = new webview.WebviewController();
+  private repoListScroller: Scroller = new Scroller();
+  private issuesScroller: Scroller = new Scroller();
+  private issueDetailScroller: Scroller = new Scroller();
+  private repoDetailScroller: Scroller = new Scroller();
+  private devProfileScroller: Scroller = new Scroller();
+  private followersScroller: Scroller = new Scroller();
+  private settingsScroller: Scroller = new Scroller();
+  private tutorialScroller: Scroller = new Scroller();
+  private privacyScroller: Scroller = new Scroller();
+  private userAgreementScroller: Scroller = new Scroller();
 
   aboutToAppear(): void { this.loadUserData(); }
 
@@ -93,18 +103,17 @@ export struct ProfileTab {
   @Builder profilePageMap(name: string, param: ESObject) {
     if (name === 'repoList') {
       HdsNavDestination() {
-        Column() {
-          // 沉浸标题栏占位：初始避开标题栏
-          Blank(100)
-          if (this.listLoading) {
-            LoadingProgress().width(32).height(32).color(this.T().accent).margin({ top: 80 })
-          } else if (this.listItems.length === 0) {
-            Column({ space: 8 }) {
-              Text('✉').fontSize(40)
-              Text('暂无仓库，前往发现更多优质开源项目').fontSize(14).fontColor(this.T().textSecondary)
-            }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center).width('100%').height('100%')
-          } else {
-            Scroll() {
+        Scroll(this.repoListScroller) {
+          Column() {
+            Blank().height(88)
+            if (this.listLoading) {
+              LoadingProgress().width(32).height(32).color(this.T().accent).margin({ top: 80 })
+            } else if (this.listItems.length === 0) {
+              Column({ space: 8 }) {
+                Text('✉').fontSize(40)
+                Text('暂无仓库，前往发现更多优质开源项目').fontSize(14).fontColor(this.T().textSecondary)
+              }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center).width('100%').height(300)
+            } else {
               Column({ space: 12 }) {
                 ForEach(this.listItems, (item: Object, idx: number) => {
                   Column() {
@@ -128,22 +137,22 @@ export struct ProfileTab {
                   })
                 }, (item: Object, idx: number) => idx.toString())
               }.width('100%').padding({ left: 16, right: 16 })
-            }.scrollBar(BarState.Off).width('100%').height('100%')
-          }
-        }.width('100%').height('100%').backgroundColor(this.T().background).padding({ top: 8 })
-      }.titleBar(buildTitleBar('我的仓库')).backgroundColor(this.T().background)
+            }
+          }.width('100%')
+        }.scrollBar(BarState.Off).width('100%').height('100%').backgroundColor(this.T().background)
+      }.titleBar(buildTitleBar('我的仓库')).backgroundColor(this.T().background).bindToScrollable([this.repoListScroller])
     } else if (name === 'issues') {
-      HdsNavDestination() { IssuesPage({ owner: this.detailOwner, repoName: this.detailRepo, onOpenWebView: (u: string) => { this.webUrl = u; this.profileStack.pushPath({ name: 'repoWeb' }); }, onOpenIssue: (o: string, r: string, n: number) => { this.detailOwner = o; this.detailRepo = r; this.detailIssueNumber = n; this.profileStack.pushPath({ name: 'issueDetail' }); } }) }
-        .titleBar(buildTitleBar('议题')).backgroundColor(this.T().background)
+      HdsNavDestination() { IssuesPage({ scroller: this.issuesScroller, owner: this.detailOwner, repoName: this.detailRepo, onOpenWebView: (u: string) => { this.webUrl = u; this.profileStack.pushPath({ name: 'repoWeb' }); }, onOpenIssue: (o: string, r: string, n: number) => { this.detailOwner = o; this.detailRepo = r; this.detailIssueNumber = n; this.profileStack.pushPath({ name: 'issueDetail' }); } }) }
+        .titleBar(buildTitleBar('议题')).backgroundColor(this.T().background).bindToScrollable([this.issuesScroller])
     } else if (name === 'issueDetail') {
-      HdsNavDestination() { IssueDetailPage({ owner: this.detailOwner, repoName: this.detailRepo, issueNumber: this.detailIssueNumber, onOpenWebView: (u: string) => { this.webUrl = u; this.profileStack.pushPath({ name: 'repoWeb' }); }, onOpenRepo: (o: string, r: string) => { this.profileStack.pushPath({ name: 'repoDetail', param: new RepoParam(o, r) }); } }) }
-        .titleBar(buildTitleBar('议题详情')).backgroundColor(this.T().background)
+      HdsNavDestination() { IssueDetailPage({ scroller: this.issueDetailScroller, owner: this.detailOwner, repoName: this.detailRepo, issueNumber: this.detailIssueNumber, onOpenWebView: (u: string) => { this.webUrl = u; this.profileStack.pushPath({ name: 'repoWeb' }); }, onOpenRepo: (o: string, r: string) => { this.profileStack.pushPath({ name: 'repoDetail', param: new RepoParam(o, r) }); } }) }
+        .titleBar(buildTitleBar('议题详情')).backgroundColor(this.T().background).bindToScrollable([this.issueDetailScroller])
     } else if (name === 'repoDetail') {
-      HdsNavDestination() { RepoDetailPage({ owner: this.paramOwner(param), repoName: this.paramRepo(param), onOpenWebView: (u: string) => { this.webUrl = u; this.profileStack.pushPath({ name: 'repoWeb' }); }, onOpenDev: (uname: string) => { this.detailOwner = uname; this.profileStack.pushPath({ name: 'devProfile' }); }, onOpenRepo: (o: string, r: string) => { this.profileStack.pushPath({ name: 'repoDetail', param: new RepoParam(o, r) }); }, onOpenIssues: (o: string, r: string) => { this.detailOwner = o; this.detailRepo = r; this.profileStack.pushPath({ name: 'issues' }); } }) }
-        .titleBar(buildTitleBar('仓库详情')).linearGradient({ colors: this.mica(), direction: GradientDirection.RightBottom })
+      HdsNavDestination() { RepoDetailPage({ scroller: this.repoDetailScroller, owner: this.paramOwner(param), repoName: this.paramRepo(param), onOpenWebView: (u: string) => { this.webUrl = u; this.profileStack.pushPath({ name: 'repoWeb' }); }, onOpenDev: (uname: string) => { this.detailOwner = uname; this.profileStack.pushPath({ name: 'devProfile' }); }, onOpenRepo: (o: string, r: string) => { this.profileStack.pushPath({ name: 'repoDetail', param: new RepoParam(o, r) }); }, onOpenIssues: (o: string, r: string) => { this.detailOwner = o; this.detailRepo = r; this.profileStack.pushPath({ name: 'issues' }); } }) }
+        .titleBar(buildTitleBar('仓库详情')).linearGradient({ colors: this.mica(), direction: GradientDirection.RightBottom }).bindToScrollable([this.repoDetailScroller])
     } else if (name === 'devProfile') {
-      HdsNavDestination() { DevProfilePage({ username: this.detailOwner, onOpenRepo: (o: string, r: string) => { this.profileStack.pushPath({ name: 'repoDetail', param: new RepoParam(o, r) }); }, onOpenWebView: (u: string) => { this.webUrl = u; this.profileStack.pushPath({ name: 'repoWeb' }); } }) }
-        .titleBar(buildTitleBar('开发者')).linearGradient({ colors: this.mica(), direction: GradientDirection.RightBottom })
+      HdsNavDestination() { DevProfilePage({ scroller: this.devProfileScroller, username: this.detailOwner, onOpenRepo: (o: string, r: string) => { this.profileStack.pushPath({ name: 'repoDetail', param: new RepoParam(o, r) }); }, onOpenWebView: (u: string) => { this.webUrl = u; this.profileStack.pushPath({ name: 'repoWeb' }); } }) }
+        .titleBar(buildTitleBar('开发者')).linearGradient({ colors: this.mica(), direction: GradientDirection.RightBottom }).bindToScrollable([this.devProfileScroller])
     } else if (name === 'repoWeb') {
       HdsNavDestination() {
         Column() {
@@ -156,62 +165,62 @@ export struct ProfileTab {
       }.titleBar(buildTitleBar('GitHub')).backgroundColor(this.T().background)
     } else if (name === 'followers' || name === 'following') {
       HdsNavDestination() {
-        Column() {
-          // 沉浸标题栏占位：初始避开标题栏
-          Blank(100)
-          if (this.listLoading) {
-            Column() {
-              LoadingProgress().width(32).height(32).color(this.T().accent)
-            }.width('100%').layoutWeight(1).justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center)
-          } else if (this.listItems.length === 0) {
-            Column({ space: 8 }) {
-              Text('✉').fontSize(40)
-              Text('暂无内容').fontSize(14).fontColor(this.T().textSecondary)
-            }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center).width('100%').layoutWeight(1)
-          } else {
-            List({ space: 0 }) {
-              ForEach(this.listItems, (item: Object, idx: number) => {
-                ListItem() {
-                  Row({ space: 12 }) {
-                    PersonPicture({
-                      url: ((item as Record<string, Object>).avatar_url as string) || '',
-                      name: ((item as Record<string, Object>).login as string) || '?',
-                      avatarSize: 40
-                    })
-                    Text(((item as Record<string, Object>).login as string) || '')
-                      .fontSize(16).fontWeight(FontWeight.Medium).fontColor(this.T().textPrimary).layoutWeight(1)
-                      .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
-                    Text('›').fontSize(18).fontColor(this.T().textSecondary)
-                  }
-                  .width('100%').height(56).padding({ left: 16, right: 16 }).alignItems(VerticalAlign.Center)
-                  .onClick(() => {
-                    const login: string = ((item as Record<string, Object>).login as string) || '';
-                    if (login) {
-                      this.detailOwner = login;
-                      this.profileStack.pushPath({ name: 'devProfile' });
+        Scroll(this.followersScroller) {
+          Column() {
+            Blank().height(88)
+            if (this.listLoading) {
+              LoadingProgress().width(32).height(32).color(this.T().accent).margin({ top: 80 })
+            } else if (this.listItems.length === 0) {
+              Column({ space: 8 }) {
+                Text('✉').fontSize(40)
+                Text('暂无内容').fontSize(14).fontColor(this.T().textSecondary)
+              }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center).width('100%').height(300)
+            } else {
+              List({ space: 0 }) {
+                ListItem() { Column() { Blank().height(88) } }
+                ForEach(this.listItems, (item: Object, idx: number) => {
+                  ListItem() {
+                    Row({ space: 12 }) {
+                      PersonPicture({
+                        url: ((item as Record<string, Object>).avatar_url as string) || '',
+                        name: ((item as Record<string, Object>).login as string) || '?',
+                        avatarSize: 40
+                      })
+                      Text(((item as Record<string, Object>).login as string) || '')
+                        .fontSize(16).fontWeight(FontWeight.Medium).fontColor(this.T().textPrimary).layoutWeight(1)
+                        .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
+                      Text('›').fontSize(18).fontColor(this.T().textSecondary)
                     }
-                  })
-                }
-              }, (item: Object, idx: number) => idx.toString())
+                    .width('100%').height(56).padding({ left: 16, right: 16 }).alignItems(VerticalAlign.Center)
+                    .onClick(() => {
+                      const login: string = ((item as Record<string, Object>).login as string) || '';
+                      if (login) {
+                        this.detailOwner = login;
+                        this.profileStack.pushPath({ name: 'devProfile' });
+                      }
+                    })
+                  }
+                }, (item: Object, idx: number) => idx.toString())
+              }
+              .divider({ strokeWidth: 1, color: this.T().border, startMargin: 68 })
+              .scrollBar(BarState.Off).width('100%').layoutWeight(1).backgroundColor(this.T().background)
             }
-            .divider({ strokeWidth: 1, color: this.T().border, startMargin: 68 })
-            .scrollBar(BarState.Off).width('100%').layoutWeight(1).backgroundColor(this.T().background)
-          }
-        }.width('100%').height('100%').backgroundColor(this.T().background).padding({ top: 8 })
+          }.width('100%')
+        }.scrollBar(BarState.Off).width('100%').height('100%').backgroundColor(this.T().background)
       }
-      .titleBar(buildTitleBar(name === 'followers' ? '粉丝' : '关注中')).backgroundColor(this.T().background)
+      .titleBar(buildTitleBar(name === 'followers' ? '粉丝' : '关注中')).backgroundColor(this.T().background).bindToScrollable([this.followersScroller])
     } else if (name === 'settings') {
-      HdsNavDestination() { SettingsPage({ onNavigate: (n: string) => { this.profileStack.pushPath({ name: n }); } }) }
-        .titleBar(buildTitleBar('设置')).backgroundColor(this.T().background)
+      HdsNavDestination() { SettingsPage({ scroller: this.settingsScroller, onNavigate: (n: string) => { this.profileStack.pushPath({ name: n }); } }) }
+        .titleBar(buildTitleBar('设置')).backgroundColor(this.T().background).bindToScrollable([this.settingsScroller])
     } else if (name === 'tutorial') {
-      HdsNavDestination() { TutorialPage() }
-        .titleBar(buildTitleBar('使用教程')).backgroundColor(this.T().background)
+      HdsNavDestination() { TutorialPage({ scroller: this.tutorialScroller }) }
+        .titleBar(buildTitleBar('使用教程')).backgroundColor(this.T().background).bindToScrollable([this.tutorialScroller])
     } else if (name === 'userAgreement') {
-      HdsNavDestination() { UserAgreementPage() }
-        .titleBar(buildTitleBar('用户协议')).backgroundColor(this.T().background)
+      HdsNavDestination() { UserAgreementPage({ scroller: this.userAgreementScroller }) }
+        .titleBar(buildTitleBar('用户协议')).backgroundColor(this.T().background).bindToScrollable([this.userAgreementScroller])
     } else if (name === 'privacy') {
-      HdsNavDestination() { PrivacyPage() }
-        .titleBar(buildTitleBar('隐私协议')).backgroundColor(this.T().background)
+      HdsNavDestination() { PrivacyPage({ scroller: this.privacyScroller }) }
+        .titleBar(buildTitleBar('隐私协议')).backgroundColor(this.T().background).bindToScrollable([this.privacyScroller])
     }
   }
 
