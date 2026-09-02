@@ -51,11 +51,13 @@ export struct NotificationDetailPage {
     }
   }
 
+  @State errorMsg: string = '';
+
   async load(): Promise<void> {
-    this.loading = true;
+    this.loading = true; this.errorMsg = '';
     try {
       this.issue = await HttpClient.get<Object>('/repos/' + this.owner + '/' + this.repoName + '/issues/' + this.issueNumber.toString());
-    } catch (e) { this.issue = null; }
+    } catch (e) { this.issue = null; this.errorMsg = HttpClient.formatError(e); }
     finally { this.loading = false; }
     this.loadComments();
   }
