@@ -1,4 +1,4 @@
-import { HdsNavDestination } from '@kit.UIDesignKit'
+import { HdsNavDestination, HdsTabsController, HdsAnimationMode } from '@kit.UIDesignKit'
 import { buildTitleBar } from '../../common/utils/NavTitleBar';
 import { webview } from '@kit.ArkWeb';
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
@@ -27,6 +27,8 @@ class RepoParam {
 
 @Component
 export struct ProfileTab {
+  tabsController?: HdsTabsController;
+  onNavChanged?: (hide: boolean) => void;
   @StorageLink(AUTH_LOGIN_KEY) @Watch('onLoginChanged') isLoggedIn: boolean = false;
   @StorageLink(THEME_KEY) themeMode: string = 'dark'; private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
   private mica(): Array<[ResourceColor, number]> {
@@ -50,6 +52,7 @@ export struct ProfileTab {
   @State detailRepo: string = '';
   @State detailIssueNumber: number = 0;
   private profileStack: NavPathStack = new NavPathStack();
+  @State navDepth: number = 0;
   private webCtl: webview.WebviewController = new webview.WebviewController();
   private repoListScroller: Scroller = new Scroller();
   private issuesScroller: Scroller = new Scroller();
@@ -62,7 +65,19 @@ export struct ProfileTab {
   private privacyScroller: Scroller = new Scroller();
   private userAgreementScroller: Scroller = new Scroller();
 
-  aboutToAppear(): void { this.loadUserData(); }
+  aboutToAppear(): void {
+    this.loadUserData();
+    setInterval(() => {
+      const depth: number = this.profileStack.getAllPathName().length;
+      if (depth > 0 && this.navDepth === 0) {
+        this.navDepth = depth;
+        if (this.onNavChanged) this.onNavChanged(true);
+      } else if (depth === 0 && this.navDepth > 0) {
+        this.navDepth = 0;
+        if (this.onNavChanged) this.onNavChanged(false);
+      }
+    }, 300);
+  }
 
   onLoginChanged(): void {
     if (this.isLoggedIn) { this.loadUserData(); } else { this.user = null; }
@@ -289,6 +304,7 @@ export struct ProfileTab {
         }.width('100%').alignItems(HorizontalAlign.Center).padding({ top: 32, bottom: 20 })
       }.scrollable(ScrollDirection.Vertical).scrollBar(BarState.Off)
         .width('100%').backgroundColor(this.themeMode === 'dark' ? this.T().background : this.T().background)
+
     }
     .navDestination(this.profilePageMap).backgroundColor(this.themeMode === 'dark' ? this.T().background : this.T().background)
     .width('100%').height('100%').mode(NavigationMode.Stack).hideTitleBar(true).hideToolBar(true)

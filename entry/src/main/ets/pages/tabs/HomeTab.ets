@@ -1,4 +1,4 @@
-import { HdsNavDestination } from '@kit.UIDesignKit'
+import { HdsNavDestination, HdsTabsController, HdsAnimationMode } from '@kit.UIDesignKit'
 import { buildTitleBar } from '../../common/utils/NavTitleBar';
 import { webview } from '@kit.ArkWeb';
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
@@ -52,7 +52,10 @@ class FavoriteRepo {
 
 @Component
 export struct HomeTab {
+  tabsController?: HdsTabsController;
+  onNavChanged?: (hide: boolean) => void;
   private homeStack: NavPathStack = new NavPathStack();
+  @State navDepth: number = 0;
   @StorageLink(THEME_KEY) themeMode: string = 'dark'; private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
   private mica(): Array<[ResourceColor, number]> {
     const d: boolean = this.themeMode === 'dark';
@@ -95,6 +98,17 @@ export struct HomeTab {
 
   aboutToAppear(): void {
     this.loadStarredRepos();
+    // 导航深度变化 → 隐藏/显示底栏（首页不随滚动隐藏）
+    setInterval(() => {
+      const depth: number = this.homeStack.getAllPathName().length;
+      if (depth > 0 && this.navDepth === 0) {
+        this.navDepth = depth;
+        if (this.onNavChanged) this.onNavChanged(true);
+      } else if (depth === 0 && this.navDepth > 0) {
+        this.navDepth = 0;
+        if (this.onNavChanged) this.onNavChanged(false);
+      }
+    }, 300);
   }
 
   onLoginChanged(): void {
@@ -196,7 +210,9 @@ export struct HomeTab {
             }.padding({ left: 16, right: 16 })
             Blank().height(76)
           }.width('100%').alignItems(HorizontalAlign.Start)
-        }.scrollBar(BarState.Off).width('100%').backgroundColor(this.T().background)
+        }
+        .scrollBar(BarState.Off).width('100%').backgroundColor(this.T().background)
+
       }
       .width('100%').height('100%').backgroundColor(this.T().background).padding({ top: 32, bottom: 20 })
     }
