@@ -3,6 +3,7 @@ import { AUTH_LOGIN_KEY } from '../../common/constants/APIConstants';
 import { RepoRepository } from '../../services/RepoRepository';
 import { UserRepository } from '../../services/UserRepository';
 import { SearchRepository } from '../../services/SearchRepository';
+import { HttpClient } from '../../services/HttpClient';
 import { RepoCard } from '../../common/components/RepoCard';
 
 @Component
@@ -20,15 +21,17 @@ export struct WorkPage {
   aboutToAppear(): void { if (this.isLoggedIn) this.loadData(); else { this.items = []; this.loading = false; } }
   onLoginChanged(): void { if (this.isLoggedIn) this.loadData(); else { this.items = []; this.loading = false; } }
 
+  @State errorMsg: string = '';
+
   async loadData(): Promise<void> {
-    this.loading = true; this.items = [];
+    this.loading = true; this.items = []; this.errorMsg = '';
     try {
       if (this.dataType === 'issues') this.items = await SearchRepository.getIssues();
       else if (this.dataType === 'pulls') this.items = await SearchRepository.getPullRequests('');
       else if (this.dataType === 'repos') this.items = await RepoRepository.getMyRepos();
       else if (this.dataType === 'orgs') this.items = await UserRepository.getOrgs();
       else if (this.dataType === 'starred') this.items = await RepoRepository.getStarredRepos();
-    } catch (e) { this.items = []; }
+    } catch (e) { this.items = []; this.errorMsg = HttpClient.formatError(e); }
     finally { this.loading = false; }
   }
 

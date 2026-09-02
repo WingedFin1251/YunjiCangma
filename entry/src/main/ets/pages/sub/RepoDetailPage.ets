@@ -63,11 +63,13 @@ export struct RepoDetailPage {
 
   aboutToAppear(): void { if (this.owner && this.repoName) this.loadRepo(); }
 
+  @State errorMsg: string = '';
+
   async loadRepo(): Promise<void> {
     if (!this.owner || !this.repoName) { this.loading = false; return; }
-    this.loading = true;
+    this.loading = true; this.errorMsg = '';
     try { this.repo = await RepoRepository.getRepoDetail(this.owner, this.repoName); }
-    catch (e) { this.repo = null; }
+    catch (e) { this.repo = null; this.errorMsg = HttpClient.formatError(e); }
     finally { this.loading = false; }
     if (this.repo) { this.loadReadme(); this.loadRelease(); }
   }
@@ -119,8 +121,9 @@ export struct RepoDetailPage {
       } else if (!this.repo) {
         Column({ space: 12 }) {
           Text('☁').fontSize(48).fontColor(this.T().textTertiary)
-          Text('无法加载仓库信息').fontSize(16).fontColor(this.T().textSecondary)
-          Text('请检查网络后重试').fontSize(13).fontColor(this.T().textTertiary)
+          Text(this.errorMsg || '无法加载仓库信息').fontSize(16).fontColor(this.T().textSecondary)
+          Text('点击重试').fontSize(13).fontColor(this.T().accent)
+            .onClick(() => { this.loadRepo(); })
         }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center).width('100%').height('100%')
       } else {
         Scroll(this.scroller) {

@@ -1,6 +1,7 @@
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
 import { UserRepository } from '../../services/UserRepository';
 import { RepoRepository } from '../../services/RepoRepository';
+import { HttpClient } from '../../services/HttpClient';
 import { AcrylicCard } from '../../common/components/AcrylicCard';
 import { MicaLayer } from '../../common/components/MicaLayer';
 import { WinButton } from '../../common/components/WinButton';
@@ -77,15 +78,17 @@ export struct DevProfilePage {
     finally { this.contribLoading = false; }
   }
 
+  @State errorMsg: string = '';
+
   async load(): Promise<void> {
-    this.loading = true;
+    this.loading = true; this.errorMsg = '';
     try {
       this.profile = await UserRepository.getUser(this.username);
       const items: Object[] = await RepoRepository.getUserRepos(this.username);
       this.allRepos = items.slice(0, 30);
       this.applyFilter();
       this.loadContributions();
-    } catch (e) { this.profile = null; this.allRepos = []; }
+    } catch (e) { this.profile = null; this.allRepos = []; this.errorMsg = HttpClient.formatError(e); }
     finally { this.loading = false; }
   }
 
@@ -111,7 +114,9 @@ export struct DevProfilePage {
       } else if (!this.profile) {
         Column({ space: 12 }) {
           Text('☁').fontSize(48).fontColor(this.T().textTertiary)
-          Text('无法加载用户信息').fontSize(14).fontColor(this.T().textSecondary)
+          Text(this.errorMsg || '无法加载用户信息').fontSize(14).fontColor(this.T().textSecondary)
+          Text('点击重试').fontSize(13).fontColor(this.T().accent)
+            .onClick(() => { this.load(); })
         }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center).width('100%').height('100%')
       } else {
         Scroll(this.scroller) {

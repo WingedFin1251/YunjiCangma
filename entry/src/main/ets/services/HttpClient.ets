@@ -3,6 +3,19 @@ import { GITHUB_API_BASE, APIHeaders } from '../common/constants/APIConstants';
 import { AuthService } from './AuthService';
 
 export class HttpClient {
+  /** 将异常格式化为用户可读的错误信息 */
+  static formatError(e: unknown): string {
+    if (e instanceof Error) {
+      const code: number = (e as Record<string, Object>)['code'] as number || 0;
+      if (code === 401) return '授权已失效，请重新登录';
+      if (code === 403) return '请求过于频繁，请稍后重试';
+      if (code === 404) return '仓库不存在或无权访问';
+      if (code === 0) return '网络连接失败，请检查网络';
+      return `请求失败 (HTTP ${code})`;
+    }
+    return '加载失败，请重试';
+  }
+
   static buildHeaders(): Record<string, string> {
     const token: string = AuthService.getToken();
     const headers: Record<string, string> = {
@@ -23,10 +36,14 @@ export class HttpClient {
         readTimeout: 15000
       });
       if (res.responseCode === 200) return JSON.parse(res.result as string) as T;
-      throw new Error(`HTTP ${res.responseCode} for ${path}`);
+      const err: Error = new Error(`HTTP ${res.responseCode}`);
+      (err as Record<string, Object>)['code'] = res.responseCode;
+      throw err;
     } catch (e) {
       if (e instanceof Error) { throw e; }
-      throw new Error(JSON.stringify(e));
+      const err: Error = new Error('NETWORK_ERROR');
+      (err as Record<string, Object>)['code'] = -1;
+      throw err;
     } finally { req.destroy(); }
   }
 

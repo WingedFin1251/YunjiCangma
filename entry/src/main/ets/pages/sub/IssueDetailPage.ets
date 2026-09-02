@@ -40,11 +40,13 @@ export struct IssueDetailPage {
 
   aboutToAppear(): void { if (this.owner && this.repoName && this.issueNumber > 0) this.load(); }
 
+  @State errorMsg: string = '';
+
   async load(): Promise<void> {
-    this.loading = true;
+    this.loading = true; this.errorMsg = '';
     try {
       this.issue = await HttpClient.get<Object>('/repos/' + this.owner + '/' + this.repoName + '/issues/' + this.issueNumber.toString());
-    } catch (e) { this.issue = null; }
+    } catch (e) { this.issue = null; this.errorMsg = HttpClient.formatError(e); }
     finally { this.loading = false; }
     this.loadComments();
   }
@@ -90,7 +92,9 @@ export struct IssueDetailPage {
         } else if (!this.issue) {
           Column({ space: 12 }) {
             Text('☁').fontSize(48).fontColor(this.T().textTertiary)
-            Text('无法加载议题').fontSize(14).fontColor(this.T().textSecondary)
+            Text(this.errorMsg || '无法加载议题').fontSize(14).fontColor(this.T().textSecondary)
+            Text('点击重试').fontSize(13).fontColor(this.T().accent)
+              .onClick(() => { this.load(); })
           }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center).width('100%').height(300)
         } else {
           // ===== 标题卡片 =====
