@@ -116,17 +116,19 @@ struct MyComponent {
 - Tab 栏图标：20fp，文字 10fp
 - 未选中：textSecondary；选中：accent
 
-## 底部导航栏
+## 底部导航栏（HdsTabs 悬浮底栏）
 
 | 属性 | 值 |
 |------|-----|
-| 高度 | 52dp |
-| 模式 | BarPosition.End（固定底部） |
-| 入口顺序 | 主页(☷) → 收件箱(✉) → 探索(◎) → 个人资料(◉) |
-| 图标 | 20fp，文字 10fp Lighter |
+| 高度 | 56vp（`barHeight(56)`） |
+| 模式 | `BarPosition.End` + `barFloatingStyle`（浮动药丸，与 PiliPlus 一致） |
+| 底部间距 | 动态 `px2vp(系统导航栏高度) + 1` |
+| 材质 | `IMMERSIVE` + 光感三档联动 `glowLevel` |
+| 入口顺序 | 首页 → 消息 → 发现 → 我的 |
+| 图标 | 22vp，文字 10.5fp |
 | 选中色 | accent |
 | 未选中色 | textSecondary |
-| 切换动画 | 无（`animationDuration: 0`） |
+| 隐藏行为 | 发现/消息页向下滚动隐藏（`SCROLL_ANIMATION`）；首页/我的页仅导航深度变化时隐藏 |
 
 ## 全局可复用组件
 
@@ -179,23 +181,44 @@ struct MyComponent {
 
 - README 等 Markdown 内容的 ArkUI 渲染组件
 
-### 头像
+### 头像 `PersonPicture.ets`
 
-- 尺寸: 32dp / 40dp / 48dp 三档
-- 样式: 纯圆形裁切，无边框
-- 首字母大写显示（用户名首字符）
+- 尺寸: 20vp / 40vp / 84vp 三档
+- 样式: 圆形裁切，URL 加载 + 首字母 fallback
+
+### 亚克力卡片 `AcrylicCard.ets`
+
+- 半透明背景 + `backdropBlur` + 细描边 + 圆角
+- 用于仓库详情 HEADER、开发者资料等
+
+### Mica 背景层 `MicaLayer.ets`
+
+- 线性渐变 + accent 柔光斑（radialGradient）
+- 用于仓库详情、开发者资料的 Stack 底层
+
+### WinUI 风格按钮 `WinButton.ets`
+
+- normal/hover/pressed 三态
+- 用于仓库详情的操作按钮（议题/PR/安全）
+
+### 可折叠区块 `ExpandableSection.ets`
+
+- 标题栏 + Fluent 展开/收起动画
+- 用于 README、Release 等可折叠内容
 
 ## 各页面布局
 
 | 页面 | 布局结构 |
 |------|----------|
-| 主页 | 导航栏(26sp Bold 标题 + 搜索/新增/更多) → 我的项目(7 项 WorkItem) → 我的星标(RepoCard 列表) |
-| 收件箱 | 导航栏(Inbox + 更多) → FilterTabBar(4 标签) → 通知列表/EmptyState |
-| 探索 | 标题(26sp Bold) → 发现(2 列: 热门仓库/精选列表) → 动态(ActivityItem) → 热门仓库(RepoCard) |
-| 个人资料 | 设置入口(☰) → 头像(48dp) + 用户名(24sp Bold) + 状态框 → 统计 → 资源列表(仓库/粉丝/关注) |
-| 仓库详情 | HEADER(头像/描述/统计) → Release → README → Info(语言/许可证/分支) |
-| 开发者资料 | 头像 + 统计 + 仓库搜索/筛选 → 贡献热力图(GraphQL 5 级色阶) |
-| 设置 | 深色模式开关 + 手动屏蔽词管理 + 使用教程 + 隐私协议 + 关于 |
+| 首页 | 固定标题栏(26sp + 搜索/新增/刷新) → 我的项目(7 项 WorkItem) → 我的星标(RepoCard 列表) |
+| 消息 | 固定标题栏 → FilterTabBar(4 标签) → 通知列表/EmptyState → 滚动隐藏底栏 |
+| 发现 | HDS 标题栏(IMMERSIVE 毛玻璃) → 发现入口(2 列) → 动态流 → 热门仓库(RepoCard) → 滚动隐藏底栏 |
+| 我的 | 设置入口(☰) → 头像 + 用户名 + 统计 → 资源列表(仓库/粉丝/关注) |
+| 搜索 | HDS 标题栏 → 固定搜索框 + 屏蔽词 → 分页结果列表(上一页/下一页) |
+| 仓库详情 | HDS 标题栏(Mica 渐变) → 亚克力卡片 HEADER → 操作按钮 → 仓库信息 → Release(可折叠) → 开发者入口 → README(可折叠) |
+| 开发者资料 | HDS 标题栏(Mica 渐变) → 亚克力卡片 头像/统计 → 贡献热力图 → 仓库搜索/筛选 |
+| 议题详情 | HDS 标题栏 → 状态/标签 → Markdown 正文 → 评论列表 |
+| 设置 | HDS 标题栏 → 深色开关 + 沉浸光感三档 + 手动屏蔽词 + 教程/协议/关于 |
 
 ## 交互规则
 

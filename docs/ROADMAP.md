@@ -1,24 +1,24 @@
 # 路线图
 
-## 当前版本: v1.0.0（正式版）
+## 当前版本: v1.1.0（正式版）
 
 - [x] 项目初始化 + 品牌「云笈藏码」
-- [x] Repository 分层 API（HttpClient → Repo/User/Search/Auth Repository）
+- [x] Repository 分层 API（HttpClient get/post/put/delete → Repo/User/Search/Auth Repository）
 - [x] 深色/浅色双主题 + 状态栏透明沉浸 + WebView 联动 + 系统 ColorMode 同步
-- [x] 15 个 REST 端点 + 1 个 GraphQL 端点（贡献热力图）
-- [x] 🔍 全局搜索（手动屏蔽词 + 30+ Linguist 语言颜色 → RepoDetailPage）
-- [x] 📦 仓库详情页（HEADER/Stats/Release/Info/README/Issues/PR/Security）
-- [x] 👤 开发者资料页（头像/统计/仓库搜索/筛选/贡献热力图 5 级色阶）
-- [x] 📊 GitHub 风格贡献热力图（GraphQL API + 横向滚动）
-- [x] 🔒 Release 代码混淆（属性/全局/文件名/导出 + remove-log）
-- [x] ⚙️ 设置页（深色开关 + 手动屏蔽词 + 使用教程 + 隐私协议 + 关于）
-- [x] 📁 页面分层（tabs/ 4 Tab + sub/ 8 子页 + NavPathStack 路由）
-- [x] 🏠 4 Tab 导航（Home/Inbox/Explore/Profile + 小白条沉浸）
-- [x] 🧊 子页面沉浸毛玻璃标题栏（HdsNavDestination + 内容滚动模糊）
-- [x] 🔐 GitHub OAuth Device Flow 登录（客户端零密钥，验证码 + 轮询）
-- [x] 🔄 登录自动刷新 + 主题持久化（preferences）
-- [x] 📋 首页工作项子页面（议题/PR/讨论/项目/仓库/组织/已加星标）
-- [x] 📡 通知列表（筛选标签 + 类型图标 + 空状态）
+- [x] 15+ 个 REST 端点 + 1 个 GraphQL 端点（贡献热力图）
+- [x] 🔍 全局搜索（固定搜索框 + 分页上一页/下一页 + 手动屏蔽词 + Linguist 语言颜色）
+- [x] 📦 仓库详情页（亚克力卡片 HEADER/Stats/Release/README + WinButton 操作按钮）
+- [x] 👤 开发者资料页（亚克力卡片 + 贡献热力图 + 仓库搜索/筛选）
+- [x] 📊 GitHub 风格贡献热力图（GraphQL API + 5 级色阶）
+- [x] 🔒 HUKS AES-256-CBC 加密存储 token + Release 代码混淆
+- [x] ⚙️ 设置页（深色开关 + 沉浸光感三档 + 手动屏蔽词 + 教程/协议/关于）
+- [x] 📁 页面分层（tabs/ 4 Tab + sub/ 14 子页 + NavPathStack 路由）
+- [x] 🏠 HdsTabs 悬浮底栏（IMMERSIVE 材质 + 动态底部间距 + PiliPlus 规格）
+- [x] 🧊 HdsNavDestination 子页面沉浸毛玻璃（IMMERSIVE_GRADIENT_BLUR + scrollEffectOpts + 主题色标题）
+- [x] ✨ 沉浸光感三档联动（弱/均衡/强 → GENTLE/ADAPTIVE/EXQUISITE，底栏 + 标题栏）
+- [x] 🎯 底栏隐藏（发现/消息页滚动隐藏 SCROLL_ANIMATION + 导航深度隐藏）
+- [x] 🔐 GitHub OAuth Device Flow 登录（客户端零密钥，HUKS 加密 token）
+- [x] 🔄 登录自动刷新 + 主题/光感持久化
 - [x] 📝 MarkdownView 组件（README 渲染）
 - [x] 🖼️ Octocat 应用图标
 
