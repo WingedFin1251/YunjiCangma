@@ -1,6 +1,6 @@
 import { ConfigurationConstant } from '@kit.AbilityKit';
 import { window } from '@kit.ArkUI';
-import { HdsTabs, HdsTabsController, HdsTabsFloatingStyle, hdsMaterial } from '@kit.UIDesignKit';
+import { HdsTabs, HdsTabsController, HdsTabsFloatingStyle, HdsAnimationMode, hdsMaterial } from '@kit.UIDesignKit';
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../common/constants/ThemeConstants';
 import { AuthService } from '../services/AuthService';
 import { HomeTab } from './tabs/HomeTab';
@@ -33,7 +33,28 @@ struct MainPage {
   }
   @State currentIndex: number = 0;
   @StorageLink('glowLevel') glowLevel: number = 1;
+  @State bottomAvoidAreaHeight: number = 12;
   private tabsController: HdsTabsController = new HdsTabsController();
+
+  aboutToAppear(): void {
+    // 动态计算底部导航栏避让高度（与 PiliPlus 一致）
+    try {
+      const ctx = this.getUIContext().getHostContext();
+      if (ctx) {
+        window.getLastWindow(ctx).then((w: window.Window) => {
+          const bottomArea = w.getWindowAvoidArea(window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR);
+          const h: number = bottomArea.bottomRect.height;
+          this.bottomAvoidAreaHeight = h === 0 ? 12 : (px2vp(h) + 1);
+          w.on('avoidAreaChange', (data) => {
+            if (data.type === window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR) {
+              const bh: number = data.area.bottomRect.height;
+              this.bottomAvoidAreaHeight = bh === 0 ? 12 : (px2vp(bh) + 1);
+            }
+          });
+        });
+      }
+    } catch (_) {}
+  }
 
   onThemeChange(): void {
     AuthService.saveTheme(this.currentTheme);
@@ -55,19 +76,14 @@ struct MainPage {
     } catch (_) {}
   }
 
-  /** HdsTabs 悬浮样式（液态玻璃沉浸材质 + 背板蒙层，材质等级随光感档位） */
+  /** HdsTabs 悬浮样式（与 PiliPlus ohos 一致） */
   private buildFloatingStyle(): HdsTabsFloatingStyle {
-    const dark: boolean = this.currentTheme === 'dark';
     let level: hdsMaterial.MaterialLevel = hdsMaterial.MaterialLevel.ADAPTIVE;
     if (this.glowLevel === 0) level = hdsMaterial.MaterialLevel.GENTLE;
     else if (this.glowLevel === 2) level = hdsMaterial.MaterialLevel.EXQUISITE;
     return {
-      barSideMargin: 16,
-      barBottomMargin: 22,
-      gradientMask: {
-        maskColor: dark ? '#33000000' : '#66F1F3F5',
-        maskHeight: 78
-      },
+      barBottomMargin: this.bottomAvoidAreaHeight,
+      adaptToHandedness: true,
       systemMaterialEffect: {
         materialType: hdsMaterial.MaterialType.IMMERSIVE,
         materialLevel: level
@@ -77,32 +93,29 @@ struct MainPage {
 
   @Builder
   tabBarContent(index: number, grayDark: Resource, grayLight: Resource, accentDark: Resource, accentLight: Resource, label: ResourceStr) {
-    Column() {
+    Column({ space: 3 }) {
       if (this.currentIndex === index) {
         // 选中：accent 色描边线稿
         Image(this.currentTheme === 'dark' ? accentDark : accentLight)
-          .width(24)
-          .height(24)
+          .width(22)
+          .height(22)
           .objectFit(ImageFit.Contain)
           .animation({ duration: 200, curve: Curve.FastOutSlowIn })
       } else {
         // 未选中：灰描边线稿（按主题取色）
         Image(this.currentTheme === 'dark' ? grayDark : grayLight)
-          .width(24)
-          .height(24)
+          .width(22)
+          .height(22)
           .objectFit(ImageFit.Contain)
           .animation({ duration: 200, curve: Curve.FastOutSlowIn })
       }
 
       Text(label)
-        .fontSize(10)
-        .fontWeight(this.currentIndex === index ? FontWeight.Bold : FontWeight.Medium)
+        .fontSize(10.5)
+        .fontWeight(this.currentIndex === index ? FontWeight.Bold : FontWeight.Normal)
         .fontColor(this.currentIndex === index ? this.T().accent : this.T().textSecondary)
         .maxLines(1)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
-        .constraintSize({ maxWidth: 52 })
-        .lineHeight(12)
-        .margin({ top: 2 })
     }
     .justifyContent(FlexAlign.Center)
     .alignItems(HorizontalAlign.Center)
@@ -119,29 +132,51 @@ struct MainPage {
         controller: this.tabsController
       }) {
         TabContent() {
-          HomeTab()
+          HomeTab({ tabsController: this.tabsController, onNavChanged: (hide: boolean) => {
+            if (hide) {
+              this.tabsController.applyHideAnimation(HdsAnimationMode.SCROLL_ANIMATION);
+            } else {
+              this.tabsController.applyShowAnimation(HdsAnimationMode.SCROLL_ANIMATION);
+            }
+          } })
         }
         .tabBar(this.tabBarContent(0, $r('app.media.tab_home_line_d'), $r('app.media.tab_home_line_l'), $r('app.media.tab_home_line_a_d'), $r('app.media.tab_home_line_a_l'), $r('app.string.tab_home')))
 
         TabContent() {
-          InboxTab()
+          InboxTab({ tabsController: this.tabsController, onNavChanged: (hide: boolean) => {
+            if (hide) {
+              this.tabsController.applyHideAnimation(HdsAnimationMode.SCROLL_ANIMATION);
+            } else {
+              this.tabsController.applyShowAnimation(HdsAnimationMode.SCROLL_ANIMATION);
+            }
+          } })
         }
         .tabBar(this.tabBarContent(1, $r('app.media.tab_inbox_line_d'), $r('app.media.tab_inbox_line_l'), $r('app.media.tab_inbox_line_a_d'), $r('app.media.tab_inbox_line_a_l'), $r('app.string.tab_inbox')))
 
         TabContent() {
-          ExploreTab()
+          ExploreTab({ tabsController: this.tabsController, onNavChanged: (hide: boolean) => {
+            if (hide) {
+              this.tabsController.applyHideAnimation(HdsAnimationMode.SCROLL_ANIMATION);
+            } else {
+              this.tabsController.applyShowAnimation(HdsAnimationMode.SCROLL_ANIMATION);
+            }
+          } })
         }
         .tabBar(this.tabBarContent(2, $r('app.media.tab_explore_line_d'), $r('app.media.tab_explore_line_l'), $r('app.media.tab_explore_line_a_d'), $r('app.media.tab_explore_line_a_l'), $r('app.string.tab_explore')))
 
         TabContent() {
-          ProfileTab()
+          ProfileTab({ tabsController: this.tabsController, onNavChanged: (hide: boolean) => {
+            if (hide) {
+              this.tabsController.applyHideAnimation(HdsAnimationMode.SCROLL_ANIMATION);
+            } else {
+              this.tabsController.applyShowAnimation(HdsAnimationMode.SCROLL_ANIMATION);
+            }
+          } })
         }
         .tabBar(this.tabBarContent(3, $r('app.media.tab_profile_line_d'), $r('app.media.tab_profile_line_l'), $r('app.media.tab_profile_line_a_d'), $r('app.media.tab_profile_line_a_l'), $r('app.string.tab_profile')))
       }
-      .barHeight(62)
+      .barHeight(56)
       .barOverlap(true)
-      .barBackgroundColor(Color.Transparent)
-      .barBackgroundBlurStyle(BlurStyle.COMPONENT_THIN)
       .barFloatingStyle(this.buildFloatingStyle())
       .backgroundColor(this.T().background)
       .scrollable(false)

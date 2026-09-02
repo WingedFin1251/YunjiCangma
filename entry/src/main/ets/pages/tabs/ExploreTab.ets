@@ -1,4 +1,4 @@
-import { HdsNavDestination } from '@kit.UIDesignKit'
+import { HdsNavDestination, HdsTabsController, HdsAnimationMode } from '@kit.UIDesignKit'
 import { buildTitleBar } from '../../common/utils/NavTitleBar';
 import { webview } from '@kit.ArkWeb';
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
@@ -36,7 +36,12 @@ class RepoParam {
 
 @Component
 export struct ExploreTab {
+  tabsController?: HdsTabsController;
+  onNavChanged?: (hide: boolean) => void;
   @StorageLink(THEME_KEY) themeMode: string = 'dark'; private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
+  @State navDepth: number = 0;
+  @State scrollHidden: boolean = false;
+  private mainScroller: Scroller = new Scroller();
   private mica(): Array<[ResourceColor, number]> {
     const d: boolean = this.themeMode === 'dark';
     return [[d ? DarkTheme.micaStart : LightTheme.micaStart, 0], [d ? DarkTheme.micaEnd : LightTheme.micaEnd, 1]];
@@ -68,6 +73,16 @@ export struct ExploreTab {
 
   aboutToAppear(): void {
     this.loadExploreData();
+    setInterval(() => {
+      const depth: number = this.exploreStack.getAllPathName().length;
+      if (depth > 0 && this.navDepth === 0) {
+        this.navDepth = depth;
+        if (!this.scrollHidden && this.onNavChanged) { this.scrollHidden = true; this.onNavChanged(true); }
+      } else if (depth === 0 && this.navDepth > 0) {
+        this.navDepth = 0;
+        if (this.scrollHidden) { this.scrollHidden = false; if (this.onNavChanged) this.onNavChanged(false); }
+      }
+    }, 300);
   }
 
   private async loadExploreData(): Promise<void> {
@@ -166,7 +181,7 @@ export struct ExploreTab {
         }.width('100%').height(56).padding({ left: 16, right: 16 }).alignItems(VerticalAlign.Center)
 
         // 内容区 — 可滚动
-        Scroll() {
+        Scroll(this.mainScroller) {
           Column() {
 
           Row({ space: 12 }) {
@@ -233,6 +248,16 @@ export struct ExploreTab {
         }.width('100%').alignItems(HorizontalAlign.Start)
       }.scrollBar(BarState.Off).width('100%')
         .backgroundColor(this.themeMode === 'dark' ? this.T().background : this.T().background)
+        .onScrollFrameBegin((offsetRemain: number) => {
+          if (offsetRemain > 0 && !this.scrollHidden && this.navDepth === 0) {
+            this.scrollHidden = true;
+            if (this.onNavChanged) this.onNavChanged(true);
+          } else if (offsetRemain < 0 && this.scrollHidden) {
+            this.scrollHidden = false;
+            if (this.onNavChanged) this.onNavChanged(false);
+          }
+          return { offsetRemain: offsetRemain };
+        })
     }
     .width('100%').height('100%')
     .padding({ top: 32, bottom: 20 })

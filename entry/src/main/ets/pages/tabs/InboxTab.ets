@@ -1,3 +1,4 @@
+import { HdsTabsController, HdsAnimationMode } from '@kit.UIDesignKit';
 import { webview } from '@kit.ArkWeb';
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
 import { EmptyState } from '../../common/components/EmptyState';
@@ -7,8 +8,13 @@ import type { GitHubNotification } from '../../models/User';
 
 @Component
 export struct InboxTab {
+  tabsController?: HdsTabsController;
+  onNavChanged?: (hide: boolean) => void;
   @StorageLink(THEME_KEY) themeMode: string = 'dark'; private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
   private inboxStack: NavPathStack = new NavPathStack();
+  @State navDepth: number = 0;
+  @State scrollHidden: boolean = false;
+  private mainScroller: Scroller = new Scroller();
   @State webUrl: string = '';
   private webCtl: webview.WebviewController = new webview.WebviewController();
   @State notifOwner: string = '';
@@ -27,6 +33,16 @@ export struct InboxTab {
 
   aboutToAppear(): void {
     this.loadNotifications();
+    setInterval(() => {
+      const depth: number = this.inboxStack.getAllPathName().length;
+      if (depth > 0 && this.navDepth === 0) {
+        this.navDepth = depth;
+        if (!this.scrollHidden && this.onNavChanged) { this.scrollHidden = true; this.onNavChanged(true); }
+      } else if (depth === 0 && this.navDepth > 0) {
+        this.navDepth = 0;
+        if (this.scrollHidden) { this.scrollHidden = false; if (this.onNavChanged) this.onNavChanged(false); }
+      }
+    }, 300);
   }
 
   private async loadNotifications(): Promise<void> {
@@ -205,7 +221,7 @@ export struct InboxTab {
 
   @Builder
   buildNotificationList() {
-    List({ space: 0 }) {
+    List({ space: 0, scroller: this.mainScroller }) {
       ForEach(this.getFilteredNotifications(), (item: GitHubNotification, _index: number) => {
         ListItem() {
           Row() {
@@ -253,5 +269,15 @@ export struct InboxTab {
     .layoutWeight(1)
     .backgroundColor(this.T().background)
     .padding({ bottom: 76 })
+    .onScrollFrameBegin((offsetRemain: number) => {
+      if (offsetRemain > 0 && !this.scrollHidden && this.navDepth === 0) {
+        this.scrollHidden = true;
+        if (this.onNavChanged) this.onNavChanged(true);
+      } else if (offsetRemain < 0 && this.scrollHidden) {
+        this.scrollHidden = false;
+        if (this.onNavChanged) this.onNavChanged(false);
+      }
+      return { offsetRemain: offsetRemain };
+    })
   }
 }
