@@ -41,7 +41,11 @@ export function buildTitleBar(title: ResourceStr): HdsNavigationTitleBarOptions 
       blurStrategy: BlurStrategy.ENABLE,
       systemMaterialEffect: {
         materialType: hdsMaterial.MaterialType.IMMERSIVE,
-        materialLevel: hdsMaterial.MaterialLevel.ADAPTIVE
+        materialLevel: (AppStorage.get<number>('glowLevel') ?? 1) === 0
+          ? hdsMaterial.MaterialLevel.GENTLE
+          : (AppStorage.get<number>('glowLevel') ?? 1) === 2
+            ? hdsMaterial.MaterialLevel.EXQUISITE
+            : hdsMaterial.MaterialLevel.ADAPTIVE
       }
     }
   };

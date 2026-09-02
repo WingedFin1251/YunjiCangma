@@ -80,7 +80,9 @@ export class AuthService {
   /** 用 HUKS AES-CBC 加密 token，返回 {iv, ct} 的 JSON（base64） */
   private static async encryptTokenValue(plaintext: string): Promise<string> {
     await AuthService.ensureTokenKey();
-    const nonceBlob: cryptoFramework.DataBlob = cryptoFramework.createRandom().generateRandomSync(16);
+    let nonceBlob: cryptoFramework.DataBlob;
+    try { nonceBlob = cryptoFramework.createRandom().generateRandomSync(16); }
+    catch (e) { throw new Error('Random generation failed: ' + JSON.stringify(e)); }
     const plainBytes: Uint8Array = new Uint8Array(plaintext.length);
     for (let i = 0; i < plaintext.length; i++) { plainBytes[i] = plaintext.charCodeAt(i); }
     // 数据经 options.inData 传入（不是函数第三参），小数据一次性 init → finish
