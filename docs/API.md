@@ -14,11 +14,11 @@
 HTTP 请求由 `services/HttpClient.ets` 统一封装，按业务域拆分为 4 个 Repository 类：
 
 ```
-HttpClient.ets          # HTTP 引擎 — buildHeaders() + get<T>() + post<T>()
-  ├── RepoRepository    # 仓库相关
+HttpClient.ets          # HTTP 引擎 — buildHeaders() + get<T>() + post<T>() + put() + delete()
+  ├── RepoRepository    # 仓库相关（含 starRepo/unstarRepo）
   ├── UserRepository    # 用户/动态/GraphQL
-  ├── SearchRepository  # 搜索/通知/PR
-  └── AuthService       # OAuth 认证
+  ├── SearchRepository  # 搜索(分页)/通知/PR
+  └── AuthService       # OAuth 认证 + HUKS 加密
 ```
 
 ### HttpClient 核心
@@ -26,6 +26,7 @@ HttpClient.ets          # HTTP 引擎 — buildHeaders() + get<T>() + post<T>()
 ```typescript
 // services/HttpClient.ets
 export class HttpClient {
+  // 支持 get<T> / post<T> / postRaw<T> / put / delete 五种方法
   static buildHeaders(): Record<string, string> {
     // 自动注入 Bearer Token（若已登录）
     // Accept + X-GitHub-Api-Version

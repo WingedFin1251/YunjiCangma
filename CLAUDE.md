@@ -8,11 +8,13 @@
 
 - **Bundle**: `com.yunjicangma.app` | **API**: 6.1.0 (23)
 - **语言**: ArkTS (TypeScript 严格子集)
-- **架构**: Stage Model + ArkUI
+- **架构**: Stage Model + ArkUI + HdsTabs/HdsNavDestination (UIDesignKit)
 - **主题**: 深色/浅色双模式（14 色值 ×2，ThemeColors 接口 + DarkTheme/LightTheme 静态类 + T() 方法，preferences 持久化 + 系统 ColorMode 联动）
 - **OAuth**: GitHub Device Flow（仅 `client_id`，客户端零密钥）— 验证码展示 + 轮询换 token
+- **安全**: HUKS AES-256-CBC 加密存储 token
 - **状态栏**: 透明沉浸（#00FFFFFF）+ statusBarContentColor 深浅切换 + 运行时更新
-- **搜索**: 手动屏蔽词过滤 + Linguist 语言颜色支持
+- **搜索**: 手动屏蔽词过滤 + 分页（上一页/下一页）+ Linguist 语言颜色
+- **沉浸光感**: 三档（弱/均衡/强 → GENTLE/ADAPTIVE/EXQUISITE），底部 Tab 栏 + 子页面标题栏联动
 
 ## 关键架构决策
 
@@ -21,12 +23,19 @@
 | 主题 | `DarkTheme`/`LightTheme` 静态类 + 组件内 `T()` 方法返回 `ThemeColors` 对象 | ArkTS 禁止裸对象字面量 + 类不能作为对象传递 |
 | 主题联动 | 每个组件 `@StorageLink(THEME_KEY)` + `this.T().xxx` | 所有组件即时响应切换 |
 | 主题持久化 | `preferences` + `AuthService.loadTheme/saveTheme` | 重启保持 |
-| 平板适配 | `Navigation.mode(Stack)` | 默认 Split 分栏导致内容区黑屏 |
 | 全屏沉浸 | `setWindowLayoutFullScreen(true)` + `setColorMode` 同步 | 状态栏 + NavDestination 标题栏统一 |
-| 小白条 | MainPage Column + bottom Row(20, surface) | 底栏色延伸至手势指示条 |
-| 安全区 | Tab 主页面 `padding({ top: 32, bottom: 20 })`；HdsNavDestination 子页面标题栏 `avoidLayoutSafeArea` + 内容顶部 `Blank(100)` | 沉浸浮层标题栏避让状态栏，内容滚动滑入栏下 |
+| 底部 Tab 栏 | `HdsTabs` 悬浮样式（IMMERSIVE 材质 + 动态底部间距） | 与 PiliPlus 一致的浮动药丸底栏 |
+| Tab 栏隐藏 | `SCROLL_ANIMATION` 模式（发现/消息页滚动隐藏 + 导航深度隐藏） | 首页/我的页不随滚动隐藏 |
+| 子页面标题栏 | `HdsNavDestination` + `buildTitleBar()`（IMMERSIVE_GRADIENT_BLUR + scrollEffectOpts） | 官方 HDS 沉浸毛玻璃方案 |
+| 标题栏颜色 | `originalStyle` + `scrollEffectStyle` 设置 `mainTitleColor` / `backIconStyle` / `menuStyle` | 浅色模式标题/按钮文字正确显示 |
+| 沉浸光感 | `AppStorage('glowLevel')` → `buildTitleBar` 读取 → `materialLevel` 映射 | 与底部 Tab 栏联动 |
+| 安全区 | Tab 主页面 `padding({ top: 32, bottom: 20 })`；HdsNavDestination 子页面标题栏 `avoidLayoutSafeArea` + 内容顶部 `Blank(88)` | 沉浸浮层标题栏避让状态栏 |
+| 滚动方向检测 | `onScrollFrameBegin` 回调 + `offsetRemain` 方向判断（发现/消息页） | 向下滚动隐藏底栏，向上滚动显示 |
+| 导航深度检测 | `setInterval` 轮询 `getAllPathName().length`（300ms） | 进入子页面隐藏底栏，返回首页显示 |
+| 底部间距 | 动态计算 `bottomAvoidAreaHeight`（`px2vp(h) + 1`，监听 `avoidAreaChange`） | 与 PiliPlus 一致的系统导航栏避让 |
+| 搜索分页 | `SearchRepository.searchRepos(query, page)` + `total_count` 计算总页数 | GitHub API 原生分页支持 |
 | OAuth 登录 | Device Flow（`POST /login/device/code` + 轮询 `access_token`） | 仅需 client_id，无需 client_secret 与回调 URL |
-| 登录刷新 | `@StorageLink(AUTH_LOGIN_KEY)` + `@Watch('onLoginChanged')` | 登录完切回 Profile 即显示用户信息 |
+| Token 安全 | HUKS AES-256-CBC 加密存储，密钥驻留系统密钥库 | 不可导出密钥，登录态安全 |
 | 数据数组 | 具名 `class` 实例 (`new WorkItem(...)`) | ArkTS 禁止内联对象和无法推断的类型 |
 | API 类型 | 具名 `interface`（User, Repository, GitHubNotification 等） | ArkTS 禁止内联对象作为类型声明 |
 | 服务分层 | `HttpClient`（HTTP 封装）→ `XxxRepository`（业务端点） | 关注点分离，Bearer Token 自动注入 |
@@ -34,11 +43,11 @@
 ## 服务层架构
 
 ```
-HttpClient.ets          # HTTP 引擎 — buildHeaders() + get<T>() + post<T>() + postRaw<T>()
-  ├── RepoRepository    # 仓库相关 — getStarredRepos, getTrendingRepos, getMyRepos, getUserRepos, getRepoDetail, getRepoContents, getReadme, getLatestRelease
+HttpClient.ets          # HTTP 引擎 — buildHeaders() + get<T>() + post<T>() + postRaw<T>() + put() + delete()
+  ├── RepoRepository    # 仓库相关 — getStarredRepos, getTrendingRepos, getTopStarredRepos, getMyRepos, getUserRepos, getRepoDetail, getReadme, getLatestRelease, starRepo, unstarRepo
   ├── UserRepository    # 用户相关 — getCurrentUser, getUser, getFollowers, getFollowing, getReceivedEvents, getOrgs, getContributions (GraphQL)
-  ├── SearchRepository  # 搜索/通知 — searchRepos, getNotifications, getIssues, getPullRequests
-  └── AuthService       # 认证 — startDeviceFlow, pollDeviceToken, Token/Theme 持久化
+  ├── SearchRepository  # 搜索/通知 — searchRepos(query, page), getNotifications, getIssues, getPullRequests
+  └── AuthService       # 认证 — startDeviceFlow, pollDeviceToken, Token/Theme/GlowLevel 持久化 + HUKS 加密
 ```
 
 ## API 端点（按 Repository 分布）
@@ -47,13 +56,16 @@ HttpClient.ets          # HTTP 引擎 — buildHeaders() + get<T>() + post<T>() 
 | 方法 | 端点 | 返回 |
 |------|------|------|
 | `getStarredRepos()` | `GET /user/starred?per_page=20` | `Repository[]` |
-| `getTrendingRepos()` | `GET /search/repositories?q=stars:>1&sort=stars&order=desc&per_page=10` | `SearchResult` |
+| `getStarredReposAll()` | `GET /user/starred?per_page=100` | `Repository[]` |
+| `getTopStarredRepos()` | `GET /search/repositories?q=stars:>1&sort=stars&order=desc&per_page=20` | `SearchResult` |
+| `getTrendingRepos()` | `GET /search/repositories?q=pushed:>=...&stars:>100&sort=stars&order=desc&per_page=10` | `SearchResult` |
 | `getMyRepos()` | `GET /user/repos?type=all&per_page=50&sort=updated` | `Repository[]` |
 | `getUserRepos(u)` | `GET /users/{u}/repos?per_page=30&sort=updated` | `Repository[]` |
 | `getRepoDetail(o,r)` | `GET /repos/{o}/{r}` | `Object` |
-| `getRepoContents(o,r,p)` | `GET /repos/{o}/{r}/contents/{p}` | `Object[]` |
 | `getReadme(o,r)` | `GET /repos/{o}/{r}/readme` | `Object` |
 | `getLatestRelease(o,r)` | `GET /repos/{o}/{r}/releases/latest` | `Object` |
+| `starRepo(o,r)` | `PUT /user/starred/{o}/{r}` | `void` |
+| `unstarRepo(o,r)` | `DELETE /user/starred/{o}/{r}` | `void` |
 
 ### UserRepository
 | 方法 | 端点 | 返回 |
@@ -69,7 +81,7 @@ HttpClient.ets          # HTTP 引擎 — buildHeaders() + get<T>() + post<T>() 
 ### SearchRepository
 | 方法 | 端点 | 返回 |
 |------|------|------|
-| `searchRepos(q)` | `GET /search/repositories?q=&per_page=20` | `Object` |
+| `searchRepos(q, page)` | `GET /search/repositories?q={q}&per_page=20&page={page}` | `Object`（含 `total_count` + `items`） |
 | `getNotifications()` | `GET /notifications?per_page=20` | `GitHubNotification[]` |
 | `getIssues()` | `GET /issues?per_page=30&state=all` | `Object[]` |
 | `getPullRequests(u)` | `GET /search/issues?q=is:pr+author:{u}&per_page=20` | `Object[]` |
@@ -81,28 +93,34 @@ entry/src/main/ets/
 ├── entryability/EntryAbility.ets       # 入口: AuthService.init + loadToken + loadTheme + 全屏沉浸 + ColorMode 同步
 ├── entrybackupability/EntryBackupAbility.ets  # 备份扩展
 ├── pages/
-│   ├── MainPage.ets                    # @Entry — Tabs(4 tab, 52dp, 小白条沉浸, 主题监听)
+│   ├── MainPage.ets                    # @Entry — HdsTabs(4 tab, 悬浮底栏, 光感联动, 滚动/导航隐藏)
 │   ├── LoginPage.ets                   # @Entry — Device Flow 登录（验证码展示 + 轮询）
 │   ├── tabs/
-│   │   ├── HomeTab.ets                 # 首页（我的项目 7 项 → WorkPage/IssuesPage + 我的星标 RepoCard）
-│   │   ├── InboxTab.ets                # 消息（FilterTabBar 4 筛选 + 通知列表/空状态）
-│   │   ├── ExploreTab.ets              # 发现（热门仓库 + 动态流 → RepoDetailPage/DevProfilePage）
-│   │   └── ProfileTab.ets              # 我的（头像 + 统计 + 列表 + 登录/登出）
+│   │   ├── HomeTab.ets                 # 首页（我的项目 7 项 + 我的星标 RepoCard）
+│   │   ├── InboxTab.ets                # 消息（FilterTabBar 4 筛选 + 通知列表 + 滚动隐藏底栏）
+│   │   ├── ExploreTab.ets              # 发现（热门仓库 + 动态流 + 滚动隐藏底栏）
+│   │   └── ProfileTab.ets              # 我的（头像 + 统计 + 列表 + 登录/登出 + 设置入口）
 │   └── sub/
-│       ├── SearchPage.ets              # 全局搜索（手动屏蔽词 + Linguist 颜色 → RepoDetailPage）
+│       ├── SearchPage.ets              # 全局搜索（固定搜索框 + 分页 + 屏蔽词 → RepoDetailPage）
 │       ├── WorkPage.ets                # 我的工作子页（议题/PR/仓库/组织/已加星标列表）
-│       ├── RepoDetailPage.ets          # 仓库详情（HEADER + Stats + Release + README + 开发者入口）
-│       ├── DevProfilePage.ets          # 开发者资料（头像/统计/仓库搜索/筛选/贡献热力图）
-│       ├── IssuesPage.ets              # Issue 列表
-│       ├── SettingsPage.ets            # 设置（深色开关 + 手动屏蔽词 + 使用教程 + 隐私协议 + 关于）
+│       ├── RepoDetailPage.ets          # 仓库详情（亚克力卡片 HEADER + Stats + Release + README + 开发者入口）
+│       ├── DevProfilePage.ets          # 开发者资料（亚克力卡片 头像/统计/贡献热力图/仓库搜索/筛选）
+│       ├── IssuesPage.ets              # Issue 列表（筛选标签 + 分隔线）
+│       ├── IssueDetailPage.ets         # Issue 详情（状态/标签/Markdown 正文 + 评论列表）
+│       ├── NewIssuePage.ets            # 新建议题（填写表单 + POST 创建）
+│       ├── StarredReposPage.ets        # 已加星标（全部星标仓库 + 取消星标即时移除）
+│       ├── TopReposPage.ets            # 星标榜（按星标数排序的热门仓库）
+│       ├── NotificationDetailPage.ets  # 通知详情（元信息 + 关联 Issue 内容 + 评论）
+│       ├── SettingsPage.ets            # 设置（深色开关 + 沉浸光感三档 + 手动屏蔽词 + 教程/协议/关于）
 │       ├── TutorialPage.ets            # 使用教程
-│       └── PrivacyPage.ets             # 隐私协议
+│       ├── PrivacyPage.ets             # 隐私协议
+│       └── UserAgreementPage.ets       # 用户协议
 ├── services/
 │   ├── HttpClient.ets                  # HTTP 引擎（get/post 泛型，Bearer 自动注入）
 │   ├── RepoRepository.ets             # 仓库端点
 │   ├── UserRepository.ets             # 用户/动态/GraphQL 端点
-│   ├── SearchRepository.ets           # 搜索/通知/PR 端点
-│   └── AuthService.ets                # Device Flow + Token CRUD + 主题存取
+│   ├── SearchRepository.ets           # 搜索/通知/PR 端点（支持分页）
+│   └── AuthService.ets                # Device Flow + HUKS 加密 Token + 主题/光感存取
 ├── models/
 │   ├── User.ets                        # User, Repository, RepoOwner, GitHubNotification, SearchResult
 │   └── AuthModels.ets                  # AuthState, LoginPageParams, DeviceFlowInfo, DevicePollStatus, DevicePollResult
@@ -111,14 +129,19 @@ entry/src/main/ets/
     │   ├── ThemeConstants.ets          # DarkTheme / LightTheme / ThemeColors / THEME_KEY / langColor()
     │   └── APIConstants.ets            # API 端点 + OAuth 配置 + AppStorage Key
     ├── utils/
-    │   └── NavTitleBar.ets             # 子页面沉浸毛玻璃标题栏（HdsNavDestination titleBar）
+    │   └── NavTitleBar.ets             # 子页面沉浸毛玻璃标题栏（buildTitleBar: scrollEffectOpts + IMMERSIVE + 主题色标题）
     └── components/
-        ├── RepoCard.ets                # 仓库卡片（头像+描述+语言+星标）
-        ├── ListItem.ets                # 列表功能项
-        ├── EmptyState.ets              # 空状态
+        ├── AcrylicCard.ets             # 亚克力卡片（半透明 + backdropBlur + 细描边 + 圆角）
+        ├── MicaLayer.ets               # Mica 背景层（渐变 + accent 柔光斑）
+        ├── WinButton.ets               # WinUI 风格按钮（三态）
+        ├── ExpandableSection.ets       # 可折叠区块（标题栏 + Fluent 展开/收起动画）
+        ├── PersonPicture.ets           # 头像组件（URL 加载 + 首字母 fallback）
+        ├── RepoCard.ets                # 仓库卡片（头像+描述+语言颜色+星标按钮）
+        ├── MarkdownView.ets            # Markdown 渲染（标题/粗体/斜体/链接/代码/列表）
         ├── FilterTabBar.ets            # 筛选标签栏
-        ├── TabBarBuilder.ets           # Tab 栏配置
-        └── MarkdownView.ets           # Markdown 渲染（README 展示）
+        ├── EmptyState.ets              # 空状态
+        ├── ListItem.ets                # 列表功能项
+        └── TabBarBuilder.ets           # Tab 栏配置
 ```
 
 ## 色彩系统
@@ -140,12 +163,6 @@ struct MyComponent {
       // ... 14 色值
     };
   }
-
-  build() {
-    Column()
-      .backgroundColor(this.T().background)   // 深色 #121212 / 浅色 #FFFFFF
-      // ...
-  }
 }
 ```
 
@@ -166,6 +183,25 @@ struct MyComponent {
 | `starYellow` | `#FFD33D` | `#9A6700` | 星标图标 |
 | `clickFeedback` | `#383838` | `#E0E4E8` | 点击反馈 |
 
+## HDS 组件使用规范
+
+### 底部 Tab 栏（HdsTabs）
+- `barHeight(56)` + `barFloatingStyle` 动态底部间距（`px2vp(h) + 1`）
+- `systemMaterialEffect: IMMERSIVE` + 光感三档联动 `glowLevel`
+- `SCROLL_ANIMATION` 模式隐藏/显示（发现/消息页滚动触发）
+- 首页/我的页仅在导航深度变化时隐藏
+
+### 子页面标题栏（HdsNavDestination）
+- `buildTitleBar()` 统一配置：`IMMERSIVE_GRADIENT_BLUR` + `scrollEffectOpts`
+- `originalStyle` + `scrollEffectStyle` 设置标题/返回键/菜单颜色（主题联动）
+- `avoidLayoutSafeArea: true`（标题栏内容避让状态栏）
+- `bindToScrollable([scroller])` 绑定滚动组件
+
+### 内容区滚动
+- Scroll 顶部 `Blank().height(88)`（56vp 标题栏 + 32vp 状态栏）
+- `onScrollFrameBegin` 检测滚动方向（发现/消息页底栏隐藏）
+- `setInterval(300ms)` 轮询 `getAllPathName().length` 检测导航深度
+
 ## ArkTS 严格模式必遵规则
 
 1. 常量 → `class static readonly`，禁止 `export const {}`
@@ -173,10 +209,16 @@ struct MyComponent {
 3. 禁止对象展开 `...obj`
 4. 数组 → 显式 `: ClassName[]`，元素用 `new ClassName()`
 5. `FontWeight.Light` → `FontWeight.Lighter`
+6. 禁止 `get` 属性语法（用普通方法代替）
+7. ForEach builder 参数：未使用的 `index` 不声明
+8. List 组件必须初始化 `width` 和 `height`
+9. Promise 链必须加 `.catch()` 处理异常
 
 ## 新增页面流程
 
 1. 创建 `.ets` → 2. `main_pages.json` 注册（如独立页面）→ 3. Tab 内子页用 `NavPathStack.pushPath({ name: 'xxx' })`
+4. 子页面用 `HdsNavDestination` 包裹 + `buildTitleBar()` + `.bindToScrollable([scroller])`
+5. 内容区 Scroll 顶部加 `Blank().height(88)`
 
 ## 构建
 
