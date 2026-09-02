@@ -9,6 +9,7 @@ export struct IssuesPage {
   @State filterState: string = 'open';
   @Prop @Watch('load') owner: string = '';
   @Prop @Watch('load') repoName: string = '';
+  scroller?: Scroller;
   onOpenWebView?: (url: string) => void;
   onOpenIssue?: (owner: string, repo: string, number: number) => void;
   private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
@@ -29,35 +30,30 @@ export struct IssuesPage {
 
   build() {
     Column() {
-      // 沉浸标题栏占位：初始避开标题栏
-      Blank(100)
-      // Filter tabs
-      Scroll() {
-        Row({ space: 8 }) {
-          ForEach(['打开', '已关闭'], (t: string, idx: number) => {
-            Text(t).fontSize(13).fontWeight(FontWeight.Medium)
-              .fontColor(this.filterState === (idx === 0 ? 'open' : 'closed') ? Color.White : this.T().textSecondary)
-              .padding({ left: 14, right: 14, top: 6, bottom: 6 })
-              .backgroundColor(this.filterState === (idx === 0 ? 'open' : 'closed') ? this.T().accent : this.T().surfaceElevated)
-              .borderRadius(8)
-              .onClick(() => { this.filterState = idx === 0 ? 'open' : 'closed'; this.load(); })
-          }, (t: string, idx: number) => idx.toString())
-        }
-      }.scrollable(ScrollDirection.Horizontal).scrollBar(BarState.Off).width('100%').height(40).padding({ left: 16 })
-
-      if (this.loading) {
+      Scroll(this.scroller) {
         Column() {
-          LoadingProgress().width(32).height(32).color(this.T().accent)
-        }.width('100%').layoutWeight(1).alignItems(HorizontalAlign.Center)
-      } else if (this.getFiltered().length === 0) {
-        Column({ space: 8 }) {
-          Text('✉').fontSize(40)
-          Text('暂无议题').fontSize(14).fontColor(this.T().textSecondary)
-        }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center).width('100%').layoutWeight(1)
-      } else {
-        List({ space: 0 }) {
-          ForEach(this.getFiltered(), (item: Object, idx: number) => {
-            ListItem() {
+          Blank().height(88)
+          // Filter tabs
+          Row({ space: 8 }) {
+            ForEach(['打开', '已关闭'], (t: string, idx: number) => {
+              Text(t).fontSize(13).fontWeight(FontWeight.Medium)
+                .fontColor(this.filterState === (idx === 0 ? 'open' : 'closed') ? Color.White : this.T().textSecondary)
+                .padding({ left: 14, right: 14, top: 6, bottom: 6 })
+                .backgroundColor(this.filterState === (idx === 0 ? 'open' : 'closed') ? this.T().accent : this.T().surfaceElevated)
+                .borderRadius(8)
+                .onClick(() => { this.filterState = idx === 0 ? 'open' : 'closed'; this.load(); })
+            }, (t: string, idx: number) => idx.toString())
+          }.width('100%').padding({ left: 16, top: 8, bottom: 8 })
+
+          if (this.loading) {
+            LoadingProgress().width(32).height(32).color(this.T().accent).margin({ top: 80 })
+          } else if (this.getFiltered().length === 0) {
+            Column({ space: 8 }) {
+              Text('✉').fontSize(40)
+              Text('暂无议题').fontSize(14).fontColor(this.T().textSecondary)
+            }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center).width('100%').height(300)
+          } else {
+            ForEach(this.getFiltered(), (item: Object, idx: number) => {
               Column() {
                 Row() {
                   Text(((item as Record<string, Object>).title as string) || '')
@@ -95,11 +91,10 @@ export struct IssuesPage {
                 const url: string = ((item as Record<string, Object>).html_url as string) || '';
                 if (url && this.onOpenWebView) this.onOpenWebView(url);
               })
-            }
-          }, (item: Object, idx: number) => idx.toString())
-        }
-        .scrollBar(BarState.Off).width('100%').layoutWeight(1).backgroundColor(this.T().background)
-      }
-    }.width('100%').height('100%').backgroundColor(this.T().background).padding({ top: 8 })
+            }, (item: Object, idx: number) => idx.toString())
+          }
+        }.width('100%')
+      }.scrollBar(BarState.Off).width('100%').height('100%').backgroundColor(this.T().background)
+    }.width('100%').height('100%').backgroundColor(this.T().background)
   }
 }

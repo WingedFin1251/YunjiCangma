@@ -10,6 +10,7 @@ export struct SearchPage {
   @State results: Object[] = [];
   @State loading: boolean = false;
   @State hasSearched: boolean = false;
+  scroller?: Scroller;
   onOpenRepo?: (owner: string, repo: string) => void;
 
   private getBlockedCount(): number { return this.results.length - this.getFilteredResults().length; }
@@ -40,59 +41,56 @@ export struct SearchPage {
 
   build() {
     Column() {
-      // 沉浸标题栏占位：初始避开标题栏
-      Blank(100)
-      // 搜索框
-      Text('').fontSize(0).fontColor(this.themeMode === 'dark' ? this.T().textPrimary : this.T().textPrimary)
-      Row() {
-        TextInput({ placeholder: '搜索仓库...', text: this.query })
-          .placeholderColor(this.T().textTertiary).fontSize(16).fontColor(this.T().textPrimary)
-          .backgroundColor(this.T().surfaceElevated).borderRadius(8).height(40)
-          .layoutWeight(1).padding({ left: 12 }).onChange((v: string) => { this.query = v; })
-        Button('搜索').fontSize(14).fontColor(Color.White).backgroundColor(this.T().accent)
-          .borderRadius(8).height(40).padding({ left: 16, right: 16 }).margin({ left: 10 })
-          .onClick(() => { this.doSearch(); })
-      }.width('100%').padding({ left: 16, right: 16, top: 12, bottom: 4 })
+      Scroll(this.scroller) {
+        Column() {
+          Blank().height(88)
+          // 搜索框
+          Row() {
+            TextInput({ placeholder: '搜索仓库...', text: this.query })
+              .placeholderColor(this.T().textTertiary).fontSize(16).fontColor(this.T().textPrimary)
+              .backgroundColor(this.T().surfaceElevated).borderRadius(8).height(40)
+              .layoutWeight(1).padding({ left: 12 }).onChange((v: string) => { this.query = v; })
+            Button('搜索').fontSize(14).fontColor(Color.White).backgroundColor(this.T().accent)
+              .borderRadius(8).height(40).padding({ left: 16, right: 16 }).margin({ left: 10 })
+              .onClick(() => { this.doSearch(); })
+          }.width('100%').padding({ left: 16, right: 16, top: 12, bottom: 4 })
 
-      // 屏蔽词（仅开关启用时显示）
-      if (this.userFilterEnabled) {
-        Row() {
-          TextInput({ placeholder: '手动屏蔽词 (逗号分隔)', text: this.filterWords })
-            .placeholderColor(this.T().textTertiary).fontSize(13).fontColor(this.T().textPrimary)
-            .backgroundColor(this.T().surfaceElevated).borderRadius(6).height(32)
-            .layoutWeight(1).padding({ left: 10 }).onChange((v: string) => { this.filterWords = v; })
-          if (this.filterWords) {
-            Text('✕').fontSize(16).fontColor(this.T().textTertiary).width(32).height(32).textAlign(TextAlign.Center).lineHeight(32)
-              .onClick(() => { this.filterWords = ''; })
+          // 屏蔽词（仅开关启用时显示）
+          if (this.userFilterEnabled) {
+            Row() {
+              TextInput({ placeholder: '手动屏蔽词 (逗号分隔)', text: this.filterWords })
+                .placeholderColor(this.T().textTertiary).fontSize(13).fontColor(this.T().textPrimary)
+                .backgroundColor(this.T().surfaceElevated).borderRadius(6).height(32)
+                .layoutWeight(1).padding({ left: 10 }).onChange((v: string) => { this.filterWords = v; })
+              if (this.filterWords) {
+                Text('✕').fontSize(16).fontColor(this.T().textTertiary).width(32).height(32).textAlign(TextAlign.Center).lineHeight(32)
+                  .onClick(() => { this.filterWords = ''; })
+              }
+            }.width('100%').padding({ left: 16, right: 16, bottom: 8 })
           }
-        }.width('100%').padding({ left: 16, right: 16, bottom: 8 })
-      }
 
-      if (this.hasSearched && !this.loading && this.getBlockedCount() > 0) {
-        Row() {
-          Text('🛡️').fontSize(14).margin({ right: 6 })
-          Text('已屏蔽 ' + this.getBlockedCount() + ' 条结果').fontSize(13).fontColor(this.T().textTertiary)
-        }.padding({ left: 16, right: 16, bottom: 6 })
-      }
+          if (this.hasSearched && !this.loading && this.getBlockedCount() > 0) {
+            Row() {
+              Text('🛡️').fontSize(14).margin({ right: 6 })
+              Text('已屏蔽 ' + this.getBlockedCount() + ' 条结果').fontSize(13).fontColor(this.T().textTertiary)
+            }.padding({ left: 16, right: 16, bottom: 6 })
+          }
 
-
-      if (this.loading) {
-        LoadingProgress().width(32).height(32).color(this.T().accent).margin({ top: 80 })
-      } else if (!this.hasSearched) {
-        Column({ space: 8 }) {
-          Text('🔍').fontSize(48)
-          Text('搜索 GitHub 仓库').fontSize(16).fontColor(this.T().textSecondary)
-        }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center)
-          .width('100%').height('100%').backgroundColor(this.T().background)
-      } else if (this.getFilteredResults().length === 0) {
-        Column({ space: 8 }) {
-          Text('✉').fontSize(40)
-          Text(this.filterWords ? '所有结果已被屏蔽' : '未找到相关仓库').fontSize(14).fontColor(this.T().textSecondary)
-        }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center)
-          .width('100%').height('100%').backgroundColor(this.T().background)
-      } else {
-        Scroll() {
-          Column() {
+          if (this.loading) {
+            LoadingProgress().width(32).height(32).color(this.T().accent).margin({ top: 80 })
+          } else if (!this.hasSearched) {
+            Column({ space: 8 }) {
+              Text('🔍').fontSize(48)
+              Text('搜索 GitHub 仓库').fontSize(16).fontColor(this.T().textSecondary)
+            }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center)
+              .width('100%').height(300)
+          } else if (this.getFilteredResults().length === 0) {
+            Column({ space: 8 }) {
+              Text('✉').fontSize(40)
+              Text(this.filterWords ? '所有结果已被屏蔽' : '未找到相关仓库').fontSize(14).fontColor(this.T().textSecondary)
+            }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center)
+              .width('100%').height(300)
+          } else {
             ForEach(this.getFilteredResults(), (item: Object, idx: number) => {
               Row() {
                 Column() {
@@ -120,9 +118,9 @@ export struct SearchPage {
                 if (parts.length === 2 && this.onOpenRepo) this.onOpenRepo(parts[0], parts[1]);
               })
             }, (item: Object, idx: number) => idx.toString())
-          }.width('100%')
-        }.scrollBar(BarState.Off).width('100%').height('100%').backgroundColor(this.T().background)
-      }
-    }.width('100%').height('100%').backgroundColor(this.T().background).padding({ top: 8 })
+          }
+        }.width('100%')
+      }.scrollBar(BarState.Off).width('100%').height('100%').backgroundColor(this.T().background)
+    }.width('100%').height('100%').backgroundColor(this.T().background)
   }
 }

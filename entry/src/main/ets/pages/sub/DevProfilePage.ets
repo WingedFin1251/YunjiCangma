@@ -30,6 +30,7 @@ export struct DevProfilePage {
   @State contribLoading: boolean = true;
   @State loading: boolean = true;
   @Prop @Watch('load') username: string = '';
+  scroller?: Scroller;
   onOpenRepo?: (owner: string, repo: string) => void;
   onOpenWebView?: (url: string) => void;
   private filterLabels: string[] = ['全部', '原创', '复刻'];
@@ -113,10 +114,9 @@ export struct DevProfilePage {
           Text('无法加载用户信息').fontSize(14).fontColor(this.T().textSecondary)
         }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center).width('100%').height('100%')
       } else {
-        Scroll() {
+        Scroll(this.scroller) {
           Column({ space: 20 }) {
-            // 沉浸标题栏占位：初始避开标题栏，滚动时滑入磨砂下
-            Blank(100)
+            Blank().height(88)
             // ===== 1. PROFILE HEADER =====
             AcrylicCard({ paddingV: 24 }) {
               Column() {

@@ -74,6 +74,14 @@ export struct HomeTab {
   @State repoName: string = '';
   @State detailIssueNumber: number = 0;
   private webCtl: webview.WebviewController = new webview.WebviewController();
+  private searchScroller: Scroller = new Scroller();
+  private starredScroller: Scroller = new Scroller();
+  private newIssueScroller: Scroller = new Scroller();
+  private issuesScroller: Scroller = new Scroller();
+  private issueDetailScroller: Scroller = new Scroller();
+  private repoDetailScroller: Scroller = new Scroller();
+  private devProfileScroller: Scroller = new Scroller();
+  private workScroller: Scroller = new Scroller();
 
   private workItems: WorkItem[] = [
     new WorkItem('●', '议题', '#2EA44F', 'issues'),
@@ -124,27 +132,27 @@ export struct HomeTab {
   @Builder
   homePageMap(name: string, param: ESObject) {
     if (name === 'search') {
-      HdsNavDestination() { SearchPage({ onOpenRepo: (owner: string, repo: string) => { this.homeStack.pushPath({ name: 'repoWeb', param: new RepoParam(owner, repo) }); } }) }
-        .titleBar(buildTitleBar('搜索')).backgroundColor(this.T().background)
+      HdsNavDestination() { SearchPage({ scroller: this.searchScroller, onOpenRepo: (owner: string, repo: string) => { this.homeStack.pushPath({ name: 'repoWeb', param: new RepoParam(owner, repo) }); } }) }
+        .titleBar(buildTitleBar('搜索')).backgroundColor(this.T().background).bindToScrollable([this.searchScroller])
     } else if (name === 'starredPage') {
-      HdsNavDestination() { StarredReposPage({ onOpenRepo: (o: string, r: string) => { this.homeStack.pushPath({ name: 'repoWeb', param: new RepoParam(o, r) }); } }) }
-        .titleBar(buildTitleBar('已加星标')).backgroundColor(this.T().background)
+      HdsNavDestination() { StarredReposPage({ scroller: this.starredScroller, onOpenRepo: (o: string, r: string) => { this.homeStack.pushPath({ name: 'repoWeb', param: new RepoParam(o, r) }); } }) }
+        .titleBar(buildTitleBar('已加星标')).backgroundColor(this.T().background).bindToScrollable([this.starredScroller])
     } else if (name === 'newIssue') {
-      HdsNavDestination() { NewIssuePage({ onCreated: () => { this.homeStack.pop(); } }) }
-        .titleBar(buildTitleBar('新建议题')).backgroundColor(this.T().background)
+      HdsNavDestination() { NewIssuePage({ scroller: this.newIssueScroller, onCreated: () => { this.homeStack.pop(); } }) }
+        .titleBar(buildTitleBar('新建议题')).backgroundColor(this.T().background).bindToScrollable([this.newIssueScroller])
     } else if (name === 'issues') {
-      HdsNavDestination() { IssuesPage({ owner: this.repoOwner, repoName: this.repoName, onOpenWebView: (u: string) => { this.webUrl = u; this.homeStack.pushPath({ name: 'repoWebView' }); }, onOpenIssue: (o: string, r: string, n: number) => { this.repoOwner = o; this.repoName = r; this.detailIssueNumber = n; this.homeStack.pushPath({ name: 'issueDetail' }); } }) }
-        .titleBar(buildTitleBar('议题')).backgroundColor(this.T().background)
+      HdsNavDestination() { IssuesPage({ scroller: this.issuesScroller, owner: this.repoOwner, repoName: this.repoName, onOpenWebView: (u: string) => { this.webUrl = u; this.homeStack.pushPath({ name: 'repoWebView' }); }, onOpenIssue: (o: string, r: string, n: number) => { this.repoOwner = o; this.repoName = r; this.detailIssueNumber = n; this.homeStack.pushPath({ name: 'issueDetail' }); } }) }
+        .titleBar(buildTitleBar('议题')).backgroundColor(this.T().background).bindToScrollable([this.issuesScroller])
     } else if (name === 'issueDetail') {
-      HdsNavDestination() { IssueDetailPage({ owner: this.repoOwner, repoName: this.repoName, issueNumber: this.detailIssueNumber, onOpenWebView: (u: string) => { this.webUrl = u; this.homeStack.pushPath({ name: 'repoWebView' }); }, onOpenRepo: (o: string, r: string) => { this.homeStack.pushPath({ name: 'repoWeb', param: new RepoParam(o, r) }); } }) }
-        .titleBar(buildTitleBar('议题详情')).backgroundColor(this.T().background)
+      HdsNavDestination() { IssueDetailPage({ scroller: this.issueDetailScroller, owner: this.repoOwner, repoName: this.repoName, issueNumber: this.detailIssueNumber, onOpenWebView: (u: string) => { this.webUrl = u; this.homeStack.pushPath({ name: 'repoWebView' }); }, onOpenRepo: (o: string, r: string) => { this.homeStack.pushPath({ name: 'repoWeb', param: new RepoParam(o, r) }); } }) }
+        .titleBar(buildTitleBar('议题详情')).backgroundColor(this.T().background).bindToScrollable([this.issueDetailScroller])
     } else if (name === 'repoWeb') {
       HdsNavDestination() {
-        RepoDetailPage({ owner: this.paramOwner(param), repoName: this.paramRepo(param), onOpenWebView: (url: string) => { this.webUrl = url; this.homeStack.pushPath({ name: 'repoWebView' }); }, onOpenDev: (uname: string) => { this.repoOwner = uname; this.homeStack.pushPath({ name: 'devProfile' }); }, onOpenRepo: (o: string, r: string) => { this.homeStack.pushPath({ name: 'repoWeb', param: new RepoParam(o, r) }); }, onOpenIssues: (o: string, r: string) => { this.repoOwner = o; this.repoName = r; this.homeStack.pushPath({ name: 'issues' }); } })
-      }.titleBar(buildTitleBar('仓库详情')).linearGradient({ colors: this.mica(), direction: GradientDirection.RightBottom })
+        RepoDetailPage({ scroller: this.repoDetailScroller, owner: this.paramOwner(param), repoName: this.paramRepo(param), onOpenWebView: (url: string) => { this.webUrl = url; this.homeStack.pushPath({ name: 'repoWebView' }); }, onOpenDev: (uname: string) => { this.repoOwner = uname; this.homeStack.pushPath({ name: 'devProfile' }); }, onOpenRepo: (o: string, r: string) => { this.homeStack.pushPath({ name: 'repoWeb', param: new RepoParam(o, r) }); }, onOpenIssues: (o: string, r: string) => { this.repoOwner = o; this.repoName = r; this.homeStack.pushPath({ name: 'issues' }); } })
+      }.titleBar(buildTitleBar('仓库详情')).linearGradient({ colors: this.mica(), direction: GradientDirection.RightBottom }).bindToScrollable([this.repoDetailScroller])
     } else if (name === 'devProfile') {
-      HdsNavDestination() { DevProfilePage({ username: this.repoOwner, onOpenRepo: (o: string, r: string) => { this.homeStack.pushPath({ name: 'repoWeb', param: new RepoParam(o, r) }); }, onOpenWebView: (u: string) => { this.webUrl = u; this.homeStack.pushPath({ name: 'repoWebView' }); } }) }
-        .titleBar(buildTitleBar('开发者')).linearGradient({ colors: this.mica(), direction: GradientDirection.RightBottom })
+      HdsNavDestination() { DevProfilePage({ scroller: this.devProfileScroller, username: this.repoOwner, onOpenRepo: (o: string, r: string) => { this.homeStack.pushPath({ name: 'repoWeb', param: new RepoParam(o, r) }); }, onOpenWebView: (u: string) => { this.webUrl = u; this.homeStack.pushPath({ name: 'repoWebView' }); } }) }
+        .titleBar(buildTitleBar('开发者')).linearGradient({ colors: this.mica(), direction: GradientDirection.RightBottom }).bindToScrollable([this.devProfileScroller])
     } else if (name === 'repoWebView') {
       HdsNavDestination() {
         Column() {
@@ -156,8 +164,8 @@ export struct HomeTab {
         .width('100%').height('100%').padding({ top: 100 })
       }.titleBar(buildTitleBar('GitHub')).backgroundColor(this.T().background)
     } else {
-      HdsNavDestination() { WorkPage({ _title: this.getWorkTitle(name), dataType: name, onOpenRepo: (o: string, r: string) => { this.homeStack.pushPath({ name: 'repoWeb', param: new RepoParam(o, r) }); } }) }
-        .titleBar(buildTitleBar(this.getWorkTitle(name))).backgroundColor(this.T().background)
+      HdsNavDestination() { WorkPage({ scroller: this.workScroller, _title: this.getWorkTitle(name), dataType: name, onOpenRepo: (o: string, r: string) => { this.homeStack.pushPath({ name: 'repoWeb', param: new RepoParam(o, r) }); } }) }
+        .titleBar(buildTitleBar(this.getWorkTitle(name))).backgroundColor(this.T().background).bindToScrollable([this.workScroller])
     }
   }
 

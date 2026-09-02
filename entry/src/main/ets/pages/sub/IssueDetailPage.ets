@@ -15,6 +15,7 @@ export struct IssueDetailPage {
   @Prop @Watch('load') owner: string = '';
   @Prop @Watch('load') repoName: string = '';
   @Prop issueNumber: number = 0;
+  scroller?: Scroller;
   onOpenWebView?: (url: string) => void;
   onOpenRepo?: (owner: string, repo: string) => void;
   private T(): ThemeColors {
@@ -79,10 +80,9 @@ export struct IssueDetailPage {
   private commentBody(c: Object): string { return (((c as Record<string, Object>).body as string) || ''); }
 
   build() {
-    Scroll() {
+    Scroll(this.scroller) {
       Column({ space: 16 }) {
-        // 沉浸标题栏占位：初始避开标题栏，滚动时滑入磨砂下
-        Blank(100)
+        Blank().height(88)
         if (this.loading) {
           Column() {
             LoadingProgress().width(32).height(32).color(this.T().accent)

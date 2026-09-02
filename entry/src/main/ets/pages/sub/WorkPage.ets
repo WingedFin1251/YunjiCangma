@@ -13,6 +13,7 @@ export struct WorkPage {
   @State loading: boolean = true;
   @Prop _title: string = '';
   @Prop dataType: string = '';
+  scroller?: Scroller;
   onOpenRepo?: (owner: string, repo: string) => void;
   private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
 
@@ -33,9 +34,6 @@ export struct WorkPage {
 
   build() {
     Column() {
-      // 沉浸标题栏占位：初始避开标题栏
-      Blank(100)
-      Text('').fontSize(0).fontColor(this.themeMode === 'dark' ? this.T().textPrimary : this.T().textPrimary)
       if (!this.isLoggedIn) {
         Column({ space: 12 }) {
           Text('🔐').fontSize(40)
@@ -52,48 +50,48 @@ export struct WorkPage {
         }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center)
           .width('100%').height('100%').backgroundColor(this.T().background)
       } else {
-        Scroll() {
-          if (this.dataType === 'repos') {
-            Column({ space: 12 }) {
-              ForEach(this.items, (item: Object, idx: number) => {
-                Column() {
-      Text('').fontSize(0).fontColor(this.themeMode === 'dark' ? this.T().textPrimary : this.T().textPrimary)
-                  RepoCard({
-                    avatarChar: (((item as Record<string, Object>).owner as Record<string, string>).login || '?').charAt(0),
-                    owner: ((item as Record<string, Object>).owner as Record<string, string>).login || '',
-                    repo: ((item as Record<string, Object>).name as string) || '',
-                    description: ((item as Record<string, Object>).description as string) || '',
-                    language: ((item as Record<string, Object>).language as string) || '',
-                    stars: (item as Record<string, Object>).stargazers_count as number || 0,
-                    isStarred: true
+        Scroll(this.scroller) {
+          Column() {
+            Blank().height(88)
+            if (this.dataType === 'repos') {
+              Column({ space: 12 }) {
+                ForEach(this.items, (item: Object, idx: number) => {
+                  Column() {
+                    RepoCard({
+                      avatarChar: (((item as Record<string, Object>).owner as Record<string, string>).login || '?').charAt(0),
+                      owner: ((item as Record<string, Object>).owner as Record<string, string>).login || '',
+                      repo: ((item as Record<string, Object>).name as string) || '',
+                      description: ((item as Record<string, Object>).description as string) || '',
+                      language: ((item as Record<string, Object>).language as string) || '',
+                      stars: (item as Record<string, Object>).stargazers_count as number || 0,
+                      isStarred: true
+                    })
+                  }.width('100%')
+                  .onClick(() => {
+                    const it = item as Record<string, Object>;
+                    const rOwner: string = ((it.owner as Record<string, string>).login as string) || '';
+                    const rName: string = (it.name as string) || '';
+                    if (this.onOpenRepo && rOwner && rName) this.onOpenRepo(rOwner, rName);
                   })
-                }.width('100%')
-                .onClick(() => {
-                  const it = item as Record<string, Object>;
-                  const rOwner: string = ((it.owner as Record<string, string>).login as string) || '';
-                  const rName: string = (it.name as string) || '';
-                  if (this.onOpenRepo && rOwner && rName) this.onOpenRepo(rOwner, rName);
-                })
-              }, (item: Object, idx: number) => idx.toString())
-            }.width('100%').padding({ left: 16, right: 16 })
-          } else {
-            Column() {
-      Text('').fontSize(0).fontColor(this.themeMode === 'dark' ? this.T().textPrimary : this.T().textPrimary)
-              ForEach(this.items, (item: Object, idx: number) => {
-                Column() {
-      Text('').fontSize(0).fontColor(this.themeMode === 'dark' ? this.T().textPrimary : this.T().textPrimary)
-                  Text(((item as Record<string, Object>).title as string) || ((item as Record<string, Object>).login as string) || ((item as Record<string, Object>).full_name as string) || ((item as Record<string, Object>).name as string) || '')
-                    .fontSize(16).fontColor(this.T().textPrimary).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
-                  if ((item as Record<string, Object>).repository_url || (item as Record<string, Object>).html_url) {
-                    Text((((item as Record<string, Object>).repository_url as string) || ((item as Record<string, Object>).html_url as string) || '').replace('https://api.github.com/repos/', ''))
-                      .fontSize(12).fontColor(this.T().textTertiary).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
-                  }
-                }.width('100%').padding({ left: 16, right: 16, top: 12, bottom: 12 })
-              }, (item: Object, idx: number) => idx.toString())
-            }.width('100%')
-          }
+                }, (item: Object, idx: number) => idx.toString())
+              }.width('100%').padding({ left: 16, right: 16 })
+            } else {
+              Column() {
+                ForEach(this.items, (item: Object, idx: number) => {
+                  Column() {
+                    Text(((item as Record<string, Object>).title as string) || ((item as Record<string, Object>).login as string) || ((item as Record<string, Object>).full_name as string) || ((item as Record<string, Object>).name as string) || '')
+                      .fontSize(16).fontColor(this.T().textPrimary).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
+                    if ((item as Record<string, Object>).repository_url || (item as Record<string, Object>).html_url) {
+                      Text((((item as Record<string, Object>).repository_url as string) || ((item as Record<string, Object>).html_url as string) || '').replace('https://api.github.com/repos/', ''))
+                        .fontSize(12).fontColor(this.T().textTertiary).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
+                    }
+                  }.width('100%').padding({ left: 16, right: 16, top: 12, bottom: 12 })
+                }, (item: Object, idx: number) => idx.toString())
+              }.width('100%')
+            }
+          }.width('100%')
         }.scrollBar(BarState.Off).width('100%').height('100%').backgroundColor(this.T().background)
       }
-    }.width('100%').height('100%').backgroundColor(this.T().background).padding({ top: 8 })
+    }.width('100%').height('100%').backgroundColor(this.T().background)
   }
 }

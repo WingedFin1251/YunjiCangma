@@ -11,6 +11,7 @@ export struct StarredReposPage {
   @StorageLink(THEME_KEY) themeMode: string = 'dark';
   @State repos: Repository[] = [];
   @State loading: boolean = true;
+  scroller?: Scroller;
   onOpenRepo?: (owner: string, repo: string) => void;
   private T(): ThemeColors {
     const d: boolean = this.themeMode === 'dark';
@@ -50,8 +51,6 @@ export struct StarredReposPage {
 
   build() {
     Column() {
-      // 沉浸标题栏占位：初始避开标题栏
-      Blank(100)
       if (this.loading) {
         Column() {
           LoadingProgress().width(32).height(32).color(this.T().accent)
@@ -63,7 +62,8 @@ export struct StarredReposPage {
           Text('去发现页找找感兴趣的项目').fontSize(12).fontColor(this.T().textTertiary)
         }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center).width('100%').layoutWeight(1)
       } else {
-        List({ space: 12 }) {
+        List({ space: 12, scroller: this.scroller }) {
+          ListItem() { Column() { Blank().height(88) } }
           ForEach(this.repos, (repo: Repository, _idx: number) => {
             ListItem() {
               Column() {

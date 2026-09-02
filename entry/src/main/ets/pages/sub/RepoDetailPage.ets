@@ -36,6 +36,7 @@ export struct RepoDetailPage {
   @State loading: boolean = true;
   @Prop @Watch('loadRepo') owner: string = '';
   @Prop @Watch('loadRepo') repoName: string = '';
+  scroller?: Scroller;
   onOpenWebView?: (url: string) => void;
   onOpenDev?: (username: string) => void;
   onOpenIssues?: (owner: string, repo: string) => void;
@@ -122,10 +123,9 @@ export struct RepoDetailPage {
           Text('请检查网络后重试').fontSize(13).fontColor(this.T().textTertiary)
         }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center).width('100%').height('100%')
       } else {
-        Scroll() {
+        Scroll(this.scroller) {
           Column({ space: 20 }) {
-            // 沉浸标题栏占位：初始避开标题栏，滚动时滑入磨砂下
-            Blank(100)
+            Blank().height(88)
             // ===== 1. HEADER =====
             AcrylicCard() {
               Column({ space: 10 }) {
