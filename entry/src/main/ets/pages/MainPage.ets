@@ -37,6 +37,10 @@ struct MainPage {
   private tabsController: HdsTabsController = new HdsTabsController();
 
   aboutToAppear(): void {
+    // 确保首次加载时状态栏颜色正确（@Watch 首次不触发）
+    this.onThemeChange();
+    // HDS IMMERSIVE 材质渲染后会覆盖状态栏颜色，延迟重新设置
+    setTimeout(() => { this.onThemeChange(); }, 300);
     // 动态计算底部导航栏避让高度（与 PiliPlus 一致）
     try {
       const ctx = this.getUIContext().getHostContext();
@@ -51,7 +55,7 @@ struct MainPage {
               this.bottomAvoidAreaHeight = bh === 0 ? 12 : (px2vp(bh) + 1);
             }
           });
-        });
+        }).catch(() => {});
       }
     } catch (_) {}
   }
@@ -71,7 +75,7 @@ struct MainPage {
             statusBarContentColor: isDark ? '#FFFFFF' : '#1F2328'
           });
           w.setWindowBackgroundColor(isDark ? '#121212' : '#F6F8FA');
-        });
+        }).catch(() => {});
       }
     } catch (_) {}
   }

@@ -1,4 +1,4 @@
-import { HdsNavDestination, HdsTabsController, HdsAnimationMode } from '@kit.UIDesignKit'
+import { HdsNavDestination, HdsTabsController } from '@kit.UIDesignKit'
 import { buildTitleBar } from '../../common/utils/NavTitleBar';
 import { webview } from '@kit.ArkWeb';
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
@@ -104,16 +104,7 @@ export struct ProfileTab {
     finally { this.listLoading = false; }
   }
 
-  private langColor(lang: string): string {
-    const m: Record<string, string> = {
-      'JavaScript': '#F7DF1E', 'TypeScript': '#3178C6', 'Python': '#3572A5',
-      'Java': '#B07219', 'C': '#555555', 'C++': '#F34B7D', 'C#': '#178600',
-      'Go': '#00ADD8', 'Rust': '#DEA584', 'Swift': '#F05138', 'Kotlin': '#A97BFF',
-      'Dart': '#00B4AB', 'Ruby': '#701516', 'PHP': '#4F5D95', 'HTML': '#E34C26',
-      'CSS': '#563D7C', 'Vue': '#41B883', 'Shell': '#89E051'
-    };
-    return m[lang] || '#B3B3B3';
-  }
+
 
   @Builder profilePageMap(name: string, param: ESObject) {
     if (name === 'repoList') {
@@ -130,7 +121,7 @@ export struct ProfileTab {
               }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center).width('100%').height(300)
             } else {
               Column({ space: 12 }) {
-                ForEach(this.listItems, (item: Object, idx: number) => {
+                ForEach(this.listItems, (item: Object) => {
                   Column() {
                     RepoCard({
                       avatarChar: (((item as Record<string, Object>).owner as Record<string, string>).login || '?').charAt(0),
@@ -150,7 +141,7 @@ export struct ProfileTab {
                     const r: string = (it.name as string) || '';
                     this.profileStack.pushPath({ name: 'repoDetail', param: new RepoParam(o, r) });
                   })
-                }, (item: Object, idx: number) => idx.toString())
+                }, (item: Object) => ((item as Record<string, Object>).name as string) || '')
               }.width('100%').padding({ left: 16, right: 16 })
             }
           }.width('100%')
@@ -193,7 +184,7 @@ export struct ProfileTab {
             } else {
               List({ space: 0 }) {
                 ListItem() { Column() { Blank().height(88) } }
-                ForEach(this.listItems, (item: Object, idx: number) => {
+                ForEach(this.listItems, (item: Object) => {
                   ListItem() {
                     Row({ space: 12 }) {
                       PersonPicture({
@@ -215,10 +206,10 @@ export struct ProfileTab {
                       }
                     })
                   }
-                }, (item: Object, idx: number) => idx.toString())
+                }, (item: Object) => ((item as Record<string, Object>).login as string) || '')
               }
               .divider({ strokeWidth: 1, color: this.T().border, startMargin: 68 })
-              .scrollBar(BarState.Off).width('100%').layoutWeight(1).backgroundColor(this.T().background)
+              .scrollBar(BarState.Off).width('100%').height('100%').layoutWeight(1).backgroundColor(this.T().background)
             }
           }.width('100%')
         }.scrollBar(BarState.Off).width('100%').height('100%').backgroundColor(this.T().background)
@@ -288,7 +279,7 @@ export struct ProfileTab {
                 Text('Sign In with GitHub').fontSize(16).fontWeight(FontWeight.Medium).fontColor(this.T().textPrimary)
               }.width('70%').height(44).justifyContent(FlexAlign.Center)
                 .backgroundColor(this.T().accent).borderRadius(8).margin({ top: 8 })
-                .onClick(() => { this.getUIContext().getRouter().pushUrl({ url: 'pages/LoginPage' }); })
+                .onClick(() => { this.getUIContext().getRouter().pushUrl({ url: 'pages/LoginPage' }).catch(() => {}); })
             }.alignItems(HorizontalAlign.Center).padding({ top: 40, bottom: 24 }).width('100%')
           }
 

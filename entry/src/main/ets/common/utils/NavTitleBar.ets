@@ -6,6 +6,10 @@ import { LengthMetrics } from '@kit.ArkUI';
  * 使用时内容区 Scroll 顶部需加 Blank().height(88)（56vp 标题栏 + 32vp 状态栏）
  */
 export function buildTitleBar(title: ResourceStr): HdsNavigationTitleBarOptions {
+  // 根据主题设置标题文字颜色（浅色模式用深色字，深色模式用白色）
+  const isDark: boolean = AppStorage.get<string>('currentTheme') !== 'light';
+  const titleColor: string = isDark ? '#FFFFFF' : '#1F2328';
+
   return {
     content: {
       title: {
@@ -14,6 +18,20 @@ export function buildTitleBar(title: ResourceStr): HdsNavigationTitleBarOptions 
     },
     avoidLayoutSafeArea: true,
     style: {
+      originalStyle: {
+        contentStyle: {
+          titleStyle: { mainTitleColor: titleColor },
+          backIconStyle: { iconColor: titleColor },
+          menuStyle: { iconColor: titleColor }
+        }
+      },
+      scrollEffectStyle: {
+        contentStyle: {
+          titleStyle: { mainTitleColor: titleColor },
+          backIconStyle: { iconColor: titleColor },
+          menuStyle: { iconColor: titleColor }
+        }
+      },
       scrollEffectOpts: {
         enableScrollEffect: true,
         scrollEffectType: ScrollEffectType.IMMERSIVE_GRADIENT_BLUR,
