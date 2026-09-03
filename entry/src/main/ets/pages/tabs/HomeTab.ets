@@ -138,6 +138,7 @@ export struct HomeTab {
   private refreshHome(): void {
     this.isStarredLoading = true;
     this.loadStarredRepos();
+    try { this.getUIContext().getPromptAction().showToast({ message: '已刷新' }); } catch (_) {}
   }
 
   private getWorkTitle(name: string): string {
