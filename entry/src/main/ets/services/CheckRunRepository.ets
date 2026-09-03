@@ -11,4 +11,9 @@ export class CheckRunRepository {
   static getCheckRuns(owner: string, repo: string, suiteId: number): Promise<Object> {
     return HttpClient.get<Object>('/repos/' + owner + '/' + repo + '/check-suites/' + suiteId.toString() + '/check-runs');
   }
+
+  /** 获取 Workflow Runs 列表（按分支筛选） */
+  static getWorkflowRuns(owner: string, repo: string, branch: string): Promise<Object> {
+    return HttpClient.get<Object>('/repos/' + owner + '/' + repo + '/actions/runs?branch=' + branch + '&per_page=10');
+  }
 }
