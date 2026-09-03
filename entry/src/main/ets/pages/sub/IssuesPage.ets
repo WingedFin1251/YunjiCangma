@@ -42,7 +42,7 @@ export struct IssuesPage {
                 .backgroundColor(this.filterState === (idx === 0 ? 'open' : 'closed') ? this.T().accent : this.T().surfaceElevated)
                 .borderRadius(8)
                 .onClick(() => { this.filterState = idx === 0 ? 'open' : 'closed'; this.load(); })
-            }, (t: string, idx: number) => idx.toString())
+            }, (_t: string, idx: number) => idx.toString())
           }.width('100%').padding({ left: 16, top: 8, bottom: 8 })
 
           if (this.loading) {
@@ -64,13 +64,13 @@ export struct IssuesPage {
                   Text('#' + ((item as Record<string, Object>).number as number || 0))
                     .fontSize(13).fontColor(this.T().textTertiary)
                   if ((((item as Record<string, Object>).labels as Object[]) || []).length > 0) {
-                    ForEach((((item as Record<string, Object>).labels as Object[]) || []).slice(0, 3), (l: Object, li: number) => {
+                    ForEach((((item as Record<string, Object>).labels as Object[]) || []).slice(0, 3), (l: Object, _li: number) => {
                       Text(((l as Record<string, Object>).name as string) || '')
                         .fontSize(11).fontColor(Color.White)
                         .padding({ left: 6, right: 6, top: 2, bottom: 2 })
                         .backgroundColor('#' + (((l as Record<string, Object>).color as string) || '218BFE'))
                         .borderRadius(4)
-                    }, (l: Object, li: number) => 'l' + li)
+                    }, (_l: Object, li: number) => 'l' + li)
                   }
                   Text(' 💬 ' + ((item as Record<string, Object>).comments as number || 0))
                     .fontSize(13).fontColor(this.T().textTertiary)
@@ -91,7 +91,7 @@ export struct IssuesPage {
                 const url: string = ((item as Record<string, Object>).html_url as string) || '';
                 if (url && this.onOpenWebView) this.onOpenWebView(url);
               })
-            }, (item: Object, idx: number) => idx.toString())
+            }, (_item: Object, idx: number) => idx.toString())
           }
         }.width('100%')
       }.scrollBar(BarState.Off).width('100%').height('100%').backgroundColor(this.T().background)
