@@ -72,6 +72,7 @@ export struct HomeTab {
   }
   @StorageLink(AUTH_LOGIN_KEY) @Watch('onLoginChanged') isLoggedIn: boolean = false;
   @State starredRepos: FavoriteRepo[] = [];
+  starredSet: Set<string> = new Set<string>();
   @State isStarredLoading: boolean = true;
   @State webUrl: string = '';
   @State repoOwner: string = '';
@@ -124,6 +125,8 @@ export struct HomeTab {
     try {
       const repos: Repository[] = await RepoRepository.getStarredRepos();
       this.starredRepos = repos.map((r: Repository) => new FavoriteRepo(r));
+      this.starredSet = new Set<string>();
+      for (let i = 0; i < repos.length; i++) { this.starredSet.add(repos[i].full_name); }
     } catch (err) {
       this.starredRepos = [];
     } finally {
@@ -179,7 +182,7 @@ export struct HomeTab {
         .width('100%').height('100%').padding({ top: 100 })
       }.titleBar(buildTitleBar('GitHub')).backgroundColor(this.T().background)
     } else {
-      HdsNavDestination() { WorkPage({ scroller: this.workScroller, _title: this.getWorkTitle(name), dataType: name, onOpenRepo: (o: string, r: string) => { this.homeStack.pushPath({ name: 'repoWeb', param: new RepoParam(o, r) }); } }) }
+      HdsNavDestination() { WorkPage({ scroller: this.workScroller, starredSet: this.starredSet, _title: this.getWorkTitle(name), dataType: name, onOpenRepo: (o: string, r: string) => { this.homeStack.pushPath({ name: 'repoWeb', param: new RepoParam(o, r) }); } }) }
         .titleBar(buildTitleBar(this.getWorkTitle(name))).backgroundColor(this.T().background).bindToScrollable([this.workScroller])
     }
   }

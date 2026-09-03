@@ -14,6 +14,7 @@ export struct WorkPage {
   @State loading: boolean = true;
   @Prop _title: string = '';
   @Prop dataType: string = '';
+  starredSet?: Set<string>;
   scroller?: Scroller;
   onOpenRepo?: (owner: string, repo: string) => void;
   private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
@@ -67,7 +68,7 @@ export struct WorkPage {
                       description: ((item as Record<string, Object>).description as string) || '',
                       language: ((item as Record<string, Object>).language as string) || '',
                       stars: (item as Record<string, Object>).stargazers_count as number || 0,
-                      isStarred: true
+                      isStarred: this.starredSet ? this.starredSet.has(((item as Record<string, Object>).full_name as string) || '') : false
                     })
                   }.width('100%')
                   .onClick(() => {
