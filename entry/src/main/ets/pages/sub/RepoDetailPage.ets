@@ -2,6 +2,7 @@ import { util } from '@kit.ArkTS';
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors, langColor } from '../../common/constants/ThemeConstants';
 import { MarkdownView } from '../../common/components/MarkdownView';
 import { RepoRepository } from '../../services/RepoRepository';
+import { HttpClient } from '../../services/HttpClient';
 import { AcrylicCard } from '../../common/components/AcrylicCard';
 import { MicaLayer } from '../../common/components/MicaLayer';
 import { WinButton } from '../../common/components/WinButton';
