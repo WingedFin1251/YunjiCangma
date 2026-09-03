@@ -14,6 +14,7 @@
 /.deveco/
 /.preview/
 /.appanalyzer/
+/.codegenie/
 .cxx/
 /.clangd
 /.clang-format
@@ -24,6 +25,12 @@
 /local.properties
 /.ohos/
 *.log
+
+# 注意：build-profile.json5 是受版本控制的项目构建配置，但 DevEco 在真机调试时
+# 会自动往里面写入 signingConfigs（含 C:\Users\<user>\.ohos\config\ 下的证书路径
+# 与密钥库口令，口令为本机绑定加密，换机即失效）。
+# 该文件出现的 signingConfig / signingConfigs 改动属于本机私有信息，不要提交。
+# 提交前请确认 `git diff build-profile.json5` 不含签名段。
 
 # OS generated files
 .DS_Store
