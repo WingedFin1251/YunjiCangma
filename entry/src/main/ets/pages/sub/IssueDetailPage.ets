@@ -116,13 +116,13 @@ export struct IssueDetailPage {
             }.width('100%').alignItems(VerticalAlign.Center)
             if (this.labels().length > 0) {
               Row({ space: 6 }) {
-                ForEach(this.labels().slice(0, 6), (l: Object, li: number) => {
+                ForEach(this.labels().slice(0, 6), (l: Object, _li: number) => {
                   Text(((l as Record<string, Object>).name as string) || '')
                     .fontSize(11).fontColor(Color.White)
                     .padding({ left: 6, right: 6, top: 2, bottom: 2 })
                     .backgroundColor('#' + (((l as Record<string, Object>).color as string) || '218BFE'))
                     .borderRadius(4)
-                }, (l: Object, li: number) => 'l' + li)
+                }, (_l: Object, li: number) => 'l' + li)
               }.width('100%')
             }
           }.width('100%').padding(16)
@@ -163,7 +163,7 @@ export struct IssueDetailPage {
                 if (ci < this.comments.length - 1) {
                   Divider().color(this.T().border).width('100%')
                 }
-              }, (c: Object, ci: number) => 'c' + ci)
+              }, (_c: Object, ci: number) => 'c' + ci)
             }.width('100%')
           }.width('100%').padding(16)
             .backgroundColor(this.T().surface).borderRadius(12)
