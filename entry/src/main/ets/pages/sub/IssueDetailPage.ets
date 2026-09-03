@@ -1,4 +1,5 @@
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
+import { IssueRepository } from '../../services/IssueRepository';
 import { HttpClient } from '../../services/HttpClient';
 import { MarkdownView } from '../../common/components/MarkdownView';
 
@@ -45,7 +46,7 @@ export struct IssueDetailPage {
   async load(): Promise<void> {
     this.loading = true; this.errorMsg = '';
     try {
-      this.issue = await HttpClient.get<Object>('/repos/' + this.owner + '/' + this.repoName + '/issues/' + this.issueNumber.toString());
+      this.issue = await IssueRepository.getIssue(this.owner, this.repoName, this.issueNumber);
     } catch (e) { this.issue = null; this.errorMsg = HttpClient.formatError(e); }
     finally { this.loading = false; }
     this.loadComments();
@@ -54,7 +55,7 @@ export struct IssueDetailPage {
   async loadComments(): Promise<void> {
     this.commentsLoading = true;
     try {
-      this.comments = await HttpClient.get<Object[]>('/repos/' + this.owner + '/' + this.repoName + '/issues/' + this.issueNumber.toString() + '/comments?per_page=50');
+      this.comments = await IssueRepository.getIssueComments(this.owner, this.repoName, this.issueNumber);
     } catch (e) { this.comments = []; }
     finally { this.commentsLoading = false; }
   }

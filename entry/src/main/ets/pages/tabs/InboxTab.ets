@@ -26,6 +26,7 @@ export struct InboxTab {
   @State notifReason: string = '';
   @State notifUpdated: string = '';
   @State notifUnread: boolean = false;
+  @State notifSubjectUrl: string = '';
   @State selectedFilter: number = 0;
   @State notifications: GitHubNotification[] = [];
   @State isInboxLoading: boolean = true;
@@ -87,6 +88,7 @@ export struct InboxTab {
         owner: this.notifOwner, repoName: this.notifRepo, issueNumber: this.notifNumber,
         notifTitle: this.notifTitle, repoFullName: this.notifRepoFull, notifType: this.notifType,
         reason: this.notifReason, updatedAt: this.notifUpdated, isUnread: this.notifUnread,
+        subjectUrl: AppStorage.get<string>('notifSubjectUrl') || '',
         onOpenWebView: (u: string) => { this.webUrl = u; this.inboxStack.pushPath({ name: 'repoWebView' }); }
       }) }
         .title('消息详情').backgroundColor(this.T().background).padding({ top: 32 })
@@ -107,7 +109,8 @@ export struct InboxTab {
     this.notifOwner = '';
     this.notifRepo = '';
     this.notifNumber = 0;
-    const m: RegExpMatchArray | null = apiUrl.match(/repos\/([^/]+)\/([^/]+)\/(?:issues|pulls|discussions)\/(\d+)/);
+    // 更通用的正则：匹配 repos/{owner}/{repo}/任意路径/{数字}
+    const m: RegExpMatchArray | null = apiUrl.match(/repos\/([^/]+)\/([^/]+)\/[^/]+\/(\d+)/);
     if (m && m[1] && m[2] && m[3]) {
       this.notifOwner = m[1];
       this.notifRepo = m[2];
@@ -119,6 +122,8 @@ export struct InboxTab {
     this.notifReason = notif.reason || '';
     this.notifUpdated = notif.updated_at || '';
     this.notifUnread = notif.unread;
+    this.notifSubjectUrl = subj ? (subj.url || '') : '';
+    AppStorage.setOrCreate('notifSubjectUrl', this.notifSubjectUrl);
     this.inboxStack.pushPath({ name: 'notifDetail' });
   }
 
