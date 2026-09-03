@@ -166,17 +166,17 @@ export struct DevProfilePage {
                   }.width('100%').padding({ top: 2, bottom: 8 })
                   Scroll() {
                     Column({ space: 2 }) {
-                      ForEach([0, 1, 2, 3, 4, 5, 6], (row: number, ri: number) => {
+                      ForEach([0, 1, 2, 3, 4, 5, 6], (row: number, _ri: number) => {
                         Row({ space: 2 }) {
-                          ForEach(this.contribWeeks.slice(Math.max(0, this.contribWeeks.length - 53)), (week: Object, wi: number) => {
+                          ForEach(this.contribWeeks.slice(Math.max(0, this.contribWeeks.length - 53)), (week: Object, _wi: number) => {
                             if (row < (((week as Record<string, Object>).contributionDays as Object[]) || []).length) {
                               Text('').width(10).height(10)
                                 .backgroundColor(this.heatColor((((((week as Record<string, Object>).contributionDays as Object[]) || [])[row] as Record<string, Object>).contributionCount as number) || 0))
                                 .borderRadius(2)
                             } else { Text('').width(10).height(10) }
-                          }, (week: Object, wi: number) => 'w' + wi)
+                          }, (_week: Object, wi: number) => 'w' + wi)
                         }
-                      }, (row: number, ri: number) => 'r' + ri)
+                      }, (_row: number, ri: number) => 'r' + ri)
                     }
                   }.scrollable(ScrollDirection.Horizontal).scrollBar(BarState.Off).width('100%').height(82)
                   Row({ space: 4 }) {
@@ -221,7 +221,7 @@ export struct DevProfilePage {
                         .backgroundColor(this.filterType === idx ? this.T().accent : (this.themeMode === 'dark' ? DarkTheme.ctrlFill : LightTheme.ctrlFill))
                         .borderRadius(8)
                         .onClick(() => { this.filterType = idx; this.applyFilter(); })
-                    }, (t: string, idx: number) => idx.toString())
+                    }, (_t: string, idx: number) => idx.toString())
                   }
                 }.scrollable(ScrollDirection.Horizontal).scrollBar(BarState.Off).width('100%').height(40).margin({ top: 8 })
 
@@ -266,7 +266,7 @@ export struct DevProfilePage {
                     if (idx < this.filteredRepos.length - 1) {
                       Divider().color(this.T().border).width('100%')
                     }
-                  }, (item: Object, idx: number) => idx.toString())
+                  }, (_item: Object, idx: number) => idx.toString())
                 }.width('100%')
               }.width('100%')
             }
