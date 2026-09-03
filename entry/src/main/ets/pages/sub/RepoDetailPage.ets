@@ -144,12 +144,12 @@ export struct RepoDetailPage {
                 }
                 if (this.topics().length > 0) {
                   Row({ space: 6 }) {
-                    ForEach(this.topics().slice(0, 8), (t: string, idx: number) => {
+                    ForEach(this.topics().slice(0, 8), (t: string, _idx: number) => {
                       Text(t).fontSize(12).fontColor(this.T().accent)
                         .padding({ left: 10, right: 10, top: 4, bottom: 4 })
                         .backgroundColor(this.themeMode === 'dark' ? '#1A2F44' : '#DDF4FF')
                         .borderRadius(8)
-                    }, (t: string, idx: number) => idx.toString())
+                    }, (_t: string, idx: number) => idx.toString())
                   }.width('100%')
                 }
                 Row({ space: 10 }) {
