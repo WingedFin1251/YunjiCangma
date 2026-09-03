@@ -225,7 +225,7 @@ export struct NotificationDetailPage {
             .backgroundColor(this.T().surface).borderRadius(12)
         }
         Blank().height(80)
-      }.width('100%')
-    }.scrollBar(BarState.Off).width('100%').height('100%').backgroundColor(this.T().background)
+      }.width('100%').constraintSize({ minHeight: '100%' })
+    }.scrollBar(BarState.Off).width('100%').layoutWeight(1).backgroundColor(this.T().background)
   }
 }

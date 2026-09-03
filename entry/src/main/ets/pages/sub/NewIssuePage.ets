@@ -95,8 +95,8 @@ export struct NewIssuePage {
             .enabled(this.canSubmit() && !this.submitting)
             .onClick(() => { this.submit(); })
         }
-        .width('100%').padding(16)
+        .width('100%').constraintSize({ minHeight: '100%' }).padding({ left: 16, right: 16 })
       }.scrollBar(BarState.Off).width('100%').height('100%')
-    }.width('100%').height('100%').backgroundColor(this.T().background).padding({ top: 8 })
+    }.width('100%').layoutWeight(1).backgroundColor(this.T().background)
   }
 }
