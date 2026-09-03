@@ -47,3 +47,6 @@ Thumbs.db
 
 # Claude Code
 /.claude/
+
+# WorkBuddy 会话记忆
+/.workbuddy/
