@@ -246,7 +246,7 @@ export struct ExploreTab {
 
           Blank().height(76)
         }.width('100%').alignItems(HorizontalAlign.Start)
-      }.scrollBar(BarState.Off).width('100%')
+      }.scrollBar(BarState.Off).edgeEffect(EdgeEffect.Spring, { alwaysEnabled: true }).width('100%')
         .backgroundColor(this.themeMode === 'dark' ? this.T().background : this.T().background)
         .onScrollFrameBegin((offsetRemain: number) => {
           if (offsetRemain > 0 && !this.scrollHidden && this.navDepth === 0) {

@@ -93,7 +93,7 @@ export struct WorkPage {
               }.width('100%')
             }
           }.width('100%')
-        }.scrollBar(BarState.Off).width('100%').height('100%').backgroundColor(this.T().background)
+        }.scrollBar(BarState.Off).edgeEffect(EdgeEffect.Spring, { alwaysEnabled: true }).width('100%').height('100%').backgroundColor(this.T().background)
       }
     }.width('100%').height('100%').backgroundColor(this.T().background)
   }
