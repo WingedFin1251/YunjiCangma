@@ -93,8 +93,8 @@ export struct IssuesPage {
               })
             }, (_item: Object, idx: number) => idx.toString())
           }
-        }.width('100%')
+        }.width('100%').constraintSize({ minHeight: '100%' })
       }.scrollBar(BarState.Off).width('100%').height('100%').backgroundColor(this.T().background)
-    }.width('100%').height('100%').backgroundColor(this.T().background)
+    }.width('100%').layoutWeight(1).backgroundColor(this.T().background)
   }
 }
