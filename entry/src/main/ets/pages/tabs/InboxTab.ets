@@ -30,7 +30,7 @@ export struct InboxTab {
   @State selectedFilter: number = 0;
   @State notifications: GitHubNotification[] = [];
   @State isInboxLoading: boolean = true;
-  private filterTabs: string[] = ['收件箱', '重点', '未读', '仓库'];
+  private filterTabs: string[] = ['全部', '未读', 'CI/Actions', '议题/PR'];
 
   aboutToAppear(): void {
     this.loadNotifications();
@@ -58,8 +58,23 @@ export struct InboxTab {
 
   /** 筛选后的通知列表 */
   private getFilteredNotifications(): GitHubNotification[] {
-    if (this.selectedFilter === 1 || this.selectedFilter === 2) {
+    if (this.selectedFilter === 0) {
+      // 收件箱：全部
+      return this.notifications;
+    }
+    if (this.selectedFilter === 1) {
+      // 未读：仅未读通知
       return this.notifications.filter((n: GitHubNotification) => n.unread);
+    }
+    if (this.selectedFilter === 2) {
+      // CI/Actions：仅 CI 类型通知
+      const ciTypes: string[] = ['CheckRun', 'CheckSuite', 'WorkflowRun', 'WorkflowJob'];
+      return this.notifications.filter((n: GitHubNotification) => ciTypes.indexOf(n.subject.type) >= 0);
+    }
+    if (this.selectedFilter === 3) {
+      // 议题/PR：仅 Issue、PullRequest、Discussion
+      const issueTypes: string[] = ['Issue', 'PullRequest', 'Discussion'];
+      return this.notifications.filter((n: GitHubNotification) => issueTypes.indexOf(n.subject.type) >= 0);
     }
     return this.notifications;
   }
@@ -270,10 +285,11 @@ export struct InboxTab {
       }, (item: GitHubNotification) => item.id)
     }
     .scrollBar(BarState.Off)
+    .edgeEffect(EdgeEffect.Spring, { alwaysEnabled: true })
     .width('100%')
-    .layoutWeight(1)
+    .height('100%')
     .backgroundColor(this.T().background)
-    .padding({ bottom: 76 })
+
     .onScrollFrameBegin((offsetRemain: number) => {
       if (offsetRemain > 0 && !this.scrollHidden && this.navDepth === 0) {
         this.scrollHidden = true;
