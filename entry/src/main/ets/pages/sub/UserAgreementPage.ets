@@ -40,7 +40,7 @@ export struct UserAgreementPage {
           .width('100%').padding(20)
       }.width('100%')
     }
-    .scrollBar(BarState.Off).width('100%').height('100%')
+    .scrollBar(BarState.Off).edgeEffect(EdgeEffect.Spring, { alwaysEnabled: true }).width('100%').height('100%')
     .backgroundColor(this.T().background).padding({ top: 8 })
   }
 }

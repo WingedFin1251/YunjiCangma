@@ -145,7 +145,7 @@ export struct ProfileTab {
               }.width('100%').padding({ left: 16, right: 16 })
             }
           }.width('100%')
-        }.scrollBar(BarState.Off).width('100%').height('100%').backgroundColor(this.T().background)
+        }.scrollBar(BarState.Off).edgeEffect(EdgeEffect.Spring, { alwaysEnabled: true }).width('100%').height('100%').backgroundColor(this.T().background)
       }.titleBar(buildTitleBar('我的仓库')).backgroundColor(this.T().background).bindToScrollable([this.repoListScroller])
     } else if (name === 'issues') {
       HdsNavDestination() { IssuesPage({ scroller: this.issuesScroller, owner: this.detailOwner, repoName: this.detailRepo, onOpenWebView: (u: string) => { this.webUrl = u; this.profileStack.pushPath({ name: 'repoWeb' }); }, onOpenIssue: (o: string, r: string, n: number) => { this.detailOwner = o; this.detailRepo = r; this.detailIssueNumber = n; this.profileStack.pushPath({ name: 'issueDetail' }); } }) }

@@ -56,6 +56,7 @@ export struct HomeTab {
   onNavChanged?: (hide: boolean) => void;
   private homeStack: NavPathStack = new NavPathStack();
   @State navDepth: number = 0;
+  @State scrollHidden: boolean = false;
   @StorageLink(THEME_KEY) themeMode: string = 'dark'; private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
   private mica(): Array<[ResourceColor, number]> {
     const d: boolean = this.themeMode === 'dark';
@@ -212,6 +213,17 @@ export struct HomeTab {
           }.width('100%').alignItems(HorizontalAlign.Start)
         }
         .scrollBar(BarState.Off).edgeEffect(EdgeEffect.Spring, { alwaysEnabled: true }).width('100%').backgroundColor(this.T().background)
+        .onScrollFrameBegin((offsetRemain: number) => {
+          if (this.navDepth > 0) return { offsetRemain: offsetRemain };
+          if (offsetRemain > 0 && !this.scrollHidden) {
+            this.scrollHidden = true;
+            if (this.onNavChanged) this.onNavChanged(true);
+          } else if (offsetRemain < 0 && this.scrollHidden) {
+            this.scrollHidden = false;
+            if (this.onNavChanged) this.onNavChanged(false);
+          }
+          return { offsetRemain: offsetRemain };
+        })
 
       }
       .width('100%').height('100%').backgroundColor(this.T().background).padding({ top: 32, bottom: 20 })
