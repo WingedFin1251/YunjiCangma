@@ -80,27 +80,26 @@ export struct NotificationDetailPage {
     if (!owner || !repo) return;
     this.checkRunLoading = true;
     try {
-      // 从通知标题中提取分支名（如 "...failed for main branch"）
+      // 从通知标题中提取分支名
       const branchMatch: RegExpMatchArray | null = this.notifTitle.match(/for (\S+) branch/);
       const branch: string = branchMatch ? branchMatch[1] : 'main';
-      // 获取最近的 check suite
-      const suites: Object = await CheckRunRepository.getCheckSuites(owner, repo, branch);
-      const suitesArr: Object[] = (suites as Record<string, Object>).check_suites as Object[] || [];
-      if (suitesArr.length > 0) {
-        const suite: Record<string, Object> = suitesArr[0] as Record<string, Object>;
-        const suiteId: number = suite.id as number || 0;
-        // 获取 check runs 详情
-        if (suiteId > 0) {
-          const runs: Object = await CheckRunRepository.getCheckRuns(owner, repo, suiteId);
-          const runsArr: Object[] = (runs as Record<string, Object>).check_runs as Object[] || [];
-          if (runsArr.length > 0) {
-            this.checkRun = runsArr[0];
-          }
+      // 通知更新时间（用于匹配最近的 run）
+      const notifTime: number = new Date(this.updatedAt).getTime();
+
+      // 获取最近的 workflow runs
+      const runsData: Object = await CheckRunRepository.getWorkflowRuns(owner, repo, branch);
+      const runsArr: Object[] = (runsData as Record<string, Object>).workflow_runs as Object[] || [];
+
+      if (runsArr.length > 0) {
+        // 找到与通知时间最近的 run（时间差最小）
+        let bestRun: Record<string, Object> = runsArr[0] as Record<string, Object>;
+        let bestDiff: number = Math.abs(new Date(bestRun.created_at as string).getTime() - notifTime);
+        for (let i = 1; i < runsArr.length; i++) {
+          const r: Record<string, Object> = runsArr[i] as Record<string, Object>;
+          const diff: number = Math.abs(new Date(r.created_at as string).getTime() - notifTime);
+          if (diff < bestDiff) { bestDiff = diff; bestRun = r; }
         }
-        // 如果没有 check runs，用 suite 信息
-        if (!this.checkRun) {
-          this.checkRun = suite;
-        }
+        this.checkRun = bestRun;
       }
     } catch (e) { this.checkRun = null; }
     finally { this.checkRunLoading = false; }
