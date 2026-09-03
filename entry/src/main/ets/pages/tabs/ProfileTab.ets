@@ -6,6 +6,7 @@ import { RepoCard } from '../../common/components/RepoCard';
 import { PersonPicture } from '../../common/components/PersonPicture';
 import { AuthService } from '../../services/AuthService';
 import { RepoRepository } from '../../services/RepoRepository';
+import type { Repository } from '../../models/User';
 import { UserRepository } from '../../services/UserRepository';
 import { RepoDetailPage } from '../sub/RepoDetailPage';
 import { DevProfilePage } from '../sub/DevProfilePage';
@@ -47,6 +48,7 @@ export struct ProfileTab {
   @State isLoading: boolean = false;
   @State listItems: Object[] = [];
   @State listLoading: boolean = true;
+  starredSet: Set<string> = new Set<string>();
   @State webUrl: string = '';
   @State detailOwner: string = '';
   @State detailRepo: string = '';
@@ -87,7 +89,13 @@ export struct ProfileTab {
     await AuthService.loadToken();
     if (AuthService.isLoggedIn()) {
       this.isLoading = true;
-      try { this.user = await UserRepository.getCurrentUser(); }
+      try {
+        this.user = await UserRepository.getCurrentUser();
+        // 加载星标列表
+        const starred: Repository[] = await RepoRepository.getStarredRepos();
+        this.starredSet = new Set<string>();
+        for (let i = 0; i < starred.length; i++) { this.starredSet.add(starred[i].full_name); }
+      }
       catch (err) { await AuthService.logout(); this.user = null; }
       finally { this.isLoading = false; }
     }
@@ -130,7 +138,7 @@ export struct ProfileTab {
                       description: ((item as Record<string, Object>).description as string) || '',
                       language: ((item as Record<string, Object>).language as string) || '',
                       stars: (item as Record<string, Object>).stargazers_count as number || 0,
-                      isStarred: true
+                      isStarred: this.starredSet.has(((item as Record<string, Object>).full_name as string) || '')
                     })
                   }
                   .width('100%')
