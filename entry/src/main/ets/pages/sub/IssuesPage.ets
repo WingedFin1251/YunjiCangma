@@ -1,4 +1,5 @@
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
+import { IssueRepository } from '../../services/IssueRepository';
 import { HttpClient } from '../../services/HttpClient';
 
 @Component
@@ -19,7 +20,7 @@ export struct IssuesPage {
   async load(): Promise<void> {
     this.loading = true;
     try {
-      this.issues = await HttpClient.get<Object[]>('/repos/' + this.owner + '/' + this.repoName + '/issues?state=' + this.filterState + '&per_page=30');
+      this.issues = await IssueRepository.getRepoIssues(this.owner, this.repoName, this.filterState);
     } catch (e) { this.issues = []; }
     finally { this.loading = false; }
   }
