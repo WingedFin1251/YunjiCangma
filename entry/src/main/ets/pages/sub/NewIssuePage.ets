@@ -50,7 +50,7 @@ export struct NewIssuePage {
     this.errorMsg = '';
     RepoRepository.createIssue(this.owner.trim(), this.repoName.trim(), this.title.trim(), this.body)
       .then(() => {
-        this.getUIContext().getPromptAction().showToast({ message: '议题已创建' });
+        try { this.getUIContext().getPromptAction().showToast({ message: '议题已创建' }); } catch (_) {}
         if (this.onCreated) this.onCreated();
       })
       .catch(() => {

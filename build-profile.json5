@@ -3,6 +3,7 @@
     "products": [
       {
         "name": "default",
+        "signingConfig": "default",
         "targetSdkVersion": "6.1.0(23)",
         "compatibleSdkVersion": "6.1.0(23)",
         "runtimeOS": "HarmonyOS",
@@ -16,10 +17,25 @@
     ],
     "buildModeSet": [
       {
-        "name": "debug",
+        "name": "debug"
       },
       {
         "name": "release"
+      }
+    ],
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "C:\\Users\\34182\\.ohos\\config\\default_Github_iLh1ZRTr7CLIb_WjZ-Oz3MplKIq3lz1JHcyvc_ql7_0=.cer",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001B0FED0C7947FB30E69BF569EC289CC30AED956A00AA508AE1EC1E3BF7038C75A6F85811D328BAC1",
+          "profile": "C:\\Users\\34182\\.ohos\\config\\default_Github_iLh1ZRTr7CLIb_WjZ-Oz3MplKIq3lz1JHcyvc_ql7_0=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "C:\\Users\\34182\\.ohos\\config\\default_Github_iLh1ZRTr7CLIb_WjZ-Oz3MplKIq3lz1JHcyvc_ql7_0=.p12",
+          "storePassword": "0000001BB34DC55475482BFF9D708F24B8E4EA2F0ECDAB371315356F51D369A28F401AE272C36E4893633A"
+        }
       }
     ]
   },

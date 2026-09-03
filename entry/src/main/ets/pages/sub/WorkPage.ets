@@ -58,7 +58,7 @@ export struct WorkPage {
             Blank().height(88)
             if (this.dataType === 'repos') {
               Column({ space: 12 }) {
-                ForEach(this.items, (item: Object, idx: number) => {
+                ForEach(this.items, (item: Object, _idx: number) => {
                   Column() {
                     RepoCard({
                       avatarChar: (((item as Record<string, Object>).owner as Record<string, string>).login || '?').charAt(0),
@@ -76,11 +76,11 @@ export struct WorkPage {
                     const rName: string = (it.name as string) || '';
                     if (this.onOpenRepo && rOwner && rName) this.onOpenRepo(rOwner, rName);
                   })
-                }, (item: Object, idx: number) => idx.toString())
+                }, (_item: Object, idx: number) => idx.toString())
               }.width('100%').padding({ left: 16, right: 16 })
             } else {
               Column() {
-                ForEach(this.items, (item: Object, idx: number) => {
+                ForEach(this.items, (item: Object, _idx: number) => {
                   Column() {
                     Text(((item as Record<string, Object>).title as string) || ((item as Record<string, Object>).login as string) || ((item as Record<string, Object>).full_name as string) || ((item as Record<string, Object>).name as string) || '')
                       .fontSize(16).fontColor(this.T().textPrimary).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -89,7 +89,7 @@ export struct WorkPage {
                         .fontSize(12).fontColor(this.T().textTertiary).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
                     }
                   }.width('100%').padding({ left: 16, right: 16, top: 12, bottom: 12 })
-                }, (item: Object, idx: number) => idx.toString())
+                }, (_item: Object, idx: number) => idx.toString())
               }.width('100%')
             }
           }.width('100%')

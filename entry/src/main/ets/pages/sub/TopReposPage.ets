@@ -76,7 +76,7 @@ export struct TopReposPage {
       } else {
         List({ space: 12, scroller: this.scroller }) {
           ListItem() { Column() { Blank().height(88) } }
-          ForEach(this.repos, (repo: Repository, idx: number) => {
+          ForEach(this.repos, (repo: Repository, _idx: number) => {
             ListItem() {
               Column() {
                 RepoCard({
@@ -94,8 +94,8 @@ export struct TopReposPage {
             }
           }, (repo: Repository) => repo.id.toString())
         }
-        .scrollBar(BarState.Off).width('100%').layoutWeight(1)
-        .padding({ left: 16, right: 16, top: 8, bottom: 76 })
+        .scrollBar(BarState.Off).width('100%').height('100%')
+        .padding({ left: 16, right: 16, top: 8 })
       }
     }.width('100%').height('100%').backgroundColor(this.T().background)
   }
