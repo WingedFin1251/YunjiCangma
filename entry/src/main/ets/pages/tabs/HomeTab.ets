@@ -211,7 +211,7 @@ export struct HomeTab {
             Blank().height(76)
           }.width('100%').alignItems(HorizontalAlign.Start)
         }
-        .scrollBar(BarState.Off).width('100%').backgroundColor(this.T().background)
+        .scrollBar(BarState.Off).edgeEffect(EdgeEffect.Spring, { alwaysEnabled: true }).width('100%').backgroundColor(this.T().background)
 
       }
       .width('100%').height('100%').backgroundColor(this.T().background).padding({ top: 32, bottom: 20 })
