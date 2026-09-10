@@ -2,6 +2,7 @@ import { ConfigurationConstant } from '@kit.AbilityKit';
 import { window } from '@kit.ArkUI';
 import { HdsTabs, HdsTabsController, HdsTabsFloatingStyle, HdsAnimationMode, hdsMaterial } from '@kit.UIDesignKit';
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../common/constants/ThemeConstants';
+import { AUTH_UNAUTHORIZED_KEY } from '../common/constants/APIConstants';
 import { AuthService } from '../services/AuthService';
 import { HomeTab } from './tabs/HomeTab';
 import { InboxTab } from './tabs/InboxTab';
@@ -33,6 +34,8 @@ struct MainPage {
   }
   @State currentIndex: number = 0;
   @StorageLink('glowLevel') glowLevel: number = 1;
+  @StorageLink(AUTH_UNAUTHORIZED_KEY) @Watch('onUnauthorized') unauthorizedTick: number = 0;
+  private authRedirecting: boolean = false;
   @State bottomAvoidAreaHeight: number = 12;
   private tabsController: HdsTabsController = new HdsTabsController();
 
@@ -58,6 +61,26 @@ struct MainPage {
         }).catch(() => {});
       }
     } catch (_) {}
+    // 401 信号若在挂载前已发出（@Watch 首次不触发），补处理一次
+    if (this.unauthorizedTick > 0) { this.onUnauthorized(); }
+  }
+
+  /** 401 未授权：清理登录态并跳登录页（传输层只发信号，Shell 统一处理） */
+  onUnauthorized(): void {
+    if (this.authRedirecting || !AuthService.isLoggedIn()) return;
+    this.authRedirecting = true;
+    this.handleUnauthorized().catch(() => {});
+  }
+
+  private async handleUnauthorized(): Promise<void> {
+    try {
+      await AuthService.logout();
+      await this.getUIContext().getRouter().pushUrl({ url: 'pages/LoginPage' });
+    } catch (e) {
+      // 登出/跳转失败不阻塞 UI
+    } finally {
+      this.authRedirecting = false;
+    }
   }
 
   onThemeChange(): void {

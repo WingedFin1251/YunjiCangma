@@ -25,3 +25,6 @@ export class APIHeaders {
 /** AppStorage 认证状态 Key */
 export const AUTH_TOKEN_KEY: string = 'authToken';
 export const AUTH_LOGIN_KEY: string = 'isLoggedIn';
+
+/** 401 未授权信号 Key（传输层发信号，Shell 统一登出并跳登录页） */
+export const AUTH_UNAUTHORIZED_KEY: string = 'authUnauthorizedTick';

@@ -1,9 +1,10 @@
 import { http } from '@kit.NetworkKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { GITHUB_API_BASE, APIHeaders } from '../common/constants/APIConstants';
-import { AuthService } from './AuthService';
 import { RateLimitService } from '../common/utils/RateLimitService';
 import type { RateLimitExhausted } from '../common/utils/RateLimitService';
+import { TokenProvider } from '../common/utils/TokenProvider';
+import { SessionEvents } from '../common/utils/SessionEvents';
 
 /** 传输层 HTTP 错误：statusCode 即响应状态码（0 表示非 HTTP 网络异常兜底） */
 export class HttpError extends Error {
@@ -58,7 +59,7 @@ export class HttpClient {
   }
 
   static buildHeaders(): Record<string, string> {
-    const token: string = AuthService.getToken();
+    const token: string = TokenProvider.getToken();
     const headers: Record<string, string> = {
       'Accept': APIHeaders.ACCEPT,
       'X-GitHub-Api-Version': APIHeaders.API_VERSION
@@ -98,10 +99,14 @@ export class HttpClient {
     } finally { req.destroy(); }
   }
 
-  /** 2xx 判定 + 403/429 配额耗尽映射；非 2xx 抛结构化错误 */
+  /** 2xx 判定 + 401 未授权信号 + 403/429 配额耗尽映射；非 2xx 抛结构化错误 */
   private static ensureOk(res: http.HttpResponse): void {
     const code: number = res.responseCode;
     if (code >= 200 && code < 300) return;
+    if (code === 401) {
+      // token 失效：只发全局信号，登录态清理与跳转由 Shell 处理（避免传输层反向依赖业务服务）
+      SessionEvents.notifyUnauthorized();
+    }
     if (code === 403 || code === 429) {
       const exhausted: RateLimitExhausted | null = RateLimitService.getExhaustedInfo();
       if (exhausted !== null) { throw new RateLimitError(exhausted); }

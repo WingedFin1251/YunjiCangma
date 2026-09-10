@@ -19,6 +19,9 @@ const PREFERENCES_NAME: string = 'github_auth_prefs';
 export class AuthService {
   private static appContext: common.UIAbilityContext | null = null;
 
+  /** OAuth 请求超时（与 HttpClient 统一 15s；不设则平台默认 60000ms） */
+  private static readonly REQUEST_TIMEOUT: number = 15000;
+
   static init(context: common.UIAbilityContext): void {
     AuthService.appContext = context;
   }
@@ -292,7 +295,9 @@ export class AuthService {
             'Accept': 'application/json'
           },
           extraData: `client_id=${encodeURIComponent(GITHUB_OAUTH_CLIENT_ID)}` +
-            `&scope=${encodeURIComponent(GITHUB_OAUTH_SCOPES)}`
+            `&scope=${encodeURIComponent(GITHUB_OAUTH_SCOPES)}`,
+          connectTimeout: AuthService.REQUEST_TIMEOUT,
+          readTimeout: AuthService.REQUEST_TIMEOUT
         }
       );
       if (response.responseCode === 200) {
@@ -332,7 +337,9 @@ export class AuthService {
           },
           extraData: `client_id=${encodeURIComponent(GITHUB_OAUTH_CLIENT_ID)}` +
             `&device_code=${encodeURIComponent(deviceCode)}` +
-            `&grant_type=${encodeURIComponent('urn:ietf:params:oauth:grant-type:device_code')}`
+            `&grant_type=${encodeURIComponent('urn:ietf:params:oauth:grant-type:device_code')}`,
+          connectTimeout: AuthService.REQUEST_TIMEOUT,
+          readTimeout: AuthService.REQUEST_TIMEOUT
         }
       );
       if (response.responseCode === 200) {
