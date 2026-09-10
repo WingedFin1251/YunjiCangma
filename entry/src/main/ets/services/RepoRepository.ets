@@ -1,6 +1,7 @@
 import { HttpClient } from './HttpClient';
 import type { Repository, SearchResult } from '../models/User';
 import type { RepoDetail, RepoContentItem, RepoReadme, RepoRelease } from '../models/RepoModels';
+import type { GitHubIssue } from '../models/IssueModels';
 
 /** 创建议题请求体 */
 class NewIssueBody {
@@ -27,8 +28,8 @@ export class RepoRepository {
   static getMyRepos(): Promise<Repository[]> { return HttpClient.get<Repository[]>('/user/repos?type=all&per_page=50&sort=updated'); }
   static getUserRepos(u: string): Promise<Repository[]> { return HttpClient.get<Repository[]>('/users/' + u + '/repos?per_page=30&sort=updated'); }
   static getRepoDetail(owner: string, repo: string): Promise<RepoDetail> { return HttpClient.get<RepoDetail>('/repos/' + owner + '/' + repo); }
-  static createIssue(owner: string, repo: string, title: string, body: string): Promise<Object> {
-    return HttpClient.post<Object>('/repos/' + owner + '/' + repo + '/issues', new NewIssueBody(title, body));
+  static createIssue(owner: string, repo: string, title: string, body: string): Promise<GitHubIssue> {
+    return HttpClient.post<GitHubIssue>('/repos/' + owner + '/' + repo + '/issues', new NewIssueBody(title, body));
   }
   static getRepoContents(owner: string, repo: string, path: string): Promise<RepoContentItem[]> {
     const p: string = path ? '/' + encodeURIComponent(path) : '';

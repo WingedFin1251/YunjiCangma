@@ -2,6 +2,7 @@ import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/cons
 import { IssueRepository } from '../../services/IssueRepository';
 import { HttpClient } from '../../services/HttpClient';
 import { MarkdownView } from '../../common/components/MarkdownView';
+import type { GitHubIssue, GitHubLabel, IssueComment } from '../../models/IssueModels';
 
 /**
  * 议题详情（原生界面）— 标题/状态/标签/正文 Markdown + 评论列表。
@@ -9,8 +10,8 @@ import { MarkdownView } from '../../common/components/MarkdownView';
 @Component
 export struct IssueDetailPage {
   @StorageLink(THEME_KEY) themeMode: string = 'dark';
-  @State issue: Object | null = null;
-  @State comments: Object[] = [];
+  @State issue: GitHubIssue | null = null;
+  @State comments: IssueComment[] = [];
   @State loading: boolean = true;
   @State commentsLoading: boolean = true;
   @Prop @Watch('load') owner: string = '';
@@ -60,27 +61,24 @@ export struct IssueDetailPage {
     finally { this.commentsLoading = false; }
   }
 
-  private rec(): Record<string, Object> { return (this.issue as Record<string, Object>); }
-  private num(k: string): number { return (this.rec()[k] as number) || 0; }
-  private str(k: string): string { return (this.rec()[k] as string) || ''; }
-  private labels(): Object[] { return (this.rec().labels as Object[]) || []; }
-  private stateText(): string { return this.str('state') === 'closed' ? 'Closed' : 'Open'; }
+  private labels(): GitHubLabel[] { return this.issue && this.issue.labels ? this.issue.labels : []; }
+  private issueState(): string { return this.issue ? (this.issue.state || '') : ''; }
+  private stateText(): string { return this.issueState() === 'closed' ? 'Closed' : 'Open'; }
   private stateColor(): string {
-    return this.str('state') === 'closed'
+    return this.issueState() === 'closed'
       ? (this.themeMode === 'dark' ? DarkTheme.discussionPurple : LightTheme.discussionPurple)
       : (this.themeMode === 'dark' ? DarkTheme.issueGreen : LightTheme.issueGreen);
   }
-  private authorLogin(): string {
-    const u: Record<string, string> = (this.rec().user as Record<string, string>);
-    return u ? (u.login || '') : '';
-  }
+  private iNumber(): string { return this.issue ? (this.issue.number || 0).toString() : '0'; }
+  private iTitle(): string { return this.issue ? (this.issue.title || '') : ''; }
+  private iCreated(): string { return this.issue && this.issue.created_at ? this.issue.created_at : ''; }
+  private iComments(): string { return this.issue ? (this.issue.comments || 0).toString() : '0'; }
+  private iBody(): string { return this.issue && this.issue.body ? this.issue.body : ''; }
+  private authorLogin(): string { return this.issue && this.issue.user ? (this.issue.user.login || '') : ''; }
   private shortDate(s: string): string { return (s || '').substring(0, 10); }
-  private commentAuthor(c: Object): string {
-    const u: Record<string, string> = ((c as Record<string, Object>).user as Record<string, string>);
-    return u ? (u.login || '') : '';
-  }
-  private commentDate(c: Object): string { return this.shortDate(((c as Record<string, Object>).created_at as string) || ''); }
-  private commentBody(c: Object): string { return (((c as Record<string, Object>).body as string) || ''); }
+  private commentAuthor(c: IssueComment): string { return c.user ? (c.user.login || '') : ''; }
+  private commentDate(c: IssueComment): string { return this.shortDate(c.created_at || ''); }
+  private commentBody(c: IssueComment): string { return c.body ? c.body : ''; }
 
   build() {
     Scroll(this.scroller) {
@@ -106,33 +104,33 @@ export struct IssueDetailPage {
                 .padding({ left: 8, right: 8, top: 3, bottom: 3 })
                 .backgroundColor(this.stateColor())
                 .borderRadius(8)
-              Text('#' + this.num('number').toString()).fontSize(13).fontColor(this.T().textTertiary)
+              Text('#' + this.iNumber()).fontSize(13).fontColor(this.T().textTertiary)
             }.width('100%')
-            Text(this.str('title')).fontSize(20).fontWeight(FontWeight.Bold).fontColor(this.T().textPrimary)
+            Text(this.iTitle()).fontSize(20).fontWeight(FontWeight.Bold).fontColor(this.T().textPrimary)
               .width('100%').lineHeight(28)
             Row({ space: 8 }) {
               Text(this.authorLogin()).fontSize(13).fontColor(this.T().accent)
-              Text('创建于 ' + this.shortDate(this.str('created_at'))).fontSize(12).fontColor(this.T().textTertiary)
-              Text('💬 ' + this.num('comments').toString()).fontSize(12).fontColor(this.T().textTertiary)
+              Text('创建于 ' + this.shortDate(this.iCreated())).fontSize(12).fontColor(this.T().textTertiary)
+              Text('💬 ' + this.iComments()).fontSize(12).fontColor(this.T().textTertiary)
             }.width('100%').alignItems(VerticalAlign.Center)
             if (this.labels().length > 0) {
               Row({ space: 6 }) {
-                ForEach(this.labels().slice(0, 6), (l: Object, _li: number) => {
-                  Text(((l as Record<string, Object>).name as string) || '')
+                ForEach(this.labels().slice(0, 6), (l: GitHubLabel, _li: number) => {
+                  Text(l.name || '')
                     .fontSize(11).fontColor(Color.White)
                     .padding({ left: 6, right: 6, top: 2, bottom: 2 })
-                    .backgroundColor('#' + (((l as Record<string, Object>).color as string) || '218BFE'))
+                    .backgroundColor('#' + (l.color || '218BFE'))
                     .borderRadius(4)
-                }, (_l: Object, li: number) => 'l' + li)
+                }, (_l: GitHubLabel, li: number) => 'l' + li)
               }.width('100%')
             }
           }.width('100%').padding(16)
             .backgroundColor(this.T().surface).borderRadius(12)
 
           // ===== 正文 =====
-          if (this.str('body') !== '') {
+          if (this.iBody() !== '') {
             Column() {
-              MarkdownView({ content: this.str('body'), fontSize: 14, onOpenRepo: this.onOpenRepo, onOpenWebView: this.onOpenWebView })
+              MarkdownView({ content: this.iBody(), fontSize: 14, onOpenRepo: this.onOpenRepo, onOpenWebView: this.onOpenWebView })
             }.width('100%').padding(16)
               .backgroundColor(this.T().surface).borderRadius(12)
           }
@@ -151,7 +149,7 @@ export struct IssueDetailPage {
             }
 
             Column() {
-              ForEach(this.comments, (c: Object, ci: number) => {
+              ForEach(this.comments, (c: IssueComment, ci: number) => {
                 Column({ space: 6 }) {
                   Row({ space: 8 }) {
                     Text(this.commentAuthor(c)).fontSize(13).fontWeight(FontWeight.Medium).fontColor(this.T().textPrimary)
@@ -164,7 +162,7 @@ export struct IssueDetailPage {
                 if (ci < this.comments.length - 1) {
                   Divider().color(this.T().border).width('100%')
                 }
-              }, (_c: Object, ci: number) => 'c' + ci)
+              }, (_c: IssueComment, ci: number) => 'c' + ci)
             }.width('100%')
           }.width('100%').padding(16)
             .backgroundColor(this.T().surface).borderRadius(12)

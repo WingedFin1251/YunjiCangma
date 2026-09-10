@@ -1,11 +1,12 @@
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
 import { IssueRepository } from '../../services/IssueRepository';
 import { HttpClient } from '../../services/HttpClient';
+import type { GitHubIssue, GitHubLabel } from '../../models/IssueModels';
 
 @Component
 export struct IssuesPage {
   @StorageLink(THEME_KEY) themeMode: string = 'dark';
-  @State issues: Object[] = [];
+  @State issues: GitHubIssue[] = [];
   @State loading: boolean = true;
   @State filterState: string = 'open';
   @Prop @Watch('load') owner: string = '';
@@ -25,8 +26,8 @@ export struct IssuesPage {
     finally { this.loading = false; }
   }
 
-  getFiltered(): Object[] {
-    return this.issues.filter((i: Object) => !((i as Record<string, Object>).pull_request));
+  getFiltered(): GitHubIssue[] {
+    return this.issues.filter((i: GitHubIssue) => !i.pull_request);
   }
 
   build() {
@@ -54,31 +55,31 @@ export struct IssuesPage {
               Text('暂无议题').fontSize(14).fontColor(this.T().textSecondary)
             }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center).width('100%').height(300)
           } else {
-            ForEach(this.getFiltered(), (item: Object, idx: number) => {
+            ForEach(this.getFiltered(), (item: GitHubIssue, idx: number) => {
               Column() {
                 Row() {
-                  Text(((item as Record<string, Object>).title as string) || '')
+                  Text(item.title || '')
                     .fontSize(16).fontWeight(FontWeight.Medium).fontColor(this.T().textPrimary).layoutWeight(1).maxLines(2)
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
                 }.width('100%')
                 Row() {
-                  Text('#' + ((item as Record<string, Object>).number as number || 0))
+                  Text('#' + (item.number || 0))
                     .fontSize(13).fontColor(this.T().textTertiary)
-                  if ((((item as Record<string, Object>).labels as Object[]) || []).length > 0) {
-                    ForEach((((item as Record<string, Object>).labels as Object[]) || []).slice(0, 3), (l: Object, _li: number) => {
-                      Text(((l as Record<string, Object>).name as string) || '')
+                  if ((item.labels || []).length > 0) {
+                    ForEach((item.labels || []).slice(0, 3), (l: GitHubLabel, _li: number) => {
+                      Text(l.name || '')
                         .fontSize(11).fontColor(Color.White)
                         .padding({ left: 6, right: 6, top: 2, bottom: 2 })
-                        .backgroundColor('#' + (((l as Record<string, Object>).color as string) || '218BFE'))
+                        .backgroundColor('#' + (l.color || '218BFE'))
                         .borderRadius(4)
-                    }, (_l: Object, li: number) => 'l' + li)
+                    }, (_l: GitHubLabel, li: number) => 'l' + li)
                   }
-                  Text(' 💬 ' + ((item as Record<string, Object>).comments as number || 0))
+                  Text(' 💬 ' + (item.comments || 0))
                     .fontSize(13).fontColor(this.T().textTertiary)
                   Blank()
-                  Text(((item as Record<string, Object>).user as Record<string, string>).login || '')
+                  Text(item.user ? (item.user.login || '') : '')
                     .fontSize(13).fontColor(this.T().textSecondary)
-                  Text(' · ' + (((item as Record<string, Object>).updated_at as string) || '').substring(0, 10))
+                  Text(' · ' + (item.updated_at || '').substring(0, 10))
                     .fontSize(12).fontColor(this.T().textTertiary)
                 }.width('100%').margin({ top: 6 })
                 if (idx < this.getFiltered().length - 1) {
@@ -87,12 +88,12 @@ export struct IssuesPage {
               }
               .width('100%').padding({ left: 16, right: 16, top: 14, bottom: 14 })
               .onClick(() => {
-                const num: number = (item as Record<string, Object>).number as number || 0;
+                const num: number = item.number || 0;
                 if (this.onOpenIssue) { this.onOpenIssue(this.owner, this.repoName, num); return; }
-                const url: string = ((item as Record<string, Object>).html_url as string) || '';
+                const url: string = item.html_url || '';
                 if (url && this.onOpenWebView) this.onOpenWebView(url);
               })
-            }, (_item: Object, idx: number) => idx.toString())
+            }, (_item: GitHubIssue, idx: number) => idx.toString())
           }
         }.width('100%').constraintSize({ minHeight: '100%' })
       }.scrollBar(BarState.Off).width('100%').height('100%').backgroundColor(this.T().background)
