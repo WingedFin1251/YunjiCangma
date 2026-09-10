@@ -63,9 +63,11 @@ export interface Repository {
   owner: RepoOwner;
   description: string | null;
   stargazers_count: number;
+  forks_count: number;
   language: string | null;
   topics: string[];
   html_url: string;
+  updated_at: string;
   fork: boolean;
 }
 
@@ -133,6 +135,40 @@ export interface GitHubEvent {
   actor: EventActor;
   repo: EventRepo;
   created_at: string;
+}
+
+/** GraphQL 贡献热力图：某一天的贡献数 */
+export interface ContributionDay {
+  contributionCount: number;
+  date: string;
+}
+
+/** GraphQL 贡献热力图：一周 */
+export interface ContributionWeek {
+  contributionDays: ContributionDay[];
+}
+
+/** GraphQL 贡献热力图：总览（总贡献数 + 按周分组） */
+export interface ContributionCalendar {
+  totalContributions: number;
+  weeks: ContributionWeek[];
+}
+
+export interface ContributionsCollection {
+  contributionCalendar?: ContributionCalendar;
+}
+
+export interface GraphQLUser {
+  contributionsCollection?: ContributionsCollection;
+}
+
+export interface GraphQLData {
+  user?: GraphQLUser;
+}
+
+/** POST /graphql 的响应（data.user.contributionsCollection.contributionCalendar） */
+export interface ContributionResponse {
+  data?: GraphQLData;
 }
 
 /** 匿名用户占位 */

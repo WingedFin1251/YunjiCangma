@@ -3,6 +3,8 @@ import { IssueRepository } from '../../services/IssueRepository';
 import { CheckRunRepository } from '../../services/CheckRunRepository';
 import { HttpClient } from '../../services/HttpClient';
 import { MarkdownView } from '../../common/components/MarkdownView';
+import type { GitHubIssue, IssueComment, GitHubLabel } from '../../models/IssueModels';
+import type { WorkflowRun, WorkflowRunsResult } from '../../models/CheckRunModels';
 
 /**
  * 消息详情 — 根据通知类型显示不同内容：
@@ -13,8 +15,8 @@ import { MarkdownView } from '../../common/components/MarkdownView';
 @Component
 export struct NotificationDetailPage {
   @StorageLink(THEME_KEY) themeMode: string = 'dark';
-  @State issue: Object | null = null;
-  @State comments: Object[] = [];
+  @State issue: GitHubIssue | null = null;
+  @State comments: IssueComment[] = [];
   @State loading: boolean = true;
   @State commentsLoading: boolean = true;
   @Prop @Watch('load') owner: string = '';
@@ -55,7 +57,7 @@ export struct NotificationDetailPage {
       || this.notifType === 'WorkflowRun' || this.notifType === 'WorkflowJob';
   }
 
-  @State checkRun: Object | null = null;
+  @State checkRun: WorkflowRun | null = null;
   @State checkRunLoading: boolean = false;
 
   aboutToAppear(): void {
@@ -87,16 +89,16 @@ export struct NotificationDetailPage {
       const notifTime: number = new Date(this.updatedAt).getTime();
 
       // 获取最近的 workflow runs
-      const runsData: Object = await CheckRunRepository.getWorkflowRuns(owner, repo, branch);
-      const runsArr: Object[] = (runsData as Record<string, Object>).workflow_runs as Object[] || [];
+      const runsData: WorkflowRunsResult = await CheckRunRepository.getWorkflowRuns(owner, repo, branch);
+      const runsArr: WorkflowRun[] = runsData.workflow_runs || [];
 
       if (runsArr.length > 0) {
         // 找到与通知时间最近的 run（时间差最小）
-        let bestRun: Record<string, Object> = runsArr[0] as Record<string, Object>;
-        let bestDiff: number = Math.abs(new Date(bestRun.created_at as string).getTime() - notifTime);
+        let bestRun: WorkflowRun = runsArr[0];
+        let bestDiff: number = Math.abs(new Date(bestRun.created_at).getTime() - notifTime);
         for (let i = 1; i < runsArr.length; i++) {
-          const r: Record<string, Object> = runsArr[i] as Record<string, Object>;
-          const diff: number = Math.abs(new Date(r.created_at as string).getTime() - notifTime);
+          const r: WorkflowRun = runsArr[i];
+          const diff: number = Math.abs(new Date(r.created_at).getTime() - notifTime);
           if (diff < bestDiff) { bestDiff = diff; bestRun = r; }
         }
         this.checkRun = bestRun;
@@ -124,19 +126,22 @@ export struct NotificationDetailPage {
     finally { this.commentsLoading = false; }
   }
 
-  private rec(): Record<string, Object> { return (this.issue as Record<string, Object>); }
-  private num(k: string): number { return (this.rec()[k] as number) || 0; }
-  private str(k: string): string { return (this.rec()[k] as string) || ''; }
-  private labels(): Object[] { return (this.rec().labels as Object[]) || []; }
-  private stateText(): string { return this.str('state') === 'closed' ? 'Closed' : 'Open'; }
+  private iNumber(): number { return this.issue ? (this.issue.number || 0) : 0; }
+  private iTitle(): string { return this.issue ? (this.issue.title || '') : ''; }
+  private iBody(): string { return this.issue ? (this.issue.body || '') : ''; }
+  private iState(): string { return this.issue ? (this.issue.state || '') : ''; }
+  private iCreatedAt(): string { return this.issue ? (this.issue.created_at || '') : ''; }
+  private iComments(): number { return this.issue ? (this.issue.comments || 0) : 0; }
+  private iLabels(): GitHubLabel[] { return this.issue ? (this.issue.labels || []) : []; }
+  private stateText(): string { return this.iState() === 'closed' ? 'Closed' : 'Open'; }
   private stateColor(): string {
-    return this.str('state') === 'closed'
+    return this.iState() === 'closed'
       ? (this.themeMode === 'dark' ? DarkTheme.discussionPurple : LightTheme.discussionPurple)
       : (this.themeMode === 'dark' ? DarkTheme.issueGreen : LightTheme.issueGreen);
   }
   private authorLogin(): string {
-    const u: Record<string, string> = (this.rec().user as Record<string, string>);
-    return u ? (u.login || '') : '';
+    if (this.issue) { return this.issue.user ? (this.issue.user.login || '') : ''; }
+    return '';
   }
   private shortDate(s: string): string { return (s || '').substring(0, 10); }
   private crStatusLabel(s: string): string {
@@ -168,8 +173,10 @@ export struct NotificationDetailPage {
     if (this.notifType === 'WorkflowJob') return 'Actions';
     return this.notifType || '通知';
   }
-  private crRec(): Record<string, Object> { return (this.checkRun as Record<string, Object>); }
-  private crStr(k: string): string { return this.checkRun ? (this.crRec()[k] as string || '') : ''; }
+  private crStatus(): string { return this.checkRun ? (this.checkRun.status || '') : ''; }
+  private crConclusion(): string { return this.checkRun ? (this.checkRun.conclusion || '') : ''; }
+  private crBranch(): string { return this.checkRun ? (this.checkRun.head_branch || '') : ''; }
+  private crHeadSha(): string { return this.checkRun ? (this.checkRun.head_sha || '') : ''; }
   @Builder crInfoItem(label: string, value: string) {
     Column({ space: 2 }) {
       Text(label).fontSize(11).fontColor(this.T().textTertiary)
@@ -178,20 +185,20 @@ export struct NotificationDetailPage {
   }
   private crDuration(): string {
     if (!this.checkRun) return '';
-    const start: string = this.crStr('started_at');
-    const end: string = this.crStr('completed_at');
+    const start: string = this.checkRun.run_started_at || '';
+    const end: string = this.checkRun.updated_at || '';
     if (!start || !end) return '';
     const ms: number = new Date(end).getTime() - new Date(start).getTime();
     const sec: number = Math.floor(ms / 1000);
     if (sec < 60) return sec + ' 秒';
     return Math.floor(sec / 60) + ' 分 ' + (sec % 60) + ' 秒';
   }
-  private commentAuthor(c: Object): string {
-    const u: Record<string, string> = ((c as Record<string, Object>).user as Record<string, string>);
-    return u ? (u.login || '') : '';
+  private commentAuthor(c: IssueComment): string {
+    if (c.user) { return c.user.login || ''; }
+    return '';
   }
-  private commentDate(c: Object): string { return this.shortDate(((c as Record<string, Object>).created_at as string) || ''); }
-  private commentBody(c: Object): string { return (((c as Record<string, Object>).body as string) || ''); }
+  private commentDate(c: IssueComment): string { return this.shortDate(c.created_at || ''); }
+  private commentBody(c: IssueComment): string { return c.body || ''; }
 
   private openInWeb(): void {
     let target: string = 'https://github.com';
@@ -252,28 +259,28 @@ export struct NotificationDetailPage {
                 Row({ space: 16 }) {
                   Column({ space: 2 }) {
                     Text('状态').fontSize(11).fontColor(this.T().textTertiary)
-                    Text(this.crStatusLabel(this.crStr('status'))).fontSize(13).fontWeight(FontWeight.Medium)
-                      .fontColor(this.crConclusionColor(this.crStr('conclusion')))
+                    Text(this.crStatusLabel(this.crStatus())).fontSize(13).fontWeight(FontWeight.Medium)
+                      .fontColor(this.crConclusionColor(this.crConclusion()))
                   }.layoutWeight(1)
                   Column({ space: 2 }) {
                     Text('结论').fontSize(11).fontColor(this.T().textTertiary)
-                    Text(this.crConclusionLabel(this.crStr('conclusion'))).fontSize(13).fontWeight(FontWeight.Medium)
-                      .fontColor(this.crConclusionColor(this.crStr('conclusion')))
+                    Text(this.crConclusionLabel(this.crConclusion())).fontSize(13).fontWeight(FontWeight.Medium)
+                      .fontColor(this.crConclusionColor(this.crConclusion()))
                   }.layoutWeight(1)
                 }.width('100%')
                 // 分支 + 提交
-                if (this.crStr('branch') !== '' || this.crStr('head_sha') !== '') {
+                if (this.crBranch() !== '' || this.crHeadSha() !== '') {
                   Row({ space: 16 }) {
-                    if (this.crStr('branch') !== '') {
+                    if (this.crBranch() !== '') {
                       Row({ space: 4 }) {
                         Text('⑂').fontSize(12).fontColor(this.T().textTertiary)
-                        Text(this.crStr('branch')).fontSize(12).fontColor(this.T().textSecondary)
+                        Text(this.crBranch()).fontSize(12).fontColor(this.T().textSecondary)
                       }
                     }
-                    if (this.crStr('head_sha') !== '') {
+                    if (this.crHeadSha() !== '') {
                       Row({ space: 4 }) {
                         Text('⊙').fontSize(12).fontColor(this.T().textTertiary)
-                        Text(this.crStr('head_sha').substring(0, 7)).fontSize(12).fontColor(this.T().textSecondary)
+                        Text(this.crHeadSha().substring(0, 7)).fontSize(12).fontColor(this.T().textSecondary)
                       }
                     }
                   }.width('100%')
@@ -330,33 +337,33 @@ export struct NotificationDetailPage {
                 .padding({ left: 8, right: 8, top: 3, bottom: 3 })
                 .backgroundColor(this.stateColor())
                 .borderRadius(8)
-              Text('#' + this.num('number').toString()).fontSize(13).fontColor(this.T().textTertiary)
+              Text('#' + this.iNumber().toString()).fontSize(13).fontColor(this.T().textTertiary)
             }.width('100%')
-            Text(this.str('title')).fontSize(20).fontWeight(FontWeight.Bold).fontColor(this.T().textPrimary)
+            Text(this.iTitle()).fontSize(20).fontWeight(FontWeight.Bold).fontColor(this.T().textPrimary)
               .width('100%').lineHeight(28)
             Row({ space: 8 }) {
               Text(this.authorLogin()).fontSize(13).fontColor(this.T().accent)
-              Text('创建于 ' + this.shortDate(this.str('created_at'))).fontSize(12).fontColor(this.T().textTertiary)
-              Text('💬 ' + this.num('comments').toString()).fontSize(12).fontColor(this.T().textTertiary)
+              Text('创建于 ' + this.shortDate(this.iCreatedAt())).fontSize(12).fontColor(this.T().textTertiary)
+              Text('💬 ' + this.iComments().toString()).fontSize(12).fontColor(this.T().textTertiary)
             }.width('100%').alignItems(VerticalAlign.Center)
-            if (this.labels().length > 0) {
+            if (this.iLabels().length > 0) {
               Row({ space: 6 }) {
-                ForEach(this.labels().slice(0, 6), (l: Object, _li: number) => {
-                  Text(((l as Record<string, Object>).name as string) || '')
+                ForEach(this.iLabels().slice(0, 6), (l: GitHubLabel, _li: number) => {
+                  Text(l.name || '')
                     .fontSize(11).fontColor(Color.White)
                     .padding({ left: 6, right: 6, top: 2, bottom: 2 })
-                    .backgroundColor('#' + (((l as Record<string, Object>).color as string) || '218BFE'))
+                    .backgroundColor('#' + (l.color || '218BFE'))
                     .borderRadius(4)
-                }, (_l: Object, li: number) => 'l' + li)
+                }, (_l: GitHubLabel, li: number) => 'l' + li)
               }.width('100%')
             }
           }.width('100%').padding(16)
             .backgroundColor(this.T().surface).borderRadius(12)
 
           // 正文
-          if (this.str('body') !== '') {
+          if (this.iBody() !== '') {
             Column() {
-              MarkdownView({ content: this.str('body'), fontSize: 14, onOpenRepo: this.onOpenRepo, onOpenWebView: this.onOpenWebView })
+              MarkdownView({ content: this.iBody(), fontSize: 14, onOpenRepo: this.onOpenRepo, onOpenWebView: this.onOpenWebView })
             }.width('100%').padding(16)
               .backgroundColor(this.T().surface).borderRadius(12)
           }
@@ -375,7 +382,7 @@ export struct NotificationDetailPage {
             }
 
             Column() {
-              ForEach(this.comments, (c: Object, ci: number) => {
+              ForEach(this.comments, (c: IssueComment, ci: number) => {
                 Column({ space: 6 }) {
                   Row({ space: 8 }) {
                     Text(this.commentAuthor(c)).fontSize(13).fontWeight(FontWeight.Medium).fontColor(this.T().textPrimary)
@@ -388,7 +395,7 @@ export struct NotificationDetailPage {
                 if (ci < this.comments.length - 1) {
                   Divider().color(this.T().border).width('100%')
                 }
-              }, (c: Object, ci: number) => 'c' + ci)
+              }, (c: IssueComment, ci: number) => 'c' + ci)
             }.width('100%')
           }.width('100%').padding(16)
             .backgroundColor(this.T().surface).borderRadius(12)

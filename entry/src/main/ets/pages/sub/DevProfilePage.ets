@@ -6,10 +6,10 @@ import { AcrylicCard } from '../../common/components/AcrylicCard';
 import { MicaLayer } from '../../common/components/MicaLayer';
 import { WinButton } from '../../common/components/WinButton';
 import { PersonPicture } from '../../common/components/PersonPicture';
-import type { User } from '../../models/User';
+import type { User, Repository, ContributionWeek, ContributionCalendar, ContributionResponse } from '../../models/User';
 
 // 贡献热力图缓存（避免重复打开同一开发者反复请求触发 GraphQL 限流）
-const contribCache: Map<string, Object[]> = new Map();
+const contribCache: Map<string, ContributionWeek[]> = new Map();
 const contribTotalCache: Map<string, number> = new Map();
 
 function fmt(n: number): string {
@@ -22,12 +22,12 @@ function fmt(n: number): string {
 export struct DevProfilePage {
   @StorageLink(THEME_KEY) themeMode: string = 'dark';
   @State profile: User | null = null;
-  @State allRepos: Object[] = [];
-  @State filteredRepos: Object[] = [];
+  @State allRepos: Repository[] = [];
+  @State filteredRepos: Repository[] = [];
   @State filterType: number = 0;
   @State searchQuery: string = '';
   @State totalContributions: number = 0;
-  @State contribWeeks: Object[] = [];
+  @State contribWeeks: ContributionWeek[] = [];
   @State contribLoading: boolean = true;
   @State loading: boolean = true;
   @Prop @Watch('load') username: string = '';
@@ -59,18 +59,15 @@ export struct DevProfilePage {
 
   async loadContributions(): Promise<void> {
     try {
-      const cached: Object[] | undefined = contribCache.get(this.username);
+      const cached: ContributionWeek[] | undefined = contribCache.get(this.username);
       if (cached) {
         this.contribWeeks = cached;
         this.totalContributions = contribTotalCache.get(this.username) || 0;
       } else {
-        const data: Object = await UserRepository.getContributions(this.username);
-        const d: Record<string, Object> = data as Record<string, Object>;
-        const userObj: Record<string, Object> = d.data ? (d.data as Record<string, Object>).user as Record<string, Object> : ({} as Record<string, Object>);
-        const coll: Record<string, Object> = userObj ? (userObj.contributionsCollection as Record<string, Object>) : ({} as Record<string, Object>);
-        const cal: Record<string, Object> = coll ? (coll.contributionCalendar as Record<string, Object>) : ({} as Record<string, Object>);
-        this.totalContributions = (cal.totalContributions as number) || 0;
-        this.contribWeeks = (cal.weeks as Object[]) || [];
+        const res: ContributionResponse = await UserRepository.getContributions(this.username);
+        const cal: ContributionCalendar | undefined = res.data?.user?.contributionsCollection?.contributionCalendar;
+        this.totalContributions = cal ? (cal.totalContributions || 0) : 0;
+        this.contribWeeks = cal ? (cal.weeks || []) : [];
         contribCache.set(this.username, this.contribWeeks);
         contribTotalCache.set(this.username, this.totalContributions);
       }
@@ -84,7 +81,7 @@ export struct DevProfilePage {
     this.loading = true; this.errorMsg = '';
     try {
       this.profile = await UserRepository.getUser(this.username);
-      const items: Object[] = await RepoRepository.getUserRepos(this.username);
+      const items: Repository[] = await RepoRepository.getUserRepos(this.username);
       this.allRepos = items.slice(0, 30);
       this.applyFilter();
       this.loadContributions();
@@ -93,12 +90,12 @@ export struct DevProfilePage {
   }
 
   applyFilter(): void {
-    let result: Object[] = this.allRepos;
-    if (this.filterType === 1) result = result.filter((r: Object) => !((r as Record<string, Object>).fork as boolean));
-    else if (this.filterType === 2) result = result.filter((r: Object) => (r as Record<string, Object>).fork as boolean);
+    let result: Repository[] = this.allRepos;
+    if (this.filterType === 1) result = result.filter((r: Repository) => !r.fork);
+    else if (this.filterType === 2) result = result.filter((r: Repository) => r.fork);
     if (this.searchQuery.trim()) {
       const q: string = this.searchQuery.toLowerCase();
-      result = result.filter((r: Object) => ((r as Record<string, Object>).name as string || '').toLowerCase().includes(q) || ((r as Record<string, Object>).description as string || '').toLowerCase().includes(q));
+      result = result.filter((r: Repository) => (r.name || '').toLowerCase().includes(q) || (r.description || '').toLowerCase().includes(q));
     }
     this.filteredRepos = result;
   }
@@ -168,13 +165,13 @@ export struct DevProfilePage {
                     Column({ space: 2 }) {
                       ForEach([0, 1, 2, 3, 4, 5, 6], (row: number, _ri: number) => {
                         Row({ space: 2 }) {
-                          ForEach(this.contribWeeks.slice(Math.max(0, this.contribWeeks.length - 53)), (week: Object, _wi: number) => {
-                            if (row < (((week as Record<string, Object>).contributionDays as Object[]) || []).length) {
+                          ForEach(this.contribWeeks.slice(Math.max(0, this.contribWeeks.length - 53)), (week: ContributionWeek, _wi: number) => {
+                            if (row < this.weekDayLen(week)) {
                               Text('').width(10).height(10)
-                                .backgroundColor(this.heatColor((((((week as Record<string, Object>).contributionDays as Object[]) || [])[row] as Record<string, Object>).contributionCount as number) || 0))
+                                .backgroundColor(this.heatColor(this.weekDayCount(week, row)))
                                 .borderRadius(2)
                             } else { Text('').width(10).height(10) }
-                          }, (_week: Object, wi: number) => 'w' + wi)
+                          }, (_week: ContributionWeek, wi: number) => 'w' + wi)
                         }
                       }, (_row: number, ri: number) => 'r' + ri)
                     }
@@ -229,27 +226,27 @@ export struct DevProfilePage {
                   .width('100%').padding({ top: 4, bottom: 8 })
 
                 Column() {
-                  ForEach(this.filteredRepos, (item: Object, idx: number) => {
+                  ForEach(this.filteredRepos, (item: Repository, idx: number) => {
                     Row() {
                       Column() {
-                        Text(((item as Record<string, Object>).name as string) || '')
+                        Text(item.name || '')
                           .fontSize(16).fontWeight(FontWeight.Medium).fontColor(this.T().textPrimary)
-                        if ((item as Record<string, Object>).description) {
-                          Text(((item as Record<string, Object>).description as string) || '')
+                        if (item.description) {
+                          Text(item.description || '')
                             .fontSize(13).fontColor(this.T().textSecondary).maxLines(2).lineHeight(18)
                             .textOverflow({ overflow: TextOverflow.Ellipsis }).margin({ top: 2 })
                         }
                         Row() {
-                          if ((item as Record<string, Object>).language) {
-                            Text(((item as Record<string, Object>).language as string) || '')
+                          if (item.language) {
+                            Text(item.language || '')
                               .fontSize(12).fontColor(this.T().textTertiary)
                           }
-                          Text(' ★ ' + fmt((item as Record<string, Object>).stargazers_count as number || 0))
+                          Text(' ★ ' + fmt(item.stargazers_count || 0))
                             .fontSize(12).fontColor(this.T().textTertiary).margin({ left: 10 })
-                          Text(' ⑂ ' + fmt((item as Record<string, Object>).forks_count as number || 0))
+                          Text(' ⑂ ' + fmt(item.forks_count || 0))
                             .fontSize(12).fontColor(this.T().textTertiary).margin({ left: 10 })
-                          if ((item as Record<string, Object>).updated_at) {
-                            Text(' · ' + (((item as Record<string, Object>).updated_at as string) || '').substring(0, 10))
+                          if (item.updated_at) {
+                            Text(' · ' + (item.updated_at || '').substring(0, 10))
                               .fontSize(12).fontColor(this.T().textTertiary).margin({ left: 10 })
                           }
                         }.margin({ top: 6 })
@@ -258,15 +255,14 @@ export struct DevProfilePage {
                     }
                     .width('100%').padding({ top: 12, bottom: 12 }).alignItems(VerticalAlign.Center)
                     .onClick(() => {
-                      const it = item as Record<string, Object>;
-                      const rOwner: string = (it.owner as Record<string, string>).login || this.username;
-                      const rName: string = (it.name as string) || '';
+                      const rOwner: string = (item.owner ? item.owner.login : '') || this.username;
+                      const rName: string = item.name || '';
                       if (this.onOpenRepo) this.onOpenRepo(rOwner, rName);
                     })
                     if (idx < this.filteredRepos.length - 1) {
                       Divider().color(this.T().border).width('100%')
                     }
-                  }, (_item: Object, idx: number) => idx.toString())
+                  }, (_item: Repository, idx: number) => idx.toString())
                 }.width('100%')
               }.width('100%')
             }
@@ -275,6 +271,17 @@ export struct DevProfilePage {
         }.scrollBar(BarState.Off).edgeEffect(EdgeEffect.Spring, { alwaysEnabled: true }).width('100%').height('100%')
       }
     }.width('100%').height('100%')
+  }
+
+  /** 某周的天数（缺字段时按 0 处理，避免渲染期异常） */
+  private weekDayLen(week: ContributionWeek): number {
+    return week.contributionDays ? week.contributionDays.length : 0;
+  }
+
+  /** 某周第 row 天的贡献数（越界或缺字段返回 0） */
+  private weekDayCount(week: ContributionWeek, row: number): number {
+    if (!week.contributionDays || row < 0 || row >= week.contributionDays.length) return 0;
+    return week.contributionDays[row].contributionCount || 0;
   }
 
   private heatColor(count: number): string {

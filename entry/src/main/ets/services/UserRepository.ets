@@ -1,5 +1,5 @@
 import { HttpClient } from './HttpClient';
-import type { User, UserSummary, OrgSummary, GitHubEvent } from '../models/User';
+import type { User, UserSummary, OrgSummary, GitHubEvent, ContributionResponse } from '../models/User';
 
 export class UserRepository {
   static getCurrentUser(): Promise<User> { return HttpClient.get<User>('/user'); }
@@ -8,13 +8,13 @@ export class UserRepository {
   static getFollowing(username: string): Promise<UserSummary[]> { return HttpClient.get<UserSummary[]>('/users/' + username + '/following?per_page=30'); }
   static getReceivedEvents(username: string): Promise<GitHubEvent[]> { return HttpClient.get<GitHubEvent[]>('/users/' + username + '/received_events?per_page=10'); }
   static getOrgs(): Promise<OrgSummary[]> { return HttpClient.get<OrgSummary[]>('/user/orgs?per_page=30'); }
-  static getContributions(username: string): Promise<Object> {
+  static getContributions(username: string): Promise<ContributionResponse> {
     const now: string = new Date().toISOString().substring(0, 10);
     const ly: Date = new Date();
     ly.setFullYear(ly.getFullYear() - 1);
     const from: string = ly.toISOString().substring(0, 10);
     const gql: string = 'query { user(login: "' + username + '") { contributionsCollection(from: "' + from + 'T00:00:00Z", to: "' + now + 'T23:59:59Z") { contributionCalendar { totalContributions weeks { contributionDays { contributionCount date } } } } } }';
     class GqlBody { query: string = ''; constructor(q: string) { this.query = q; } }
-    return HttpClient.post<Object>('/graphql', new GqlBody(gql));
+    return HttpClient.post<ContributionResponse>('/graphql', new GqlBody(gql));
   }
 }
