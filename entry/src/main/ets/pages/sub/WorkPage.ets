@@ -5,12 +5,33 @@ import { UserRepository } from '../../services/UserRepository';
 import { SearchRepository } from '../../services/SearchRepository';
 import { HttpClient } from '../../services/HttpClient';
 import { RepoCard } from '../../common/components/RepoCard';
+import type { Repository, OrgSummary } from '../../models/User';
+import type { GitHubIssue, SearchIssuesResult } from '../../models/IssueModels';
+
+/** 工作列表统一视图项（议题/PR/仓库/组织/星标共用一种渲染模型，避免动态取字段） */
+class WorkListItem {
+  title: string = '';
+  subtitle: string = '';
+  owner: string = '';
+  repo: string = '';
+  description: string = '';
+  language: string = '';
+  stars: number = 0;
+  fullName: string = '';
+  avatarChar: string = '?';
+  isStarred: boolean = false;
+
+  constructor(title: string, subtitle: string) {
+    this.title = title;
+    this.subtitle = subtitle;
+  }
+}
 
 @Component
 export struct WorkPage {
   @StorageLink(THEME_KEY) themeMode: string = 'dark';
   @StorageLink(AUTH_LOGIN_KEY) @Watch('onLoginChanged') isLoggedIn: boolean = false;
-  @State items: Object[] = [];
+  @State items: WorkListItem[] = [];
   @State loading: boolean = true;
   @Prop _title: string = '';
   @Prop dataType: string = '';
@@ -27,13 +48,58 @@ export struct WorkPage {
   async loadData(): Promise<void> {
     this.loading = true; this.items = []; this.errorMsg = '';
     try {
-      if (this.dataType === 'issues') this.items = await SearchRepository.getIssues();
-      else if (this.dataType === 'pulls') this.items = await SearchRepository.getPullRequests('');
-      else if (this.dataType === 'repos') this.items = await RepoRepository.getMyRepos();
-      else if (this.dataType === 'orgs') this.items = await UserRepository.getOrgs();
-      else if (this.dataType === 'starred') this.items = await RepoRepository.getStarredRepos();
+      if (this.dataType === 'issues') {
+        this.items = this.mapIssues(await SearchRepository.getIssues());
+      } else if (this.dataType === 'pulls') {
+        const res: SearchIssuesResult = await SearchRepository.getPullRequests('');
+        this.items = this.mapIssues(res.items);
+      } else if (this.dataType === 'repos') {
+        this.items = this.mapRepos(await RepoRepository.getMyRepos());
+      } else if (this.dataType === 'orgs') {
+        this.items = this.mapOrgs(await UserRepository.getOrgs());
+      } else if (this.dataType === 'starred') {
+        this.items = this.mapRepos(await RepoRepository.getStarredRepos());
+      }
     } catch (e) { this.items = []; this.errorMsg = HttpClient.formatError(e); }
     finally { this.loading = false; }
+  }
+
+  private mapIssues(list: GitHubIssue[]): WorkListItem[] {
+    const out: WorkListItem[] = [];
+    for (let i = 0; i < list.length; i++) {
+      const it: GitHubIssue = list[i];
+      const raw: string = it.repository_url ? it.repository_url : (it.html_url || '');
+      out.push(new WorkListItem(it.title || '', raw.replace('https://api.github.com/repos/', '')));
+    }
+    return out;
+  }
+
+  private mapRepos(list: Repository[]): WorkListItem[] {
+    const out: WorkListItem[] = [];
+    for (let i = 0; i < list.length; i++) {
+      const r: Repository = list[i];
+      const owner: string = r.owner ? (r.owner.login || '') : '';
+      const item: WorkListItem = new WorkListItem(r.full_name || r.name || '', '');
+      item.owner = owner;
+      item.repo = r.name || '';
+      item.description = r.description || '';
+      item.language = r.language || '';
+      item.stars = r.stargazers_count || 0;
+      item.fullName = r.full_name || '';
+      item.avatarChar = (owner || '?').charAt(0);
+      item.isStarred = this.starredSet ? this.starredSet.has(item.fullName) : false;
+      out.push(item);
+    }
+    return out;
+  }
+
+  private mapOrgs(list: OrgSummary[]): WorkListItem[] {
+    const out: WorkListItem[] = [];
+    for (let i = 0; i < list.length; i++) {
+      const o: OrgSummary = list[i];
+      out.push(new WorkListItem(o.login || '', ''));
+    }
+    return out;
   }
 
   build() {
@@ -59,38 +125,35 @@ export struct WorkPage {
             Blank().height(88)
             if (this.dataType === 'repos') {
               Column({ space: 12 }) {
-                ForEach(this.items, (item: Object, _idx: number) => {
+                ForEach(this.items, (item: WorkListItem, _idx: number) => {
                   Column() {
                     RepoCard({
-                      avatarChar: (((item as Record<string, Object>).owner as Record<string, string>).login || '?').charAt(0),
-                      owner: ((item as Record<string, Object>).owner as Record<string, string>).login || '',
-                      repo: ((item as Record<string, Object>).name as string) || '',
-                      description: ((item as Record<string, Object>).description as string) || '',
-                      language: ((item as Record<string, Object>).language as string) || '',
-                      stars: (item as Record<string, Object>).stargazers_count as number || 0,
-                      isStarred: this.starredSet ? this.starredSet.has(((item as Record<string, Object>).full_name as string) || '') : false
+                      avatarChar: item.avatarChar,
+                      owner: item.owner,
+                      repo: item.repo,
+                      description: item.description,
+                      language: item.language,
+                      stars: item.stars,
+                      isStarred: item.isStarred
                     })
                   }.width('100%')
                   .onClick(() => {
-                    const it = item as Record<string, Object>;
-                    const rOwner: string = ((it.owner as Record<string, string>).login as string) || '';
-                    const rName: string = (it.name as string) || '';
-                    if (this.onOpenRepo && rOwner && rName) this.onOpenRepo(rOwner, rName);
+                    if (this.onOpenRepo && item.owner && item.repo) this.onOpenRepo(item.owner, item.repo);
                   })
-                }, (_item: Object, idx: number) => idx.toString())
+                }, (_item: WorkListItem, idx: number) => idx.toString())
               }.width('100%').padding({ left: 16, right: 16 })
             } else {
               Column() {
-                ForEach(this.items, (item: Object, _idx: number) => {
+                ForEach(this.items, (item: WorkListItem, _idx: number) => {
                   Column() {
-                    Text(((item as Record<string, Object>).title as string) || ((item as Record<string, Object>).login as string) || ((item as Record<string, Object>).full_name as string) || ((item as Record<string, Object>).name as string) || '')
+                    Text(item.title || '')
                       .fontSize(16).fontColor(this.T().textPrimary).maxLines(2).textOverflow({ overflow: TextOverflow.Ellipsis })
-                    if ((item as Record<string, Object>).repository_url || (item as Record<string, Object>).html_url) {
-                      Text((((item as Record<string, Object>).repository_url as string) || ((item as Record<string, Object>).html_url as string) || '').replace('https://api.github.com/repos/', ''))
+                    if (item.subtitle !== '') {
+                      Text(item.subtitle)
                         .fontSize(12).fontColor(this.T().textTertiary).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
                     }
                   }.width('100%').padding({ left: 16, right: 16, top: 12, bottom: 12 })
-                }, (_item: Object, idx: number) => idx.toString())
+                }, (_item: WorkListItem, idx: number) => idx.toString())
               }.width('100%')
             }
           }.width('100%')

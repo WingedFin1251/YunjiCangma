@@ -1,13 +1,13 @@
 import { HttpClient } from './HttpClient';
-import type { User } from '../models/User';
+import type { User, UserSummary, OrgSummary, GitHubEvent } from '../models/User';
 
 export class UserRepository {
   static getCurrentUser(): Promise<User> { return HttpClient.get<User>('/user'); }
   static getUser(username: string): Promise<User> { return HttpClient.get<User>('/users/' + username); }
-  static getFollowers(username: string): Promise<Object[]> { return HttpClient.get<Object[]>('/users/' + username + '/followers?per_page=30'); }
-  static getFollowing(username: string): Promise<Object[]> { return HttpClient.get<Object[]>('/users/' + username + '/following?per_page=30'); }
-  static getReceivedEvents(username: string): Promise<Object[]> { return HttpClient.get<Object[]>('/users/' + username + '/received_events?per_page=10'); }
-  static getOrgs(): Promise<Object[]> { return HttpClient.get<Object[]>('/user/orgs?per_page=30'); }
+  static getFollowers(username: string): Promise<UserSummary[]> { return HttpClient.get<UserSummary[]>('/users/' + username + '/followers?per_page=30'); }
+  static getFollowing(username: string): Promise<UserSummary[]> { return HttpClient.get<UserSummary[]>('/users/' + username + '/following?per_page=30'); }
+  static getReceivedEvents(username: string): Promise<GitHubEvent[]> { return HttpClient.get<GitHubEvent[]>('/users/' + username + '/received_events?per_page=10'); }
+  static getOrgs(): Promise<OrgSummary[]> { return HttpClient.get<OrgSummary[]>('/user/orgs?per_page=30'); }
   static getContributions(username: string): Promise<Object> {
     const now: string = new Date().toISOString().substring(0, 10);
     const ly: Date = new Date();

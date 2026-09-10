@@ -97,6 +97,44 @@ export interface SearchResult {
   items: Repository[];
 }
 
+/** 用户摘要（/followers、/following 等列表接口返回的精简用户对象） */
+export interface UserSummary {
+  id: number;
+  login: string;
+  avatar_url: string;
+  html_url: string;
+}
+
+/** 组织摘要（GET /user/orgs） */
+export interface OrgSummary {
+  id: number;
+  login: string;
+  avatar_url: string;
+  description: string | null;
+}
+
+/** 活动事件中的操作者 */
+export interface EventActor {
+  login: string;
+  display_login: string;
+  avatar_url: string;
+}
+
+/** 活动事件中的仓库 */
+export interface EventRepo {
+  name: string;
+  url: string;
+}
+
+/** 仓库活动事件（GET /users/{user}/received_events） */
+export interface GitHubEvent {
+  id: string;
+  type: string;
+  actor: EventActor;
+  repo: EventRepo;
+  created_at: string;
+}
+
 /** 匿名用户占位 */
 export const ANONYMOUS_USER: Partial<User> = {
   login: '',

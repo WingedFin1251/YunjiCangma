@@ -10,7 +10,7 @@ import { DevProfilePage } from '../sub/DevProfilePage';
 import { IssuesPage } from '../sub/IssuesPage';
 import { IssueDetailPage } from '../sub/IssueDetailPage';
 import { TopReposPage } from '../sub/TopReposPage';
-import type { Repository } from '../../models/User';
+import type { Repository, GitHubEvent } from '../../models/User';
 
 class ActivityItem {
   avatar: string = '';
@@ -93,16 +93,14 @@ export struct ExploreTab {
       this.trendingRepos = [];
     }
     try {
-      const events = await UserRepository.getReceivedEvents('github');
+      const events: GitHubEvent[] = await UserRepository.getReceivedEvents('github');
       const items: ActivityItem[] = [];
       for (let i = 0; i < Math.min(events.length, 5); i++) {
-        const evt = events[i] as Record<string, Object>;
-        const repoObj = evt.repo as Record<string, string>;
-        const actorObj = evt.actor as Record<string, string>;
-        if (repoObj && actorObj) {
-          const repoName: string = repoObj.name || '';
-          const actorName: string = actorObj.display_login || actorObj.login || '';
-          const actionType: string = (evt.type as string || '').replace('Event', '').toLowerCase();
+        const evt: GitHubEvent = events[i];
+        if (evt.repo && evt.actor) {
+          const repoName: string = evt.repo.name || '';
+          const actorName: string = evt.actor.display_login || evt.actor.login || '';
+          const actionType: string = (evt.type || '').replace('Event', '').toLowerCase();
           items.push(new ActivityItem(
             actorName.charAt(0),
             actorName,

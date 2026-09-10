@@ -32,6 +32,8 @@ export interface GitHubIssue {
   created_at: string;
   updated_at: string;
   html_url: string;
+  /** 仓库议题列表接口会带此字段（api.github.com 前缀，展示时需裁剪） */
+  repository_url?: string;
   pull_request?: PullRequestRef;
 }
 

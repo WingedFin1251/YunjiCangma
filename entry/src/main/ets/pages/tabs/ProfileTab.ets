@@ -12,7 +12,7 @@ import { RepoDetailPage } from '../sub/RepoDetailPage';
 import { DevProfilePage } from '../sub/DevProfilePage';
 import { IssuesPage } from '../sub/IssuesPage';
 import { IssueDetailPage } from '../sub/IssueDetailPage';
-import type { User } from '../../models/User';
+import type { User, UserSummary } from '../../models/User';
 import { AUTH_LOGIN_KEY } from '../../common/constants/APIConstants';
 import { SettingsPage } from '../sub/SettingsPage';
 import { TutorialPage } from '../sub/TutorialPage';
@@ -47,7 +47,8 @@ export struct ProfileTab {
   }
   @State user: User | null = null;
   @State isLoading: boolean = false;
-  @State listItems: Object[] = [];
+  @State repoItems: Repository[] = [];
+  @State userItems: UserSummary[] = [];
   @State listLoading: boolean = true;
   starredSet: Set<string> = new Set<string>();
   @State webUrl: string = '';
@@ -103,13 +104,13 @@ export struct ProfileTab {
   }
 
   private async loadList(type: string): Promise<void> {
-    this.listLoading = true; this.listItems = [];
+    this.listLoading = true; this.repoItems = []; this.userItems = [];
     try {
       const u: string = this.user?.login || '';
-      if (type === 'repoList') { this.listItems = await RepoRepository.getMyRepos(); }
-      else if (type === 'followers') { this.listItems = await UserRepository.getFollowers(u); }
-      else if (type === 'following') { this.listItems = await UserRepository.getFollowing(u); }
-    } catch (err) { this.listItems = []; }
+      if (type === 'repoList') { this.repoItems = await RepoRepository.getMyRepos(); }
+      else if (type === 'followers') { this.userItems = await UserRepository.getFollowers(u); }
+      else if (type === 'following') { this.userItems = await UserRepository.getFollowing(u); }
+    } catch (err) { this.repoItems = []; this.userItems = []; }
     finally { this.listLoading = false; }
   }
 
@@ -123,34 +124,33 @@ export struct ProfileTab {
             Blank().height(88)
             if (this.listLoading) {
               LoadingProgress().width(32).height(32).color(this.T().accent).margin({ top: 80 })
-            } else if (this.listItems.length === 0) {
+            } else if (this.repoItems.length === 0) {
               Column({ space: 8 }) {
                 Text('✉').fontSize(40)
                 Text('暂无仓库，前往发现更多优质开源项目').fontSize(14).fontColor(this.T().textSecondary)
               }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center).width('100%').height(300)
             } else {
               Column({ space: 12 }) {
-                ForEach(this.listItems, (item: Object) => {
+                ForEach(this.repoItems, (item: Repository) => {
                   Column() {
                     RepoCard({
-                      avatarChar: (((item as Record<string, Object>).owner as Record<string, string>).login || '?').charAt(0),
-                      owner: ((item as Record<string, Object>).owner as Record<string, string>).login || '',
-                      repo: ((item as Record<string, Object>).name as string) || '',
-                      description: ((item as Record<string, Object>).description as string) || '',
-                      language: ((item as Record<string, Object>).language as string) || '',
-                      stars: (item as Record<string, Object>).stargazers_count as number || 0,
-                      isStarred: this.starredSet.has(((item as Record<string, Object>).full_name as string) || '')
+                      avatarChar: (item.owner ? (item.owner.login || '?') : '?').charAt(0),
+                      owner: item.owner ? (item.owner.login || '') : '',
+                      repo: item.name || '',
+                      description: item.description || '',
+                      language: item.language || '',
+                      stars: item.stargazers_count || 0,
+                      isStarred: this.starredSet.has(item.full_name || '')
                     })
                   }
                   .width('100%')
                   .onClick(() => {
-                    const it = item as Record<string, Object>;
-                    this.webUrl = (it.html_url as string) || '';
-                    const o: string = ((it.owner as Record<string, string>).login as string) || '';
-                    const r: string = (it.name as string) || '';
+                    this.webUrl = item.html_url || '';
+                    const o: string = item.owner ? (item.owner.login || '') : '';
+                    const r: string = item.name || '';
                     this.profileStack.pushPath({ name: 'repoDetail', param: new RepoParam(o, r) });
                   })
-                }, (item: Object) => ((item as Record<string, Object>).name as string) || '')
+                }, (item: Repository) => item.name || '')
               }.width('100%').padding({ left: 16, right: 16 })
             }
           }.width('100%')
@@ -185,7 +185,7 @@ export struct ProfileTab {
             Blank().height(88)
             if (this.listLoading) {
               LoadingProgress().width(32).height(32).color(this.T().accent).margin({ top: 80 })
-            } else if (this.listItems.length === 0) {
+            } else if (this.userItems.length === 0) {
               Column({ space: 8 }) {
                 Text('✉').fontSize(40)
                 Text('暂无内容').fontSize(14).fontColor(this.T().textSecondary)
@@ -193,29 +193,29 @@ export struct ProfileTab {
             } else {
               List({ space: 0 }) {
                 ListItem() { Column() { Blank().height(88) } }
-                ForEach(this.listItems, (item: Object) => {
+                ForEach(this.userItems, (item: UserSummary) => {
                   ListItem() {
                     Row({ space: 12 }) {
                       PersonPicture({
-                        url: ((item as Record<string, Object>).avatar_url as string) || '',
-                        name: ((item as Record<string, Object>).login as string) || '?',
+                        url: item.avatar_url || '',
+                        name: item.login || '?',
                         avatarSize: 40
                       })
-                      Text(((item as Record<string, Object>).login as string) || '')
+                      Text(item.login || '')
                         .fontSize(16).fontWeight(FontWeight.Medium).fontColor(this.T().textPrimary).layoutWeight(1)
                         .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
                       Text('›').fontSize(18).fontColor(this.T().textSecondary)
                     }
                     .width('100%').height(56).padding({ left: 16, right: 16 }).alignItems(VerticalAlign.Center)
                     .onClick(() => {
-                      const login: string = ((item as Record<string, Object>).login as string) || '';
+                      const login: string = item.login || '';
                       if (login) {
                         this.detailOwner = login;
                         this.profileStack.pushPath({ name: 'devProfile' });
                       }
                     })
                   }
-                }, (item: Object) => ((item as Record<string, Object>).login as string) || '')
+                }, (item: UserSummary) => item.login || '')
               }
               .divider({ strokeWidth: 1, color: this.T().border, startMargin: 68 })
               .scrollBar(BarState.Off).width('100%').height('100%').layoutWeight(1).backgroundColor(this.T().background)
