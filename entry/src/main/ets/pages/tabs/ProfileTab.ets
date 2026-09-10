@@ -18,6 +18,7 @@ import { SettingsPage } from '../sub/SettingsPage';
 import { TutorialPage } from '../sub/TutorialPage';
 import { PrivacyPage } from '../sub/PrivacyPage';
 import { UserAgreementPage } from '../sub/UserAgreementPage';
+import { RateLimitPage } from '../sub/RateLimitPage';
 
 /** 仓库跳转参数（避免共享状态被当前页绑定，造成双重导航） */
 class RepoParam {
@@ -235,6 +236,9 @@ export struct ProfileTab {
     } else if (name === 'privacy') {
       HdsNavDestination() { PrivacyPage({ scroller: this.privacyScroller }) }
         .titleBar(buildTitleBar('隐私协议')).backgroundColor(this.T().background).bindToScrollable([this.privacyScroller])
+    } else if (name === 'rateLimit') {
+      HdsNavDestination() { RateLimitPage() }
+        .titleBar(buildTitleBar('API 配额')).backgroundColor(this.T().background)
     }
   }
 

@@ -1,17 +1,19 @@
 import { http } from '@kit.NetworkKit';
 import { GITHUB_API_BASE, APIHeaders } from '../common/constants/APIConstants';
-import { AuthService } from './AuthService';
+import { AuthService } from './AuthService';import { RateLimitService } from '../common/utils/RateLimitService';
 
 export class HttpClient {
   /** 将异常格式化为用户可读的错误信息（从消息字符串解析 HTTP 状态码） */
   static formatError(e: Object): string {
     if (e instanceof Error) {
       const msg: string = e.message || '';
+      // 速率限制错误直接返回（已包含详细信息）
+      if (msg.indexOf('配额已用完') >= 0) return msg;
       const m: RegExpMatchArray | null = msg.match(/HTTP (\d+)/);
       if (m) {
         const code: number = parseInt(m[1]);
         if (code === 401) return '授权已失效，请重新登录';
-        if (code === 403) return '请求过于频繁，请稍后重试';
+        if (code === 403 || code === 429) return '请求过于频繁，请稍后重试';
         if (code === 404) return '仓库不存在或无权访问';
         return `请求失败 (HTTP ${code})`;
       }
@@ -40,7 +42,14 @@ export class HttpClient {
         connectTimeout: 15000,
         readTimeout: 15000
       });
+      // 解析速率限制 Header
+      RateLimitService.parseHeaders(res.header as Record<string, string>);
       if (res.responseCode === 200) return JSON.parse(res.result as string) as T;
+      // 403/429 + 耗尽 → 抛速率限制错误
+      if ((res.responseCode === 403 || res.responseCode === 429)) {
+        const msg: string | null = RateLimitService.checkAndGetError();
+        if (msg !== null) { throw new Error(msg); }
+      }
       throw new Error(`HTTP ${res.responseCode}`);
     } catch (e) {
       if (e instanceof Error) { throw e; }

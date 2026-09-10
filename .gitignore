@@ -50,3 +50,6 @@ Thumbs.db
 
 # WorkBuddy 会话记忆
 /.workbuddy/
+
+# DSH 会话诊断缓存（不入库）
+/_diag/

@@ -61,6 +61,11 @@ export struct SettingsPage {
         }.width('100%').padding({ left: 20, right: 20, bottom: 14 })
         Divider().color(this.T().border).width('90%')
 
+        // API 配额
+        this.settingRow('📊 API 配额', false, () => { if (this.onNavigate) this.onNavigate('rateLimit'); })
+
+        Divider().color(this.T().border).width('90%')
+
         // 使用教程
         this.settingRow('📖 使用教程', false, () => { if (this.onNavigate) this.onNavigate('tutorial'); })
 
