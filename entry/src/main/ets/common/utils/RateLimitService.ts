@@ -8,6 +8,13 @@ import { RateLimitInfo, isRateLimitExhausted, formatTimeUntilReset } from '../mo
 /** 速率限制状态变化回调 */
 type RateLimitCallback = (info: RateLimitInfo, exhausted: boolean) => void;
 
+/** 配额耗尽的结构化信息（传输层据此构造错误，避免中文文案跨文件耦合） */
+export interface RateLimitExhausted {
+  remaining: number;
+  limit: number;
+  resetText: string;
+}
+
 export class RateLimitService {
   private static _info: RateLimitInfo | null = null;
   private static _listeners: RateLimitCallback[] = [];
@@ -77,12 +84,14 @@ export class RateLimitService {
     }
   }
 
-  /** 检查是否已耗尽，返回用户可读的错误信息 */
-  static checkAndGetError(): string | null {
+  /** 是否已耗尽配额；返回结构化信息供传输层构造错误（文案只在 UI 层生成） */
+  static getExhaustedInfo(): RateLimitExhausted | null {
     const info: RateLimitInfo | null = RateLimitService._info;
     if (!info || !isRateLimitExhausted(info)) return null;
-    const remaining = info.remaining;
-    const reset = formatTimeUntilReset(info);
-    return 'API 请求配额已用完（剩余 ' + remaining + '/' + info.limit + '），' + reset;
+    return {
+      remaining: info.remaining,
+      limit: info.limit,
+      resetText: formatTimeUntilReset(info)
+    };
   }
 }
