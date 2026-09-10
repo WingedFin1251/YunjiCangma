@@ -30,6 +30,8 @@ export class RateLimitError extends Error {
 }
 
 export class HttpClient {
+  private static readonly REQUEST_TIMEOUT: number = 15000;
+
   /** 将异常格式化为用户可读的中文错误信息（读结构化字段，不再反解析 message 字符串） */
   static formatError(e: Object): string {
     if (e instanceof RateLimitError) {
@@ -65,104 +67,91 @@ export class HttpClient {
     return headers;
   }
 
-  static async get<T>(path: string): Promise<T> {
+  /** 统一请求入口：鉴权 → 超时 → 每次响应解析限流头 → 资源释放；5 个公开方法共用 */
+  private static async doRequest(method: http.RequestMethod, url: string, body?: string,
+    extraHeaders?: Record<string, string>): Promise<http.HttpResponse> {
     const req = http.createHttp();
     try {
-      const res = await req.request(`${GITHUB_API_BASE}${path}`, {
-        method: http.RequestMethod.GET,
-        header: HttpClient.buildHeaders(),
-        connectTimeout: 15000,
-        readTimeout: 15000
-      });
-      // 解析速率限制 Header
-      RateLimitService.parseHeaders(res.header as Record<string, string>);
-      if (res.responseCode === 200) return JSON.parse(res.result as string) as T;
-      // 403/429 + 配额耗尽 → 抛结构化限流错误
-      if (res.responseCode === 403 || res.responseCode === 429) {
-        const exhausted: RateLimitExhausted | null = RateLimitService.getExhaustedInfo();
-        if (exhausted !== null) { throw new RateLimitError(exhausted); }
+      const h: Record<string, string> = HttpClient.buildHeaders();
+      h['Content-Type'] = 'application/json';
+      if (extraHeaders) {
+        const keys: string[] = Object.keys(extraHeaders);
+        for (let i = 0; i < keys.length; i++) {
+          const k: string = keys[i];
+          h[k] = extraHeaders[k];
+        }
       }
-      throw new HttpError(res.responseCode);
+      const options: http.HttpRequestOptions = {
+        method: method,
+        header: h,
+        extraData: body,
+        connectTimeout: HttpClient.REQUEST_TIMEOUT,
+        readTimeout: HttpClient.REQUEST_TIMEOUT
+      };
+      const res = await req.request(url, options);
+      // 限流对全部动词生效，写操作后配额数据也保持最新
+      RateLimitService.parseHeaders(res.header as Record<string, string>);
+      return res;
     } catch (e) {
       if (e instanceof Error) { throw e; }
       throw new HttpError(0);
     } finally { req.destroy(); }
   }
 
-  static async postRaw<T>(url: string, body: string, extraHeaders?: Record<string, string>): Promise<T> {
-    const req = http.createHttp();
+  /** 2xx 判定 + 403/429 配额耗尽映射；非 2xx 抛结构化错误 */
+  private static ensureOk(res: http.HttpResponse): void {
+    const code: number = res.responseCode;
+    if (code >= 200 && code < 300) return;
+    if (code === 403 || code === 429) {
+      const exhausted: RateLimitExhausted | null = RateLimitService.getExhaustedInfo();
+      if (exhausted !== null) { throw new RateLimitError(exhausted); }
+    }
+    throw new HttpError(code);
+  }
+
+  /** 解析 JSON 响应体；失败转中文兜底错误，不再让英文 SyntaxError 直透 */
+  private static parseJson<T>(res: http.HttpResponse): T {
+    const raw: string = res.result as string;
     try {
-      const h: Record<string, string> = HttpClient.buildHeaders();
-      h['Content-Type'] = 'application/json';
-      if (extraHeaders) { const keys: string[] = Object.keys(extraHeaders); for (let i = 0; i < keys.length; i++) { const k: string = keys[i]; h[k] = extraHeaders[k]; } }
-      const res = await req.request(url, {
-        method: http.RequestMethod.POST,
-        header: h,
-        extraData: body,
-        connectTimeout: 15000,
-        readTimeout: 15000
-      });
-      if (res.responseCode === 200 || res.responseCode === 201) return JSON.parse(res.result as string) as T;
-      throw new HttpError(res.responseCode);
+      return JSON.parse(raw) as T;
     } catch (e) {
-      if (e instanceof Error) { throw e; }
-      throw new HttpError(0);
-    } finally { req.destroy(); }
+      throw new Error('响应数据解析失败');
+    }
+  }
+
+  static async get<T>(path: string): Promise<T> {
+    const res = await HttpClient.doRequest(http.RequestMethod.GET, GITHUB_API_BASE + path);
+    HttpClient.ensureOk(res);
+    return HttpClient.parseJson<T>(res);
+  }
+
+  /** 完整 URL + 自定义头（供 OAuth 等非 api.github.com 场景使用） */
+  static async postRaw<T>(url: string, body: string, extraHeaders?: Record<string, string>): Promise<T> {
+    const res = await HttpClient.doRequest(http.RequestMethod.POST, url, body, extraHeaders);
+    HttpClient.ensureOk(res);
+    return HttpClient.parseJson<T>(res);
   }
 
   static async post<T>(path: string, body: Object): Promise<T> {
-    const req = http.createHttp();
-    try {
-      const h: Record<string, string> = HttpClient.buildHeaders();
-      h['Content-Type'] = 'application/json';
-      const res = await req.request(`${GITHUB_API_BASE}${path}`, {
-        method: http.RequestMethod.POST,
-        header: h,
-        extraData: JSON.stringify(body),
-        connectTimeout: 15000,
-        readTimeout: 15000
-      });
-      if (res.responseCode === 200 || res.responseCode === 201) return JSON.parse(res.result as string) as T;
-      throw new HttpError(res.responseCode);
-    } catch (e) {
-      if (e instanceof Error) { throw e; }
-      throw new HttpError(0);
-    } finally { req.destroy(); }
+    const res = await HttpClient.doRequest(http.RequestMethod.POST, GITHUB_API_BASE + path, JSON.stringify(body));
+    HttpClient.ensureOk(res);
+    return HttpClient.parseJson<T>(res);
+  }
+
+  /** 编辑类接口官方推荐 PATCH（当前无调用需求，备用） */
+  static async patch<T>(path: string, body: Object): Promise<T> {
+    const res = await HttpClient.doRequest(http.RequestMethod.PATCH, GITHUB_API_BASE + path, JSON.stringify(body));
+    HttpClient.ensureOk(res);
+    return HttpClient.parseJson<T>(res);
   }
 
   static async put(path: string): Promise<void> {
-    const req = http.createHttp();
-    try {
-      const res = await req.request(`${GITHUB_API_BASE}${path}`, {
-        method: http.RequestMethod.PUT,
-        header: HttpClient.buildHeaders(),
-        connectTimeout: 15000,
-        readTimeout: 15000
-      });
-      if (res.responseCode !== 204) {
-        throw new HttpError(res.responseCode);
-      }
-    } catch (e) {
-      if (e instanceof Error) { throw e; }
-      throw new HttpError(0);
-    } finally { req.destroy(); }
+    const res = await HttpClient.doRequest(http.RequestMethod.PUT, GITHUB_API_BASE + path);
+    HttpClient.ensureOk(res);
   }
 
   static async delete(path: string): Promise<void> {
-    const req = http.createHttp();
-    try {
-      const res = await req.request(`${GITHUB_API_BASE}${path}`, {
-        method: http.RequestMethod.DELETE,
-        header: HttpClient.buildHeaders(),
-        connectTimeout: 15000,
-        readTimeout: 15000
-      });
-      if (res.responseCode !== 204) {
-        throw new HttpError(res.responseCode);
-      }
-    } catch (e) {
-      if (e instanceof Error) { throw e; }
-      throw new HttpError(0);
-    } finally { req.destroy(); }
+    const res = await HttpClient.doRequest(http.RequestMethod.DELETE, GITHUB_API_BASE + path);
+    HttpClient.ensureOk(res);
   }
 }
