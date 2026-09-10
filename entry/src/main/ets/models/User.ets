@@ -93,6 +93,7 @@ export interface GitHubNotification {
 
 /** 搜索仓库结果 */
 export interface SearchResult {
+  total_count: number;
   items: Repository[];
 }
 

@@ -8,6 +8,7 @@ import { MicaLayer } from '../../common/components/MicaLayer';
 import { WinButton } from '../../common/components/WinButton';
 import { ExpandableSection } from '../../common/components/ExpandableSection';
 import { PersonPicture } from '../../common/components/PersonPicture';
+import type { RepoDetail, RepoLicense, RepoReadme, RepoRelease } from '../../models/RepoModels';
 
 /** Base64 → UTF-8 字符串（系统原生解码，避免手写循环阻塞主线程） */
 function b64decode(b64: string): string {
@@ -29,11 +30,11 @@ function fmt(n: number): string {
 @Component
 export struct RepoDetailPage {
   @StorageLink(THEME_KEY) themeMode: string = 'dark';
-  @State repo: Object | null = null;
+  @State repo: RepoDetail | null = null;
   private readmeText: string = '';
   @State readmeLoaded: boolean = false;
   @State readmeLoading: boolean = false;
-  @State latestRelease: Object | null = null;
+  @State latestRelease: RepoRelease | null = null;
   @State loading: boolean = true;
   @Prop @Watch('loadRepo') owner: string = '';
   @Prop @Watch('loadRepo') repoName: string = '';
@@ -83,8 +84,8 @@ export struct RepoDetailPage {
   async loadReadme(): Promise<void> {
     this.readmeLoading = true;
     try {
-      const data: Object = await RepoRepository.getReadme(this.owner, this.repoName);
-      const raw: string = (data as Record<string, Object>).content as string || '';
+      const data: RepoReadme = await RepoRepository.getReadme(this.owner, this.repoName);
+      const raw: string = data.content || '';
       setTimeout(() => {
         try { this.readmeText = b64decode(raw); } catch (e) { this.readmeText = raw; }
         this.readmeLoaded = true;
@@ -93,22 +94,27 @@ export struct RepoDetailPage {
     finally { this.readmeLoading = false; }
   }
 
-  private rr(): Record<string, Object> { return (this.repo as Record<string, Object>); }
-  private ownerRec(): Record<string, string> { return (this.rr().owner as Record<string, string>); }
-  private ownerLogin(): string { return this.ownerRec() ? (this.ownerRec().login || this.owner) : this.owner; }
-  private ownerAvatar(): string { return this.ownerRec() ? (this.ownerRec().avatar_url || '') : ''; }
-  private num(k: string): number { return (this.rr()[k] as number) || 0; }
-  private str(k: string): string { return (this.rr()[k] as string) || ''; }
-  private topics(): string[] { return (this.rr().topics as string[]) || []; }
+  private ownerLogin(): string { return this.repo && this.repo.owner ? (this.repo.owner.login || this.owner) : this.owner; }
+  private ownerAvatar(): string { return this.repo && this.repo.owner ? (this.repo.owner.avatar_url || '') : ''; }
+  private rName(): string { return this.repo ? (this.repo.name || '') : ''; }
+  private rDesc(): string { return this.repo && this.repo.description ? this.repo.description : ''; }
+  private rStars(): string { return fmt(this.repo ? (this.repo.stargazers_count || 0) : 0); }
+  private rForks(): string { return fmt(this.repo ? (this.repo.forks_count || 0) : 0); }
+  private rIssues(): string { return fmt(this.repo ? (this.repo.open_issues_count || 0) : 0); }
+  private rBranch(): string { return this.repo ? (this.repo.default_branch || '') : ''; }
+  private rLang(): string { return this.repo && this.repo.language ? this.repo.language : ''; }
+  private rCreated(): string { return this.repo && this.repo.created_at ? this.repo.created_at.substring(0, 10) : ''; }
+  private rUpdated(): string { return this.repo && this.repo.updated_at ? this.repo.updated_at.substring(0, 10) : ''; }
+  private topics(): string[] { return this.repo && this.repo.topics ? this.repo.topics : []; }
   private licenseName(): string {
-    const lic: Record<string, string> = (this.rr().license as Record<string, string>);
-    if (lic) { return lic.spdx_id || lic.name || ''; }
-    return '';
+    if (!this.repo || !this.repo.license) return '';
+    const lic: RepoLicense = this.repo.license;
+    return lic.spdx_id || lic.name || '';
   }
-  private releaseTag(): string { return this.latestRelease ? (((this.latestRelease as Record<string, Object>).tag_name as string) || '') : ''; }
-  private releaseName(): string { return this.latestRelease ? (((this.latestRelease as Record<string, Object>).name as string) || '') : ''; }
-  private releaseDate(): string { return this.latestRelease ? ((((this.latestRelease as Record<string, Object>).published_at as string) || '').substring(0, 10)) : ''; }
-  private releaseBody(): string { return this.latestRelease ? (((this.latestRelease as Record<string, Object>).body as string) || '') : ''; }
+  private releaseTag(): string { return this.latestRelease ? (this.latestRelease.tag_name || '') : ''; }
+  private releaseName(): string { return this.latestRelease && this.latestRelease.name ? this.latestRelease.name : ''; }
+  private releaseDate(): string { return this.latestRelease && this.latestRelease.published_at ? this.latestRelease.published_at.substring(0, 10) : ''; }
+  private releaseBody(): string { return this.latestRelease && this.latestRelease.body ? this.latestRelease.body : ''; }
   private openWeb(url: string): void { if (this.onOpenWebView) this.onOpenWebView(url); }
 
   build() {
@@ -138,9 +144,9 @@ export struct RepoDetailPage {
                   Text(this.ownerLogin()).fontSize(13).fontColor(this.T().textSecondary)
                     .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
                 }.width('100%').alignItems(VerticalAlign.Center)
-                Text(this.str('name') || this.repoName).fontSize(28).fontWeight(FontWeight.Bold).fontColor(this.T().textPrimary).width('100%')
-                if (this.str('description') !== '') {
-                  Text(this.str('description')).fontSize(14).fontColor(this.T().textSecondary).lineHeight(20).width('100%')
+                Text(this.rName() || this.repoName).fontSize(28).fontWeight(FontWeight.Bold).fontColor(this.T().textPrimary).width('100%')
+                if (this.rDesc() !== '') {
+                  Text(this.rDesc()).fontSize(14).fontColor(this.T().textSecondary).lineHeight(20).width('100%')
                 }
                 if (this.topics().length > 0) {
                   Row({ space: 6 }) {
@@ -153,9 +159,9 @@ export struct RepoDetailPage {
                   }.width('100%')
                 }
                 Row({ space: 10 }) {
-                  this.statCard('星标', fmt(this.num('stargazers_count')))
-                  this.statCard('复刻', fmt(this.num('forks_count')))
-                  this.statCard('议题', fmt(this.num('open_issues_count')))
+                  this.statCard('星标', this.rStars())
+                  this.statCard('复刻', this.rForks())
+                  this.statCard('议题', this.rIssues())
                 }.width('100%').margin({ top: 6 })
               }.width('100%')
             }
@@ -180,14 +186,14 @@ export struct RepoDetailPage {
             AcrylicCard() {
               Column() {
                 this.sectionTitle('📋 仓库信息')
-                this.infoRow('默认分支', this.str('default_branch'))
-                if (this.str('language') !== '') {
+                this.infoRow('默认分支', this.rBranch())
+                if (this.rLang() !== '') {
                   Divider().color(this.T().border).width('100%')
                   Row() {
                     Text('语言').fontSize(14).fontColor(this.T().textSecondary).width(88)
                     Row({ space: 6 }) {
-                      Circle().width(8).height(8).fill(langColor(this.str('language')))
-                      Text(this.str('language')).fontSize(15).fontColor(this.T().textPrimary)
+                      Circle().width(8).height(8).fill(langColor(this.rLang()))
+                      Text(this.rLang()).fontSize(15).fontColor(this.T().textPrimary)
                     }
                   }.width('100%').padding({ top: 14, bottom: 14 })
                 }
@@ -195,13 +201,13 @@ export struct RepoDetailPage {
                   Divider().color(this.T().border).width('100%')
                   this.infoRow('许可证', this.licenseName())
                 }
-                if (this.str('created_at') !== '') {
+                if (this.rCreated() !== '') {
                   Divider().color(this.T().border).width('100%')
-                  this.infoRow('创建', this.str('created_at').substring(0, 10))
+                  this.infoRow('创建', this.rCreated())
                 }
-                if (this.str('updated_at') !== '') {
+                if (this.rUpdated() !== '') {
                   Divider().color(this.T().border).width('100%')
-                  this.infoRow('最近更新', this.str('updated_at').substring(0, 10))
+                  this.infoRow('最近更新', this.rUpdated())
                 }
               }.width('100%')
             }

@@ -1,5 +1,6 @@
 import { DarkTheme, LightTheme, THEME_KEY, ThemeColors } from '../../common/constants/ThemeConstants';
 import { SearchRepository } from '../../services/SearchRepository';
+import type { Repository, SearchResult } from '../../models/User';
 
 @Component
 export struct SearchPage {
@@ -7,7 +8,7 @@ export struct SearchPage {
   @StorageLink('userFilterEnabled') userFilterEnabled: boolean = true;
   @State query: string = '';
   @State filterWords: string = '';
-  @State results: Object[] = [];
+  @State results: Repository[] = [];
   @State totalCount: number = 0;
   @State loading: boolean = false;
   @State hasSearched: boolean = false;
@@ -17,15 +18,15 @@ export struct SearchPage {
 
   private getBlockedCount(): number { return this.results.length - this.getFilteredResults().length; }
 
-  private getFilteredResults(): Object[] {
+  private getFilteredResults(): Repository[] {
     // 仅手动屏蔽词（受开关控制）
     const manual: string[] = this.userFilterEnabled
       ? this.filterWords.toLowerCase().split(/[,，\s]+/).filter((w: string) => w.length > 0)
       : [];
     if (manual.length === 0) return this.results;
-    return this.results.filter((item: Object) => {
-      const name: string = ((item as Record<string, Object>).full_name as string || '').toLowerCase();
-      const desc: string = ((item as Record<string, Object>).description as string || '').toLowerCase();
+    return this.results.filter((item: Repository) => {
+      const name: string = (item.full_name || '').toLowerCase();
+      const desc: string = (item.description || '').toLowerCase();
       return !manual.some((w: string) => name.includes(w) || desc.includes(w));
     });
   }
@@ -35,10 +36,9 @@ export struct SearchPage {
     if (!this.query.trim()) return;
     this.loading = true; this.hasSearched = true; this.results = []; this.page = 1;
     try {
-      const data = await SearchRepository.searchRepos(this.query.trim(), 1);
-      const d: Record<string, Object> = data as Record<string, Object>;
-      this.results = d.items as Object[] || [];
-      this.totalCount = d.total_count as number || 0;
+      const data: SearchResult = await SearchRepository.searchRepos(this.query.trim(), 1);
+      this.results = data.items;
+      this.totalCount = data.total_count;
 
     } catch (e) { this.results = []; this.totalCount = 0; console.error('SearchPage', `search error: ${JSON.stringify(e)}`); }
     finally { this.loading = false; }
@@ -48,8 +48,8 @@ export struct SearchPage {
     if (this.loading || newPage < 1 || !this.query.trim()) return;
     this.loading = true; this.page = newPage;
     try {
-      const data = await SearchRepository.searchRepos(this.query.trim(), newPage);
-      this.results = (data as Record<string, Object>).items as Object[] || [];
+      const data: SearchResult = await SearchRepository.searchRepos(this.query.trim(), newPage);
+      this.results = data.items;
     } catch (e) { this.results = []; }
     finally { this.loading = false; }
   }
@@ -115,33 +115,33 @@ export struct SearchPage {
               Text(this.filterWords ? '所有结果已被屏蔽' : '未找到相关仓库').fontSize(14).fontColor(this.T().textSecondary)
             }.justifyContent(FlexAlign.Center).alignItems(HorizontalAlign.Center).width('100%')
           } else {
-            ForEach(this.getFilteredResults(), (item: Object) => {
+            ForEach(this.getFilteredResults(), (item: Repository) => {
               Row() {
                 Column() {
-                  Text(((item as Record<string, Object>).full_name as string) || '')
+                  Text(item.full_name || '')
                     .fontSize(16).fontWeight(FontWeight.Medium).fontColor(this.T().textPrimary)
-                  if ((item as Record<string, Object>).description) {
-                    Text(((item as Record<string, Object>).description as string) || '')
+                  if (item.description) {
+                    Text(item.description || '')
                       .fontSize(13).fontColor(this.T().textSecondary).maxLines(2)
                       .textOverflow({ overflow: TextOverflow.Ellipsis }).margin({ top: 2 })
                   }
                   Row() {
-                    if ((item as Record<string, Object>).language) {
-                      Text(((item as Record<string, Object>).language as string) || '')
+                    if (item.language) {
+                      Text(item.language || '')
                         .fontSize(12).fontColor(this.T().textTertiary)
                     }
-                    Text(' ★ ' + ((item as Record<string, Object>).stargazers_count as number || 0).toString())
+                    Text(' ★ ' + (item.stargazers_count || 0).toString())
                       .fontSize(12).fontColor(this.T().textTertiary).margin({ left: 12 })
                   }.margin({ top: 4 })
                 }.alignItems(HorizontalAlign.Start).layoutWeight(1)
                 Text('›').fontSize(20).fontColor(this.T().textSecondary)
               }.width('100%').padding({ left: 16, right: 16, top: 12, bottom: 12 })
               .onClick(() => {
-                const fullName: string = ((item as Record<string, Object>).full_name as string) || '';
+                const fullName: string = item.full_name || '';
                 const parts: string[] = fullName.split('/');
                 if (parts.length === 2 && this.onOpenRepo) this.onOpenRepo(parts[0], parts[1]);
               })
-            }, (item: Object) => ((item as Record<string, Object>).full_name as string) || '')
+            }, (item: Repository) => item.full_name || '')
             // 分页导航
             if (this.totalPages() > 1 && !this.hasFilterWords()) {
               Row({ space: 12 }) {
