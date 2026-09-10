@@ -10,34 +10,43 @@ import { isRateLimitExhausted, formatTimeUntilReset } from '../../common/models/
 export struct RateLimitPage {
   @StorageLink(THEME_KEY) themeMode: string = 'dark';
   @State rateLimit: RateLimitInfo | null = null;
+  private listener: ((info: RateLimitInfo, exhausted: boolean) => void) | null = null;
   private T(): ThemeColors { const d = this.themeMode === 'dark'; return { background: d ? DarkTheme.background : LightTheme.background, surface: d ? DarkTheme.surface : LightTheme.surface, surfaceElevated: d ? DarkTheme.surfaceElevated : LightTheme.surfaceElevated, border: d ? DarkTheme.border : LightTheme.border, textPrimary: d ? DarkTheme.textPrimary : LightTheme.textPrimary, textSecondary: d ? DarkTheme.textSecondary : LightTheme.textSecondary, textTertiary: d ? DarkTheme.textTertiary : LightTheme.textTertiary, accent: d ? DarkTheme.accent : LightTheme.accent, issueGreen: d ? DarkTheme.issueGreen : LightTheme.issueGreen, prBlue: d ? DarkTheme.prBlue : LightTheme.prBlue, discussionPurple: d ? DarkTheme.discussionPurple : LightTheme.discussionPurple, orgOrange: d ? DarkTheme.orgOrange : LightTheme.orgOrange, starYellow: d ? DarkTheme.starYellow : LightTheme.starYellow, clickFeedback: d ? DarkTheme.clickFeedback : LightTheme.clickFeedback }; }
 
   aboutToAppear(): void {
     this.rateLimit = RateLimitService.getInfo();
-    RateLimitService.onChange((info: RateLimitInfo) => { this.rateLimit = info; });
+    this.listener = (info: RateLimitInfo) => { this.rateLimit = info; };
+    RateLimitService.onChange(this.listener);
   }
 
-  private get usedCount(): number {
+  aboutToDisappear(): void {
+    if (this.listener !== null) {
+      RateLimitService.offChange(this.listener);
+      this.listener = null;
+    }
+  }
+
+  private getUsedCount(): number {
     if (!this.rateLimit) return 0;
     return this.rateLimit.limit - this.rateLimit.remaining;
   }
 
-  private get progressPercent(): number {
+  private getProgressPercent(): number {
     if (!this.rateLimit || this.rateLimit.limit === 0) return 0;
-    return Math.round((this.usedCount / this.rateLimit.limit) * 100);
+    return Math.round((this.getUsedCount() / this.rateLimit.limit) * 100);
   }
 
-  private get statusText(): string {
+  private getStatusText(): string {
     if (!this.rateLimit) return '暂无数据';
     if (isRateLimitExhausted(this.rateLimit)) return '已耗尽';
-    if (this.progressPercent >= 80) return '接近上限';
+    if (this.getProgressPercent() >= 80) return '接近上限';
     return '正常';
   }
 
-  private get statusColor(): string {
+  private getStatusColor(): string {
     if (!this.rateLimit) return this.T().textTertiary;
     if (isRateLimitExhausted(this.rateLimit)) return '#DA3633';
-    if (this.progressPercent >= 80) return '#FF9529';
+    if (this.getProgressPercent() >= 80) return '#FF9529';
     return this.T().issueGreen;
   }
 
@@ -58,7 +67,7 @@ export struct RateLimitPage {
           Column({ space: 12 }) {
             // 状态标签
             Row() {
-              Text(this.statusText).fontSize(14).fontWeight(FontWeight.Medium)
+              Text(this.getStatusText()).fontSize(14).fontWeight(FontWeight.Medium)
                 .fontColor(this.T().textPrimary)
               Blank()
               Text(this.rateLimit.resource).fontSize(12).fontColor(this.T().textTertiary)
@@ -69,15 +78,15 @@ export struct RateLimitPage {
             // 进度条
             Column({ space: 4 }) {
               Row() {
-                Text('已用 ' + this.usedCount).fontSize(14).fontColor(this.T().textPrimary)
+                Text('已用 ' + this.getUsedCount()).fontSize(14).fontColor(this.T().textPrimary)
                 Blank()
                 Text('共 ' + this.rateLimit.limit).fontSize(14).fontColor(this.T().textTertiary)
               }.width('100%')
               Row() {
                 Column()
-                  .width((this.progressPercent / 100 * 100).toString() + '%')
+                  .width((this.getProgressPercent() / 100 * 100).toString() + '%')
                   .height(8).borderRadius(4)
-                  .backgroundColor(this.statusColor)
+                  .backgroundColor(this.getStatusColor())
                 Blank()
               }.width('100%').height(8).backgroundColor(this.T().surfaceElevated).borderRadius(4)
             }.width('100%')
@@ -88,7 +97,7 @@ export struct RateLimitPage {
               Divider().color(this.T().border).width('100%')
               this.detailRow('剩余', this.rateLimit.remaining.toString())
               Divider().color(this.T().border).width('100%')
-              this.detailRow('已用', this.usedCount.toString() + ' (' + this.progressPercent + '%)')
+              this.detailRow('已用', this.getUsedCount().toString() + ' (' + this.getProgressPercent() + '%)')
               Divider().color(this.T().border).width('100%')
               this.detailRow('重置时间', formatTimeUntilReset(this.rateLimit))
             }.width('100%').padding(16)

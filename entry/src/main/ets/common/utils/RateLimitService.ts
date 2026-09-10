@@ -29,15 +29,32 @@ export class RateLimitService {
   }
 
   /**
+   * 大小写不敏感取响应头
+   * GitHub HTTP/1.1 返回驼峰键（X-RateLimit-*），HTTP/2 强制小写键，平台栈还可能统一小写化
+   */
+  private static pickHeader(headers: Record<string, string>, name: string): string {
+    const lower: string = name.toLowerCase();
+    const keys: string[] = Object.keys(headers);
+    for (let i = 0; i < keys.length; i++) {
+      if (keys[i].toLowerCase() === lower) {
+        const v: string | undefined = headers[keys[i]];
+        return v === undefined ? '' : v;
+      }
+    }
+    return '';
+  }
+
+  /**
    * 从 HTTP 响应头解析速率限制信息
    * 调用时机：每次 HttpClient 请求完成后
    */
   static parseHeaders(headers: Record<string, string>): void {
     try {
-      const limitStr: string | undefined = headers['X-RateLimit-Limit'];
-      const remainingStr: string | undefined = headers['X-RateLimit-Remaining'];
-      const resetStr: string | undefined = headers['X-RateLimit-Reset'];
-      const resource: string = headers['X-RateLimit-Resource'] || 'core';
+      const limitStr: string = RateLimitService.pickHeader(headers, 'X-RateLimit-Limit');
+      const remainingStr: string = RateLimitService.pickHeader(headers, 'X-RateLimit-Remaining');
+      const resetStr: string = RateLimitService.pickHeader(headers, 'X-RateLimit-Reset');
+      const resourceRaw: string = RateLimitService.pickHeader(headers, 'X-RateLimit-Resource');
+      const resource: string = resourceRaw.length > 0 ? resourceRaw : 'core';
 
       if (!limitStr || !remainingStr || !resetStr) return;
 
